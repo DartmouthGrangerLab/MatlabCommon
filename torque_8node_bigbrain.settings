@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings name="parallel" xmlns="urn:mathworks.matlab.settings" xsi:schemaLocation="urn:mathworks.matlab.settings settings.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <settings name="profiles">
+        <settings name="torque_8node_bigbrain" visible="true">
+            <key name="Description" visible="true">
+                <string>
+                    <value><![CDATA[uses 8 processors on 8 nodes for a total of 64 processes]]></value>
+                </string>
+            </key>
+            <key name="ProjectComponent" visible="true">
+                <string>
+                    <value><![CDATA[TorqueProfile1ProjectComponent]]></value>
+                </string>
+            </key>
+            <key name="SchedulerComponent" visible="true">
+                <string>
+                    <value><![CDATA[TorqueProfile1SchedulerComponent]]></value>
+                </string>
+            </key>
+        </settings>
+    </settings>
+    <settings name="projectcomponents">
+        <settings name="TorqueProfile1ProjectComponent" visible="true">
+            <key name="CaptureDiary" visible="true">
+                <bool>
+                    <value>1</value>
+                </bool>
+            </key>
+            <key name="NumWorkersRange" visible="true">
+                <double minArraySize="0" maxArraySize="3">
+                    <value>2.0</value>
+                    <value>1.0</value>
+                    <value>32.0</value>
+                </double>
+            </key>
+        </settings>
+    </settings>
+    <settings name="schedulercomponents">
+        <settings name="Torque" visible="true">
+            <settings name="TorqueProfile1SchedulerComponent" visible="true">
+                <key name="HasSharedFilesystem" visible="true">
+                    <bool>
+                        <value>1</value>
+                    </bool>
+                </key>
+                <key name="NumWorkers" visible="true">
+                    <double>
+                        <value>80.0</value>
+                    </double>
+                </key>
+                <key name="ResourceTemplate" visible="true">
+                    <string>
+                        <value><![CDATA[-l nodes=8:ppn=8,walltime=24:00:00]]></value>
+                    </string>
+                </key>
+                <key name="RshCommand" visible="true">
+                    <string>
+                        <value><![CDATA[ssh]]></value>
+                    </string>
+                </key>
+            </settings>
+        </settings>
+    </settings>
+</settings>

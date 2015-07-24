@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings name="parallel" xmlns="urn:mathworks.matlab.settings" xsi:schemaLocation="urn:mathworks.matlab.settings settings.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <settings name="profiles">
+        <settings name="torque_1node_discovery" visible="true">
+            <key name="Description" visible="true">
+                <string>
+                    <value><![CDATA[uses 28 processors on 1 nodes for a total of 16 processes]]></value>
+                </string>
+            </key>
+            <key name="ProjectComponent" visible="true">
+                <string>
+                    <value><![CDATA[torque_2nodesProjectComponent_Import1]]></value>
+                </string>
+            </key>
+            <key name="SchedulerComponent" visible="true">
+                <string>
+                    <value><![CDATA[torque_2nodesSchedulerComponent_Import1]]></value>
+                </string>
+            </key>
+        </settings>
+    </settings>
+    <settings name="projectcomponents">
+        <settings name="torque_2nodesProjectComponent_Import1" visible="true">
+            <key name="AdditionalPaths" visible="true">
+                <string minArraySize="0" maxArraySize="0" undef="true">
+                </string>
+            </key>
+            <key name="AttachedFiles" visible="true">
+                <string minArraySize="0" maxArraySize="0" undef="true">
+                </string>
+            </key>
+            <key name="AutoAttachFiles" visible="true" anytype="true">
+            </key>
+            <key name="CaptureDiary" visible="true">
+                <bool>
+                    <value>1</value>
+                </bool>
+            </key>
+            <key name="JobFinishedFcn" visible="true" anytype="true">
+            </key>
+            <key name="JobQueuedFcn" visible="true" anytype="true">
+            </key>
+            <key name="JobRunningFcn" visible="true" anytype="true">
+            </key>
+            <key name="JobTimeout" visible="true" anytype="true">
+            </key>
+            <key name="NumWorkersRange" visible="true">
+                <double minArraySize="0" maxArraySize="3">
+                    <value>2.0</value>
+                    <value>1.0</value>
+                    <value>32.0</value>
+                </double>
+            </key>
+            <key name="TaskFinishedFcn" visible="true" anytype="true">
+            </key>
+            <key name="TaskRunningFcn" visible="true" anytype="true">
+            </key>
+            <key name="TaskTimeout" visible="true" anytype="true">
+            </key>
+        </settings>
+    </settings>
+    <settings name="schedulercomponents">
+        <settings name="Torque" visible="true">
+            <settings name="torque_2nodesSchedulerComponent_Import1" visible="true">
+                <key name="ClusterMatlabRoot" visible="true">
+                    <string undef="true">
+                    </string>
+                </key>
+                <key name="CommunicatingJobWrapper" visible="true" anytype="true">
+                </key>
+                <key name="HasSharedFilesystem" visible="true">
+                    <bool>
+                        <value>1</value>
+                    </bool>
+                </key>
+                <key name="JobStorageLocation" visible="true">
+                    <string minArraySize="0" maxArraySize="0" undef="true">
+                    </string>
+                </key>
+                <key name="LicenseNumber" visible="true" anytype="true">
+                </key>
+                <key name="NumWorkers" visible="true">
+                    <double>
+                        <value>80.0</value>
+                    </double>
+                </key>
+                <key name="RcpCommand" visible="true" anytype="true">
+                </key>
+                <key name="RequiresMathWorksHostedLicensing" visible="true" anytype="true">
+                </key>
+                <key name="ResourceTemplate" visible="true">
+                    <string>
+                        <value><![CDATA[-l nodes=1:ppn=28,walltime=24:00:00]]></value>
+                    </string>
+                </key>
+                <key name="RshCommand" visible="true">
+                    <string>
+                        <value><![CDATA[rsh]]></value>
+                    </string>
+                </key>
+                <key name="SubmitArguments" visible="true">
+                    <string>
+                        <value><![CDATA[]]></value>
+                    </string>
+                </key>
+            </settings>
+        </settings>
+    </settings>
+</settings>
