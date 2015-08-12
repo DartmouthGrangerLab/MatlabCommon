@@ -1,3 +1,4 @@
+%Calculates d' (2-alternative forced-choice tasks)
 %Technically, this is an 'approximation'
 %Input:
 %   TP - number of true positives
