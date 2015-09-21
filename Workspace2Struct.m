@@ -1,4 +1,5 @@
 %Saves all the variables from the current workspace into a single structure array
+%DO NOT CALL WITHIN A PARFOR OR OTHER WORKER THREAD
 %Author: Andres Gonzalez, 2012 (version 0.2)
 %Modified slightly by Eli Bowen
 %#########################################################################
