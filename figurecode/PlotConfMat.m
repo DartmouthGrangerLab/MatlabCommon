@@ -10,6 +10,9 @@ function [h] = PlotConfMat (h, targetsWide, predWide, labels)
     set(h, 'Renderer', 'painters');
 %     imagesc(confMat);
     plotconfusion(targetsWide, predWide);
+    if size(labels,1) < size(labels,2)
+        labels = labels';
+    end
     set(gca, 'YTickLabel', [labels;' ';' ']);
     set(gca, 'XTickLabel', [labels;' ';' ']);
     xticklabel_rotate([], 90, [], 'FontSize', 16);

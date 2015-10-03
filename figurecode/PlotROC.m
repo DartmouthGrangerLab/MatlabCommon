@@ -15,7 +15,7 @@ function [h] = PlotROC (h, targetsWide, predWide, labels)
     plot([0,1], [0,1], 'Color', [0.5,0.5,0.5]);
     hold on;
     for i = 1:numel(labels)
-        scatter([fpr{i},1], [tpr{i},1], [], figColors(i,:), 'Marker', markerTypes(mod(i,numel(markerTypes))));
+        scatter([fpr{i},1], [tpr{i},1], [], figColors(i,:), 'Marker', markerTypes(1+mod(i,numel(markerTypes))));
         hold on;
     end
     set(gca, 'FontSize', 14);
