@@ -61,6 +61,16 @@ function [] = StartThreadPool (hardware)
             end
         end
         maxNumCompThreads(32); %limits total cores used
+    elseif strcmp(hardware, 'boskop') %------------------------------
+        if str2double(ver(1:4)) < 2014
+            if matlabpool('size') < 1
+                matlabpool(8);
+            end
+        else
+            if isempty(gcp('nocreate'))
+                parpool(8);
+            end
+        end   
     else %------------------------------
         if str2double(ver(1:4)) < 2014
             if matlabpool('size') < 1
