@@ -82,6 +82,9 @@ function [] = StartThreadPool (hardware)
             end
             nTries = nTries + 1;
         end
+        if hadException == 1
+            error('StartThreadPool(''boskop'') failed 10 times to create a parallel pool! Giving up.');
+        end
     else %------------------------------
         if str2double(ver(1:4)) < 2014
             if matlabpool('size') < 1
