@@ -62,15 +62,26 @@ function [] = StartThreadPool (hardware)
         end
         maxNumCompThreads(32); %limits total cores used
     elseif strcmp(hardware, 'boskop') %------------------------------
-        if str2double(ver(1:4)) < 2014
-            if matlabpool('size') < 1
-                matlabpool(8);
+        nTries = 0;
+        hadException = 1;
+        while nTries < 10 && hadException == 1 %on boskop, running qsub twice within 30 seconds can cause parpool to fail because of a race condition
+            hadException = 0;
+            try
+                if str2double(ver(1:4)) < 2014
+                    if matlabpool('size') < 1
+                        matlabpool(8);
+                    end
+                else
+                    if isempty(gcp('nocreate'))
+                        parpool(8);
+                    end
+                end
+            catch myException
+                disp(myException);
+                hadException = 1;
             end
-        else
-            if isempty(gcp('nocreate'))
-                parpool(8);
-            end
-        end   
+            nTries = nTries + 1;
+        end
     else %------------------------------
         if str2double(ver(1:4)) < 2014
             if matlabpool('size') < 1
