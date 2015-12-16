@@ -62,6 +62,11 @@ function [] = StartThreadPool (hardware)
         end
         maxNumCompThreads(32); %limits total cores used
     elseif strcmp(hardware, 'boskop') %------------------------------
+        %method 1 (should work)
+%         c = parcluster('local');
+%         c.JobStorageLocation = fullfile(outputFolder, 'temp');
+        
+        %method 2 (should also work)
         nTries = 0;
         hadException = 1;
         while nTries < 10 && hadException == 1 %on boskop, running qsub twice within 30 seconds can cause parpool to fail because of a race condition
