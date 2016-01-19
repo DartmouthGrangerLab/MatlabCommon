@@ -8,7 +8,6 @@ function [h] = PlotConfMat (h, targetsWide, predWide, labels)
         h = figure();
     end
     set(h, 'Renderer', 'painters');
-%     imagesc(confMat);
     plotconfusion(targetsWide, predWide);
     if size(labels,1) < size(labels,2)
         labels = labels';
