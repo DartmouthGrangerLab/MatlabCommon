@@ -7,7 +7,7 @@
 %   precision - (OPTIONAL) number of decimal points to render. default = 4.
 function [h] = PlotDSM (h, mat, labels, precision)
     assert(size(mat, 1) == size(mat, 2), 'mat must be a square matrix!');
-    if isempty(precision)
+    if exist('precision', 'var') && isempty(precision)
         precision = 4;
     end
     
