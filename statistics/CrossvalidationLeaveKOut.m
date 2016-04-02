@@ -11,6 +11,7 @@ function [trainIndices, testIndices] = CrossvalidationLeaveKOut (labels, numVali
         fractionTest = 0.5;
     end
 
+    uniqueLabels = unique(labels);
     trainIndices = cell(numValidations, 1);
     testIndices = cell(numValidations, 1);
     for trial = 1:numValidations
@@ -18,8 +19,8 @@ function [trainIndices, testIndices] = CrossvalidationLeaveKOut (labels, numVali
         testIndices{trial} = [];
     end
     for trial = 1:numValidations
-        for k = 1:numel(unique(labels))
-            catIndices = find(labels == k);
+        for k = 1:numel(uniqueLabels)
+            catIndices = find(labels == uniqueLabels(k));
             nTest = ceil(numel(catIndices) * fractionTest); %num test
             nTrain = numel(catIndices) - nTest; %num train
             [randIndices] = randperm(numel(catIndices));

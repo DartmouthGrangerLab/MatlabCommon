@@ -10,14 +10,15 @@ function [trainIndices, testIndices] = CrossvalidationKFold (labels, numFolds)
         numFolds = 10;
     end
 
+    uniqueLabels = unique(labels);
     trainIndices = cell(numFolds, 1);
     testIndices = cell(numFolds, 1);
     for fold = 1:numFolds
         trainIndices{fold} = [];
         testIndices{fold} = [];
     end
-    for k = 1:numel(unique(labels))
-        catIndices = find(labels == k);
+    for k = 1:numel(uniqueLabels)
+        catIndices = find(labels == uniqueLabels(k));
         N = numel(catIndices);
         for fold = 1:numFolds
             trainIndices{fold} = [trainIndices{fold};catIndices(1:ceil((fold-1)*N/numFolds))];

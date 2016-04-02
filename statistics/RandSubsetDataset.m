@@ -4,8 +4,9 @@
 %   frac - fraction of data to keep (0 to 1)
 function [indices] = RandSubsetDataset (labels, frac)
     indices = [];
-    for k = 1:numel(unique(labels))
-        catIndices = find(labels == k);
+    uniqueLabels = unique(labels);
+    for k = 1:numel(uniqueLabels)
+        catIndices = find(labels == uniqueLabels(k));
         N = numel(catIndices);
         
         randIdx = randperm(N);
