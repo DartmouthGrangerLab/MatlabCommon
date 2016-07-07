@@ -4,7 +4,7 @@
 %   pattern - search term (a string)
 %   exact - OPTIONAL if 1, will only accept exact string matches. Note search is always case sensitive. Default = 0
 %RETURNS:
-%   indices - 
+%   indices - empty array [] if nothing found, otherwise an array of integers
 function [indices] = StringFind (str, pattern, exact)
     if ~exist('exact', 'var') || isempty(exact)
         exact = 0;
