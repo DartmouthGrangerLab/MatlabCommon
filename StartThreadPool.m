@@ -42,7 +42,7 @@ function [] = StartThreadPool (numThreads, hardware)
         %method 2 (should also work)
         nTries = 0;
         hadSuccess = 0;
-        while nTries < 20 && hadSuccess == 0 %on discovery, running qsub twice within 30 seconds can cause parpool to fail because of a race condition
+        while nTries < 25 && hadSuccess == 0 %on discovery, running qsub twice within 30 seconds can cause parpool to fail because of a race condition
             %below method sometimes works, but occasionally breaks everything
             %if parpool() gives you a 'not enough parameters' error, delete the contents of ~/.matlab/local_cluster_jobs/R2015a/
 %             try
@@ -88,7 +88,7 @@ function [] = StartThreadPool (numThreads, hardware)
             nTries = nTries + 1;
         end
         if hadSuccess == 0
-            error(['StartThreadPool(',num2str(numThreads),', ''discovery'') failed 20 times to create a parallel pool! Giving up.']);
+            error(['StartThreadPool(',num2str(numThreads),', ''discovery'') failed 25 times to create a parallel pool! Giving up.']);
         end
     else %------------------------------
         if str2double(ver(1:4)) < 2014
