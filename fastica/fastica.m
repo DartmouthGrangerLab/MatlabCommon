@@ -257,8 +257,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
     else
         for i=1:2:(length(varargin)-1)
             if ~ischar (varargin{i}),
-                error (['Unknown type of optional parameter name (parameter' ...
-                    ' names must be strings).']);
+                error ('Unknown type of optional parameter name (parameter names must be strings).');
             end
             % change the value of parameter
             switch lower (varargin{i})
@@ -385,7 +384,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
             end;
 
             % Calculate PCA
-            [E, D]=pcamat(mixedsig, firstEig, lastEig, interactivePCA, verbose);
+            [E, D] = pcamat(mixedsig, firstEig, lastEig, interactivePCA, verbose);
         end
     end
 
@@ -400,7 +399,6 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
                 fprintf ('Whitening not needed.\n');
             end
         else
-
             % Whitening is needed
             % display notice if the user entered some of the whitening info, but not all.
             if (jumpWhitening > 0) & (b_verbose)
