@@ -2,9 +2,13 @@
 %Inputs:
 %   numThreads - number of threads requested. ignored exclusively when hardware = 'bigbrain'
 %   hardware - OPTIONAL - one of 'bigbrain', 'discovery', or 'local' (default = local pool)
-function [] = StartThreadPool (numThreads, hardware)
-    if nargin == 0
+%   spmdEnabled - OPTIONAL - true or false (default = true, same as matlab's default) - can safely set to false iff you never use the spmd keyword. ignored exclusively when hardware = 'bigbrain'
+function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
+    if nargin < 2
         hardware = '';
+    end
+    if nargin < 3
+        spmdEnabled = true;
     end
     ver = version('-release'); %returns a string like '2014a'
     
@@ -71,7 +75,7 @@ function [] = StartThreadPool (numThreads, hardware)
                         end
                     else
                         if isempty(gcp('nocreate'))
-                            parpool(numThreads);
+                            parpool(numThreads, 'SpmdEnabled', spmdEnabled);
                         end
                     end
                     fileLock.release();
@@ -97,7 +101,7 @@ function [] = StartThreadPool (numThreads, hardware)
             end
         else
             if isempty(gcp('nocreate'))
-                parpool(numThreads);
+                parpool(numThreads, 'SpmdEnabled', spmdEnabled);
             end
         end
     end
