@@ -8,7 +8,7 @@ function json=saveubjson(rootname,obj,varargin)
 % convert a MATLAB object (cell, struct or array) into a Universal 
 % Binary JSON (UBJSON) binary string
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang <at> neu.edu)
 % created on 2013/08/17
 %
 % $Id$
@@ -475,9 +475,9 @@ if(~isfloat(num))
 end
 
 if(isa(num,'single'))
-  val=['d' data2byte(num,'uint8')];
+  val=['d' data2byte(swapbytes(num),'uint8')];
 else
-  val=['D' data2byte(num,'uint8')];
+  val=['D' data2byte(swapbytes(num),'uint8')];
 end
 %%-------------------------------------------------------------------------
 function data=I_a(num,type,dim,format)
@@ -533,9 +533,9 @@ if(id==0)
 end
 
 if(id==1)
-  data=data2byte(single(num),'uint8');
+  data=data2byte(swapbytes(single(num)),'uint8');
 elseif(id==2)
-  data=data2byte(double(num),'uint8');
+  data=data2byte(swapbytes(double(num)),'uint8');
 end
 
 if(nargin>=3 && length(dim)>=2 && prod(dim)~=dim(2))
