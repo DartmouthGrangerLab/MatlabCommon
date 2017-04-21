@@ -18,7 +18,7 @@ function [v] = NMI (label, result)
     if length(label_unique) ~= length(result_unique)
         v = -1;
         return;
-    end;
+    end
 
     c = length(label_unique);
 
