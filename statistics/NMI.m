@@ -3,6 +3,10 @@
 %http://www.mathworks.com/matlabcentral/fileexchange/29047-normalized-mutual-information/content//nmi.m
 %http://nlp.stanford.edu/IR-book/html/htmledition/evaluation-of-clustering-1.html
 %return value should be between 0 and 1
+%INPUTS:
+%   label - a 1D vector
+%   result - a 1D vector
+%NOTE: I think NMI2 is more correct - it often returns the same value, but sometimes not. (Eli Bowen 5/2017)
 function [v] = NMI (label, result)
     assert(length(label) == length(result));
 
