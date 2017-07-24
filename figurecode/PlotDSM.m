@@ -5,10 +5,14 @@
 %   mat - 
 %   labels - text to display for each category (cell array of strings)
 %   precision - (OPTIONAL) number of decimal points to render. default = 4.
-function [h] = PlotDSM (h, mat, labels, precision)
+%   fontSize - (OPTIONAL) font size for the text. Can leave blank for matlab defaults of 10.
+function [h] = PlotDSM (h, mat, labels, precision, fontSize)
     assert(size(mat, 1) == size(mat, 2), 'mat must be a square matrix!');
     if exist('precision', 'var') && isempty(precision)
         precision = 4;
+    end
+    if ~exist('fontSize', 'var') || isempty(fontSize)
+        fontSize = 10; %this is the matlab default
     end
     
     if isempty(h)
@@ -22,7 +26,7 @@ function [h] = PlotDSM (h, mat, labels, precision)
         textStrings = num2str(mat(:), ['%0.',num2str(precision),'f']); %create strings from the matrix values
         textStrings = strtrim(cellstr(textStrings)); %remove any space padding
         [x,y] = meshgrid(1:size(mat, 1)); %create x and y coordinates for the strings
-        hStrings = text(x(:), y(:), textStrings(:), 'HorizontalAlignment', 'center'); %plot the strings
+        hStrings = text(x(:), y(:), textStrings(:), 'HorizontalAlignment', 'center', 'FontSize', fontSize); %plot the strings (font size 10 = default)
         midValue = mean(get(gca,'CLim')); %get the middle value of the color range
         textColors = repmat(mat(:) > midValue, 1, 3); %choose white or black for the text color of the strings so
                                                       %they can be easily seen over the background color
