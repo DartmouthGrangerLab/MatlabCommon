@@ -76,7 +76,11 @@ function [nmi] = NMI2 (true_mem, mem)
     end
     MI = MI / n;
     
-    nmi = MI / sqrt(Ha*Hb);
+    if MI == 0
+        nmi = 0;
+    else
+        nmi = MI / sqrt(Ha*Hb);
+    end
 end
 
 %---------------------auxiliary functions---------------------
