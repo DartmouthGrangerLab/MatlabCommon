@@ -2,7 +2,7 @@
 %INPUTS:
 %   str - variable to search within. If a string, returns the result of strfind(). If a cell array of strings (e.g. {'hi','there'}), returns indices into the cell array.
 %   pattern - search term (a string)
-%   exact - OPTIONAL if 1, will only accept exact string matches. Note search is always case sensitive. Default = 0
+%   exact - OPTIONAL if true, will only accept exact string matches. Note search is always case sensitive. Default = 0
 %RETURNS:
 %   indices - empty array [] if nothing found, otherwise an array of integers
 function [indices] = StringFind (str, pattern, exact)
