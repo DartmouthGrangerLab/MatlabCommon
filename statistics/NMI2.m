@@ -9,7 +9,8 @@
 %                 mem=[2 1 3 1 4 5]
 %        Cluster labels are coded using positive integer. 
 %RETURNS:
-%   AMI - normalized mutual information
+%   NMI - normalized mutual information
+%   MI - mutual information
 %--------------------------------------------------------------------------
 %References: 
 % [1] 'A Novel Approach for Automatic Number of Clusters Detection based on Consensus Clustering', N.X. Vinh, and Epps, J., in Procs. IEEE Int. Conf. on Bioinformatics and Bioengineering (Taipei, Taiwan), 2009.
@@ -34,8 +35,8 @@
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
-%Modified by Eli Bowen from AMI function to only calculate NMI
-function [nmi] = NMI2 (true_mem, mem)
+%Modified by Eli Bowen from AMI function to only calculate NMI, return 
+function [nmi,MI] = NMI2 (true_mem, mem)
     if nargin == 1
         T = true_mem; %contingency table pre-supplied
     elseif nargin == 2
