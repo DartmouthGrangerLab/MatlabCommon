@@ -7,23 +7,26 @@
 %   indices - empty array [] if nothing found, otherwise an array of integers
 function [indices] = StringFind (str, pattern, exact)
     if ~exist('exact', 'var') || isempty(exact)
-        exact = 0;
+        exact = false;
     end
     
     if iscellstr(str)
-        indexC = strfind(str, pattern);
-        indices = find(not(cellfun('isempty', indexC)));
-        if exact == 1
-            exactIndices = [];
-            for i = 1:numel(indices)
-                if strcmp(str{indices(i)}, pattern)
-                    exactIndices = [exactIndices, indices(i)];
-                end
-            end
-            indices = exactIndices;
+        if exact
+%             indices = find(not(cellfun('isempty', strfind(str, pattern))));
+%             exactIndices = [];
+%             for i = 1:numel(indices)
+%                 if strcmp(str{indices(i)}, pattern)
+%                     exactIndices = [exactIndices, indices(i)];
+%                 end
+%             end
+%             indices = exactIndices;
+            indices = find(strcmp(str, pattern)); %20x faster
+        else
+%             indices = find(contains(str, pattern, 'IgnoreCase', false)); %slower
+            indices = find(not(cellfun('isempty', strfind(str, pattern)))); %DON'T use contains, as recommended by matlab - it's twice as slow!
         end
     elseif ischar(str)
-        if exact == 1
+        if exact
             if strcmp(str, pattern)
                 indices = 1;
             else
