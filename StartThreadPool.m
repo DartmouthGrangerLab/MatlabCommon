@@ -88,7 +88,7 @@ function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
                 disp(myException);
             end
             
-            pause(5);
+            pause(10);
             nTries = nTries + 1;
         end
         if hadSuccess == 0
