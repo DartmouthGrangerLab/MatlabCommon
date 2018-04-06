@@ -7,7 +7,7 @@
 %   stdOfX - OPTIONAL - precomputed value of exactly std(x, 1) - only useful for speeding up multiple calls with the same X
 function [retVal] = PointBiserial (d, x, stdOfX)
     assert(islogical(d), 'd must be binary (boolean)');
-    N = size(d, 1); %Length
+    N = size(d, 1);
     
     if ~exist('stdOfX', 'var') || isempty(stdOfX)
         stdOfX = std(x, 1); %numMIs x 1 - population standard devation for each of D columns in x
