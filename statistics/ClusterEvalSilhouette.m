@@ -12,6 +12,27 @@ function [s] = ClusterEvalSilhouette (X, clustAssignments, distMeasure)
         distMeasure = 'Euclidean';
     end
     
+    if strcmp(distMeasure, 'cosine')
+        Xnorm = sqrt(sum(X.^2, 2));
+        
+        tooSmall = (Xnorm <= eps(max(Xnorm)));
+        if any(tooSmall)
+            X(tooSmall,:) = [];
+            clustAssignments(tooSmall) = [];
+            disp(['ClusterEvalSilhouette: removing ',num2str(sum(tooSmall)/numel(tooSmall)*100),'% (',num2str(sum(tooSmall)),') of points for being too small for cosine distance']);
+        end
+    elseif strcmp(distMeasure, 'correlation')
+        Xnorm = X - mean(X, 2);
+        Xnorm = sqrt(sum(Xnorm.^2, 2));
+        
+        tooSmall = (Xnorm <= eps(max(Xnorm)));
+        if any(tooSmall)
+            X(tooSmall,:) = [];
+            clustAssignments(tooSmall) = [];
+            disp(['ClusterEvalSilhouette: removing ',num2str(sum(tooSmall)/numel(tooSmall)*100),'% (',num2str(sum(tooSmall)),') of points for being too small for correlation distance']);
+        end
+    end
+    
     s = mean(silhouette(X, clustAssignments, distMeasure), 'omitnan');
     %^ will still produce NaN if all coefficients are NaN (e.g. if there's only one category in clustAssignments, or only one nonzero dimension in the data)
     %but omitnan is useful because single-datapoint clusters return NaN - other clusters may still be good to go.
