@@ -42,7 +42,9 @@ function [h] = Plot3DHeatmap (h, mat, xLabels, yLabels, zLabels, cmap)
     for i = 1:size(mat, 1)
         for j = 1:size(mat, 2)
             for k = 1:size(mat, 3)
-                surf(r*sphereX + i, r*sphereY + j, r*sphereZ + k, 'FaceColor', myColors(min(size(myColors, 1), 1 + floor(size(myColors, 1)*(mat(i,j,k)-min(mat(:)))/(max(mat(:))-min(mat(:))))),:), 'EdgeColor', 'none', 'FaceAlpha', faceAlpha, 'FaceLighting', 'none'); % sphere with radius r centred at (ii,jj,kk)
+                if ~isnan(mat(i,j,k))
+                    surf(r*sphereX + i, r*sphereY + j, r*sphereZ + k, 'FaceColor', myColors(min(size(myColors, 1), 1 + floor(size(myColors, 1)*(mat(i,j,k)-min(mat(:), [], 'omitnan'))/(max(mat(:), [], 'omitnan')-min(mat(:), [], 'omitnan')))),:), 'EdgeColor', 'none', 'FaceAlpha', faceAlpha, 'FaceLighting', 'none'); % sphere with radius r centred at (ii,jj,kk)
+                end
             end
         end
     end
