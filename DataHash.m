@@ -1,119 +1,85 @@
-function Hash = DataHash(Data, Opt)
+function [Hash] = DataHash (Data, varargin)
 % DATAHASH - Checksum for Matlab array of any type
 % This function creates a hash value for an input of any type. The type and
 % dimensions of the input are considered as default, such that UINT8([0,0]) and
-% UINT16(0) have different hash values. Nested STRUCTs and CELLs are parsed
-% recursively.
+% UINT16(0) have different hash values. Nested STRUCTs and CELLs are parsed recursively.
 %
-% Hash = DataHash(Data, Opt)
+% Hash = DataHash(Data, Opts...)
 % INPUT:
 %   Data: Array of these built-in types:
-%           (U)INT8/16/32/64, SINGLE, DOUBLE, (real or complex)
-%           CHAR, LOGICAL, CELL (nested), STRUCT (scalar or array, nested),
-%           function_handle.
-%   Opt:  Struct to specify the hashing algorithm and the output format.
-%         Opt and all its fields are optional.
-%         Opt.Method: String, known methods for Java 1.6 (Matlab 2009a):
-%              'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'MD2', 'MD5'.
-%            Known methods for Java 1.3 (Matlab 6.5):
-%              'MD5', 'SHA-1'.
-%            Default: 'MD5'.
-%         Opt.Format: String specifying the output format:
+%           (U)INT8/16/32/64, SINGLE, DOUBLE, (real/complex, full/sparse)
+%           CHAR, LOGICAL, CELL (nested), STRUCT (scalar or array, nested), function_handle, string.
+%   Opts: Char strings to specify the method, the input and theoutput types:
+%         Input types:
+%            'array': The contents, type and size of the input [Data] are considered for the creation of the hash. 
+%                     Nested CELLs and STRUCT arrays are parsed recursively.
+%                     Empty arrays of different type reply different hashs.
+%            'file':  [Data] is treated as file name and the hash is calculated for the files contents.
+%            'bin':   [Data] is a numerical, LOGICAL or CHAR array.
+%                     Only the binary contents of the array is considered, such that
+%                     e.g. empty arrays of different type reply the same hash.
+%            'ascii': Same as 'bin', but only the 8-bit ASCII part of the 16-bit Matlab CHARs is considered.
+%         Output types:
 %            'hex', 'HEX':      Lower/uppercase hexadecimal string.
 %            'double', 'uint8': Numerical vector.
-%            'base64':          Base64 encoded string, only printable ASCII
-%                               characters, shorter than 'hex', no padding.
-%            Default: 'hex'.
-%         Opt.Input: Type of the input as string, not case-sensitive:
-%            'array': The contents, type and size of the input [Data] are
-%                     considered  for the creation of the hash. Nested CELLs
-%                     and STRUCT arrays are parsed recursively. Empty arrays of
-%                     different type reply different hashs.
-%            'file':  [Data] is treated as file name and the hash is calculated
-%                     for the files contents.
-%            'bin':   [Data] is a numerical, LOGICAL or CHAR array. Only the
-%                     binary contents of the array is considered, such that
-%                     e.g. empty arrays of different type reply the same hash.
-%            Default: 'array'.
+%            'base64':          Base64.
+%            'short':           Base64 without padding.
+%         Hashing method:
+%            'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'MD2', 'MD5'.
+%            Call DataHash without inputs to get a list of available methods.
+%
+%         Default: 'MD5', 'hex', 'array'
 %
 % OUTPUT:
-%   Hash: String, DOUBLE or UINT8 vector. The length depends on the hashing
-%         method.
+%   Hash: String, DOUBLE or UINT8 vector. The length depends on the hashing method.
+%         If DataHash is called without inputs, a struct is replied:
+%           .HashVersion: Version number of the hashing method of this tool. In
+%              case of bugs or additions, the output can change.
+%           .Date: Date of release of the current HashVersion.
+%           .HashMethod: Cell string of the recognized hash methods.
 %
 % EXAMPLES:
 % % Default: MD5, hex:
-%   DataHash([])                % 7de5637fd217d0e44e0082f4d79b3e73
+%   DataHash([])                      % 5b302b7b2099a97ba2a276640a192485
 % % MD5, Base64:
-%   Opt.Format = 'base64';
-%   Opt.Method = 'MD5';
-%   DataHash(int32(1:10), Opt)  % bKdecqzUpOrL4oxzk+cfyg
+%   DataHash(int32(1:10), 'short', 'MD5')  % +tJN9yeF89h3jOFNN55XLg
 % % SHA-1, Base64:
 %   S.a = uint8([]);
 %   S.b = {{1:10}, struct('q', uint64(415))};
-%   Opt.Method = 'SHA-1';
-%   DataHash(S, Opt)            % ZMe4eUAp0G9TDrvSW0/Qc0gQ9/A
+%   DataHash(S, 'SHA-1', 'HEX')       % 18672BE876463B25214CA9241B3C79CC926F3093
 % % SHA-1 of binary values:
-%   Opt.Method = 'SHA-1';
-%   Opt.Input  = 'bin';
-%   DataHash(1:8, Opt)          % 826cf9d3a5d74bbe415e97d4cecf03f445f69225
+%   DataHash(1:8, 'SHA-1', 'bin')     % 826cf9d3a5d74bbe415e97d4cecf03f445f69225
+% % SHA-256, consider ASCII part only (Matlab's CHAR has 16 bits!):
+%   DataHash('abc', 'SHA-256', 'ascii')
+%       % ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+% % Or equivalently by converting the input to UINT8:
+%   DataHash(uint8('abc'), 'SHA-256', 'bin')
 %
 % NOTES:
 %   Function handles and user-defined objects cannot be converted uniquely:
 %   - The subfunction ConvertFuncHandle uses the built-in function FUNCTIONS,
 %     but the replied struct can depend on the Matlab version.
 %   - It is tried to convert objects to UINT8 streams in the subfunction
-%     ConvertObject. A conversion by STRUCT() might be more appropriate.
-%   Adjust these subfunctions on demand.
+%     ConvertObject. A conversion by STRUCT() might be more appropriate. Adjust these subfunctions on demand.
 %
-%   MATLAB CHARs have 16 bits! In consequence the string 'hello' is treated as
-%   UINT16('hello') for the binary input method. Use this to get the hash of an
-%   ASCII-string (Result as defined in RFC 1321!):
-%     Opt.Method = 'MD5'; Opt.Input = 'bin';
-%     DataHash(uint8('abc'), Opt);    % '900150983cd24fb0d6963f7d28e17f72'
+%   MATLAB CHARs have 16 bits! Use Opt.Input='ascii' for comparisons with e.g. online hash generators.
 %
-%   DataHash uses James Tursa's smart and fast TYPECASTX, if it is installed:
-%     http://www.mathworks.com/matlabcentral/fileexchange/17476
-%   As fallback the built-in TYPECAST is used automatically, but for large
-%   inputs this can be more than 100 times slower.
+%   For arrays the calculated hash value might be changed in new versions.
+%   Calling this function without inputs replies the version of the hash.
 %
-% Tested: Matlab 7.7, 7.8, 7.13, WinXP/32, Win7/64
-% Author: Jan Simon, Heidelberg, (C) 2011-2015 matlab.THISYEAR(a)nMINUSsimon.de
-
-%Acquired by Eli Bowen 6/30/15 from https://www.mathworks.com/matlabcentral/fileexchange/31272-datahash
-%Modified only for readibility and to add this documentation
-%License:
-%Copyright (c) 2015, Jan Simon
-%All rights reserved.
-%Redistribution and use in source and binary forms, with or without
-%modification, are permitted provided that the following conditions are met:
-%    * Redistributions of source code must retain the above copyright
-%      notice, this list of conditions and the following disclaimer.
-%    * Redistributions in binary form must reproduce the above copyright
-%      notice, this list of conditions and the following disclaimer in
-%      the documentation and/or other materials provided with the distribution
-%THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-%AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-%IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-%ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-%LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-%CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-%SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-%INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-%CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-%ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-%POSSIBILITY OF SUCH DAMAGE.
-
-% See also: TYPECAST, CAST.
-% FEX:
-% Michael Kleder, "Compute Hash", no structs and cells:
-%   http://www.mathworks.com/matlabcentral/fileexchange/8944
-% Tim, "Serialize/Deserialize", converts structs and cells to a byte stream:
-%   http://www.mathworks.com/matlabcentral/fileexchange/29457
-% Jan Simon, "CalcMD5", MD5 only, much faster C-mex:
+%   The older style for input arguments is accepted also: Struct with fields 'Input', 'Method', 'OutFormat'.
+%
+%   The C-Mex function GetMD5 is 2 to 100 times faster, but obtains MD5 only:
 %   http://www.mathworks.com/matlabcentral/fileexchange/25921
-
-% $JRev: R-v V:022 Sum:68JCxGh2/Q0N Date:30-Mar-2015 01:35:37 $
+%
+% Tested: Matlab/64 7.8, 7.13, 8.6, 9.1, Win7/64
+% Author: Jan Simon, Heidelberg, (C) 2011-2019 matlab.2010(a)n(MINUS)simon.de
+%
+% See also: TYPECAST, CAST.
+% Tim, "Serialize/Deserialize", converts structs and cells to a byte stream: http://www.mathworks.com/matlabcentral/fileexchange/29457
+% $JRev: R-Q V:042 Sum:YC3M62YZN03w Date:02-Mar-2019 23:12:53 $
 % $License: BSD (use/copy/change/redistribute on own risk, mention the author) $
+% $UnitTest: uTest_DataHash $
 % $File: Tools\GLFile\DataHash.m $
 % History:
 % 001: 01-May-2011 21:52, First version.
@@ -130,9 +96,22 @@ function Hash = DataHash(Data, Opt)
 %      Now the number of dimensions is included, to avoid this.
 % 022: 30-Mar-2015 00:04, Bugfix: Failed for strings and [] without TYPECASTX.
 %      Ross found these 2 bugs, which occur when TYPECASTX is not installed.
-%      If you need the base64 format padded with '=' characters, adjust
-%      fBase64_enc as you like.
-
+%      If you need the base64 format padded with '=' characters, adjust fBase64_enc as you like.
+% 026: 29-Jun-2015 00:13, Changed hash for STRUCTs.
+%      Struct arrays are analysed field by field now, which is much faster.
+% 027: 13-Sep-2015 19:03, 'ascii' input as abbrev. for Input='bin' and UINT8().
+% 028: 15-Oct-2015 23:11, Example values in help section updated to v022.
+% 029: 16-Oct-2015 22:32, Use default options for empty input.
+% 031: 28-Feb-2016 15:10, New hash value to get same reply as GetMD5.
+%      New Matlab version (at least 2015b) use a fast method for TYPECAST, such
+%      that calling James Tursa's TYPECASTX is not needed anymore.
+%      Matlab 6.5 not supported anymore: MException for CATCH.
+% 033: 18-Jun-2016 14:28, BUGFIX: Failed on empty files. Thanks to Christian (AuthorID 2918599).
+% 035: 19-May-2018 01:11, STRING type considered.
+% 040: 13-Nov-2018 01:20, Fields of Opt not case-sensitive anymore.
+% 041: 09-Feb-2019 18:12, ismethod(class(V),) to support R2018b.
+% 042: 02-Mar-2019 18:39, base64: in Java, short: Base64 with padding. Unit test. base64->short.
+%
 % OPEN BUGS:
 % Nath wrote:
 % function handle refering to struct containing the function will create
@@ -142,277 +121,229 @@ function Hash = DataHash(Data, Opt)
 %   addprop(d,'f');
 %   d.f= @(varargin) struct2cell(d);
 %   DataHash(d.f) % infinite loop
+% This is caught with an error message concerning the recursion limit now.
+%#ok<*CHARTEN>
+%Acquired by Eli Bowen 3/26/2019 (older version 22 was downloaded on 6/30/15 and used until 3/26/2019) from https://www.mathworks.com/matlabcentral/fileexchange/31272-datahash
+%Modified only for readibility and to add this documentation
 
-% Main function: ===============================================================
-% typecastx creates a shared data copy instead of the deep copy as Matlab's
-% TYPECAST - for a [1000x1000] DOUBLE array this is 100 times faster!
-persistent usetypecastx
-if isempty(usetypecastx)
-   % Java is needed:
-   if ~usejava('jvm')
-      Error_L('NoJava', 'Java is required.');
-   end
+    % Reply current version if called without inputs: ------------------------------
+    if nargin == 0
+        R = Version_L;
+        if nargout == 0
+            disp(R);
+        else
+            Hash = R;
+        end
+        return;
+    end
 
-   usetypecastx = ~isempty(which('typecastx'));  % Run the slow WHICH once only
+    % Parse inputs: ----------------------------------------------------------------
+    [Method,OutFormat,isFile,isBin,Data] = ParseInput(Data, varargin{:});
+
+    % Create the engine: -----------------------------------------------------------
+    try
+        Engine = java.security.MessageDigest.getInstance(Method);
+    catch ME % Handle errors during initializing the engine:
+        if ~usejava('jvm')
+            Error_L('needJava', 'DataHash needs Java.');
+        end
+        Error_L('BadInput2', 'Invalid hashing algorithm: [%s]. %s', Method, ME.message);
+    end
+
+    % Create the hash value: -------------------------------------------------------
+    if isFile
+        [FID, Msg] = fopen(Data, 'r'); % Open the file
+        if FID < 0
+            Error_L('BadFile', ['Cannot open file: %s', char(10), '%s'], Data, Msg);
+        end
+
+        % Read file in chunks to save memory and Java heap space:
+        Chunk = 1e6;         % Fastest for 1e6 on Win7/64, HDD
+        Count = Chunk;       % Dummy value to satisfy WHILE condition
+        while Count == Chunk
+            [Data, Count] = fread(FID, Chunk, '*uint8');
+            if Count ~= 0    % Avoid error for empty file
+                Engine.update(Data);
+            end
+        end
+        fclose(FID);
+    elseif isBin             % Contents of an elementary array, type tested already:
+        if ~isempty(Data)    % Engine.update fails for empty input!
+            if isnumeric(Data)
+                if isreal(Data)
+                    Engine.update(typecast(Data(:), 'uint8'));
+                else
+                    Engine.update(typecast(real(Data(:)), 'uint8'));
+                    Engine.update(typecast(imag(Data(:)), 'uint8'));
+                end
+            elseif islogical(Data)               % TYPECAST cannot handle LOGICAL
+                Engine.update(typecast(uint8(Data(:)), 'uint8'));
+            elseif ischar(Data)                  % TYPECAST cannot handle CHAR
+                Engine.update(typecast(uint16(Data(:)), 'uint8'));
+                % Bugfix: Line removed
+            elseif myIsString(Data)
+                if isscalar(Data)
+                    Engine.update(typecast(uint16(Data{1}), 'uint8'));
+                else
+                    Error_L('BadBinData', 'Bin type requires scalar string.');
+                end
+            else % This should have been caught above!
+                Error_L('BadBinData', 'Data type not handled: %s', class(Data));
+            end
+        end
+    else                 % Array with type:
+        Engine = CoreHash(Data, Engine);
+    end
+
+    % Calculate the hash: ----------------------------------------------------------
+    Hash = typecast(Engine.digest, 'uint8');
+
+    % Convert hash specific output format: -----------------------------------------
+    switch OutFormat
+        case 'hex'
+            Hash = sprintf('%.2x', double(Hash));
+        case 'HEX'
+            Hash = sprintf('%.2X', double(Hash));
+        case 'double'
+            Hash = double(reshape(Hash, 1, []));
+        case 'uint8'
+            Hash = reshape(Hash, 1, []);
+        case 'short'
+            Hash = fBase64_enc(double(Hash), 0);
+        case 'base64'
+            Hash = fBase64_enc(double(Hash), 1);
+        otherwise
+            Error_L('BadOutFormat', '[Opt.Format] must be: HEX, hex, uint8, double, base64.');
+    end
 end
 
-% Default options: -------------------------------------------------------------
-Method    = 'MD5';
-OutFormat = 'hex';
-isFile    = false;
-isBin     = false;
+% ******************************************************************************
+function Engine = CoreHash (Data, Engine)
+    % Consider the type and dimensions of the array to distinguish arrays with the
+    % same data, but different shape: [0 x 0] and [0 x 1], [1,2] and [1;2],
+    % DOUBLE(0) and SINGLE([0,0]):
+    % <  v016: [class, size, data]. BUG! 0 and zeros(1,1,0) had the same hash!
+    % >= v016: [class, ndims, size, data]
+    Engine.update([uint8(class(Data)), typecast(uint64([ndims(Data), size(Data)]), 'uint8')]);
 
-% Check number and type of inputs: ---------------------------------------------
-nArg = nargin;
-if nArg == 2
-   if isa(Opt, 'struct') == 0   % Bad type of 2nd input:
-      Error_L('BadInput2', '2nd input [Opt] must be a struct.');
-   end
-   
-   % Specify hash algorithm:
-   if isfield(Opt, 'Method')
-      Method = upper(Opt.Method);
-   end
-   
-   % Specify output format:
-   if isfield(Opt, 'Format')
-      OutFormat = Opt.Format;
-   end
-   
-   % Check if the Input type is specified - default: 'array':
-   if isfield(Opt, 'Input')
-      if strcmpi(Opt.Input, 'File')
-         isFile = true;
-         if ischar(Data) == 0
-            Error_L('CannotOpen', '1st input FileName must be a string');
-         end
-         
-      elseif strncmpi(Opt.Input, 'bin', 3)  % Accept 'binary' also
-         isBin = true;
-         if (isnumeric(Data) || ischar(Data) || islogical(Data)) == 0 || ...
-               issparse(Data)
-            Error_L('BadDataType', ...
-               '1st input must be numeric, CHAR or LOGICAL for binary input.');
-         end
-      end
-   end
-   
-elseif nArg ~= 1  % Bad number of arguments:
-   Error_L('BadNInput', '1 or 2 inputs required.');
-end
-
-% Create the engine: -----------------------------------------------------------
-try
-   Engine = java.security.MessageDigest.getInstance(Method);
-catch
-   Error_L('BadInput2', 'Invalid algorithm: [%s].', Method);
-end
-
-% Create the hash value: -------------------------------------------------------
-if isFile
-   % Check existence of file:
-   Found = FileExist(Data);
-   if ~Found
-      Error_L('FileNotFound', 'File not found: %s.', Data);
-   end
-   
-   % Open the file:
-   FID = fopen(Data, 'r');
-   if FID < 0
-      Error_L('CannotOpen', 'Cannot open file: %s.', Data);
-   end
-   
-   % Read file in chunks to save memory and Java heap space:
-   Chunk         = 1e6;
-   [Data, Count] = fread(FID, Chunk, '*uint8');
-   Engine.update(Data);
-   while Count == Chunk
-      [Data, Count] = fread(FID, Chunk, '*uint8');
-      Engine.update(Data);
-   end
-   fclose(FID);
-   
-   % Calculate the hash:
-   if usetypecastx
-      Hash = typecastx(Engine.digest, 'uint8');
-   else
-      Hash = typecast(Engine.digest, 'uint8');
-   end
-
-elseif isBin             % Contents of an elementary array, type tested already:
-   if isempty(Data)      % Nothing to do, Engine.update fails for empty input!
-      if usetypecastx    % Bugfix: Consider missing typecastx
-         Hash = typecastx(Engine.digest, 'uint8');
-      else
-         Hash = typecast(Engine.digest, 'uint8');
-      end
-      
-   elseif usetypecastx   % Faster typecastx:
-      if isreal(Data)
-         Engine.update(typecastx(Data(:), 'uint8'));
-      else
-         Engine.update(typecastx(real(Data(:)), 'uint8'));
-         Engine.update(typecastx(imag(Data(:)), 'uint8'));
-      end
-      Hash = typecastx(Engine.digest, 'uint8');
-      
-   else                  % Matlab's TYPECAST is less elegant:
-      if isnumeric(Data)
-         if isreal(Data)
+    if issparse(Data)                    % Sparse arrays to struct:
+        [S.Index1, S.Index2, S.Value] = find(Data);
+        Engine                        = CoreHash(S, Engine);
+    elseif isstruct(Data)                % Hash for all array elements and fields:
+        F = sort(fieldnames(Data));      % Ignore order of fields
+        for iField = 1:length(F)         % Loop over fields
+            aField = F{iField};
+            Engine.update(uint8(aField));
+            for iS = 1:numel(Data)       % Loop over elements of struct array
+                Engine = CoreHash(Data(iS).(aField), Engine);
+            end
+        end
+    elseif iscell(Data)                  % Get hash for all cell elements:
+        for iS = 1:numel(Data)
+            Engine = CoreHash(Data{iS}, Engine);
+        end
+    elseif isempty(Data)                 % Nothing to do
+    elseif isnumeric(Data)
+        if isreal(Data)
             Engine.update(typecast(Data(:), 'uint8'));
-         else
+        else
             Engine.update(typecast(real(Data(:)), 'uint8'));
             Engine.update(typecast(imag(Data(:)), 'uint8'));
-         end
-      elseif islogical(Data)               % TYPECAST cannot handle LOGICAL
-         Engine.update(typecast(uint8(Data(:)), 'uint8'));
-      elseif ischar(Data)                  % TYPECAST cannot handle CHAR
-         Engine.update(typecast(uint16(Data(:)), 'uint8'));
-         % Bugfix: Line removed
-      end
-      Hash = typecast(Engine.digest, 'uint8');
-   end
-   
-elseif usetypecastx  % Faster typecastx:
-   Engine = CoreHash_(Data, Engine);
-   Hash   = typecastx(Engine.digest, 'uint8');
-   
-else                 % Slower built-in TYPECAST:
-   Engine = CoreHash(Data, Engine);
-   Hash   = typecast(Engine.digest, 'uint8');
-end
+        end
+    elseif islogical(Data)               % TYPECAST cannot handle LOGICAL
+        Engine.update(typecast(uint8(Data(:)), 'uint8'));
+    elseif ischar(Data)                  % TYPECAST cannot handle CHAR
+        Engine.update(typecast(uint16(Data(:)), 'uint8'));
+    elseif myIsString(Data)              % [19-May-2018] String class in >= R2016b
+        classUint8 = uint8([117, 105, 110, 116, 49, 54]); % 'uint16'
+        for iS = 1:numel(Data)
+            % Emulate without recursion: Engine = CoreHash(uint16(Data{iS}), Engine)
+            aString = uint16(Data{iS});
+            Engine.update([classUint8, typecast(uint64([ndims(aString), size(aString)]), 'uint8')]);
+            if ~isempty(aString)
+                Engine.update(typecast(uint16(aString), 'uint8'));
+            end
+        end
+    elseif isa(Data, 'function_handle')
+        Engine = CoreHash(ConvertFuncHandle(Data), Engine);
+    elseif (isobject(Data) || isjava(Data)) && ismethod(class(Data), 'hashCode')
+        Engine = CoreHash(char(Data.hashCode), Engine);
+    else  % Most likely a user-defined object:
+        try
+            BasicData = ConvertObject(Data);
+        catch ME
+            error(['JSimon:', mfilename, ':BadDataType'], '%s: Cannot create elementary array for type: %s\n  %s', mfilename, class(Data), ME.message);
+        end
 
-% Convert hash specific output format: -----------------------------------------
-switch OutFormat
-   case 'hex'
-      Hash = sprintf('%.2x', double(Hash));
-   case 'HEX'
-      Hash = sprintf('%.2X', double(Hash));
-   case 'double'
-      Hash = double(reshape(Hash, 1, []));
-   case 'uint8'
-      Hash = reshape(Hash, 1, []);
-   case 'base64'
-      Hash = fBase64_enc(double(Hash));
-   otherwise
-      Error_L('BadOutFormat', ...
-         '[Opt.Format] must be: HEX, hex, uint8, double, base64.');
+        try
+            Engine = CoreHash(BasicData, Engine);
+        catch ME
+            if strcmpi(ME.identifier, 'MATLAB:recursionLimit')
+                ME = MException(['JSimon:', mfilename, ':RecursiveType'], '%s: Cannot create hash for recursive data type: %s', mfilename, class(Data));
+            end
+            throw(ME);
+        end
+    end
 end
-
-% return;
 
 % ******************************************************************************
-function Engine = CoreHash_(Data, Engine)
-% This method uses the faster typecastx version.
-
-% Consider the type and dimensions of the array to distinguish arrays with the
-% same data, but different shape: [0 x 0] and [0 x 1], [1,2] and [1;2],
-% DOUBLE(0) and SINGLE([0,0]):
-% <  v016: [class, size, data]. BUG! 0 and zeros(1,1,0) had the same hash!
-% >= v016: [class, ndim, size, data]
-Engine.update([uint8(class(Data)), ...
-              typecastx([ndims(Data), size(Data)], 'uint8')]);
-
-% Special treatment for sparse arrays - store the indices at first and the
-% values afterwards:
-if issparse(Data)
-   % Replace Data by vector of non-zero elements:
-   [i1, i2, Data] = find(Data);
-   Engine.update(typecastx(i1, 'uint8'));
-   Engine.update(typecastx(i2, 'uint8'));
+function [Method, OutFormat, isFile, isBin, Data] = ParseInput (Data, varargin)
+    % Default options: -------------------------------------------------------------
+    Method    = 'MD5';
+    OutFormat = 'hex';
+    isFile    = false;
+    isBin     = false;
+    
+    % Check number and type of inputs: ---------------------------------------------
+    nOpt = nargin - 1;
+    Opt  = varargin;
+    if nOpt == 1 && isa(Opt{1}, 'struct') % Old style Options as struct:
+        Opt  = struct2cell(Opt{1});
+        nOpt = numel(Opt);
+    end
+    
+    % Loop over strings in the input: ----------------------------------------------
+    for iOpt = 1:nOpt
+        aOpt = Opt{iOpt};
+        if ~ischar(aOpt)
+            Error_L('BadInputType', '[Opt] must be a struct or chars.');
+        end
+        
+        switch lower(aOpt)
+            case 'file'            % Data contains the file name:
+                isFile = true;
+            case {'bin', 'binary'} % Just the contents of the data:
+                if (isnumeric(Data) || ischar(Data) || islogical(Data) || myIsString(Data)) == 0 || issparse(Data)
+                    Error_L('BadDataType', ['[Bin] input needs data type: ', 'numeric, CHAR, LOGICAL, STRING.']);
+                end
+                isBin = true;
+            case 'array'
+                isBin = false;     % Is the default already
+            case {'asc', 'ascii'}  % 8-bit part of MATLAB CHAR or STRING:
+                isBin = true;
+                if ischar(Data)
+                    Data = uint8(Data);
+                elseif myIsString(Data) && numel(Data) == 1
+                    Data = uint8(char(Data));
+                else
+                    Error_L('BadDataType', 'ASCII method: Data must be a CHAR or scalar STRING.');
+                end
+            case 'hex'
+                if aOpt(1) == 'H'
+                    OutFormat = 'HEX';
+                else
+                    OutFormat = 'hex';
+                end
+            case {'double','uint8','short','base64'}
+                OutFormat = lower(aOpt);
+            otherwise  % Guess that this is the method:
+                Method = upper(aOpt);
+        end
+    end
 end
-
-if isstruct(Data)                    % Hash for all array elements and fields:
-   F      = sort(fieldnames(Data));  % Ignore order of fields
-   Engine = CoreHash_(F, Engine);    % Consider the fieldnames
-   
-   for iS = 1:numel(Data)            % Loop over elements of struct array
-      for iField = 1:length(F)       % Loop over fields
-         Engine = CoreHash_(Data(iS).(F{iField}), Engine);
-      end
-   end
-   
-elseif iscell(Data)                  % Get hash for all cell elements:
-   for iS = 1:numel(Data)
-      Engine = CoreHash_(Data{iS}, Engine);
-   end
-      
-elseif isnumeric(Data) || islogical(Data) || ischar(Data)
-   if isempty(Data) == 0
-      if isreal(Data)                % TRUE for LOGICAL and CHAR also:
-         Engine.update(typecastx(Data(:), 'uint8'));
-      else                           % Complex input:
-         Engine.update(typecastx(real(Data(:)), 'uint8'));
-         Engine.update(typecastx(imag(Data(:)), 'uint8'));
-      end
-   end
-   
-elseif isa(Data, 'function_handle')
-   Engine = CoreHash_(ConvertFuncHandle(Data), Engine);
-   
-elseif (isobject(Data) || isjava(Data)) && ismethod(Data, 'hashCode')
-   Engine = CoreHash_(Data.hashCode, Engine);
-   
-else  % Most likely this is a user-defined object:
-   try
-      Engine = CoreHash_(ConvertObject(Data), Engine);
-   catch
-      warning(['JSimon:', mfilename, ':BadDataType'], ...
-         ['Type of variable not considered: ', class(Data)]);
-   end
-end
-
-% return;
 
 % ******************************************************************************
-function Engine = CoreHash(Data, Engine)
-% This methods uses the slower TYPECAST of Matlab
-% See CoreHash_ for comments.
-
-Engine.update([uint8(class(Data)), ...
-              typecast([ndims(Data), size(Data)], 'uint8')]);
-
-if isstruct(Data)                    % Hash for all array elements and fields:
-   F      = sort(fieldnames(Data));  % Ignore order of fields
-   Engine = CoreHash(F, Engine);     % Catch the fieldnames
-   for iS = 1:numel(Data)            % Loop over elements of struct array
-      for iField = 1:length(F)       % Loop over fields
-         Engine = CoreHash(Data(iS).(F{iField}), Engine);
-      end
-   end
-elseif iscell(Data)                  % Get hash for all cell elements:
-   for iS = 1:numel(Data)
-      Engine = CoreHash(Data{iS}, Engine);
-   end
-elseif isempty(Data)
-elseif isnumeric(Data)
-   if isreal(Data)
-      Engine.update(typecast(Data(:), 'uint8'));
-   else
-      Engine.update(typecast(real(Data(:)), 'uint8'));
-      Engine.update(typecast(imag(Data(:)), 'uint8'));
-   end
-elseif islogical(Data)               % TYPECAST cannot handle LOGICAL
-   Engine.update(typecast(uint8(Data(:)), 'uint8'));
-elseif ischar(Data)                  % TYPECAST cannot handle CHAR
-   Engine.update(typecast(uint16(Data(:)), 'uint8'));
-elseif isa(Data, 'function_handle')
-   Engine = CoreHash(ConvertFuncHandle(Data), Engine);
-elseif (isobject(Data) || isjava(Data)) && ismethod(Data, 'hashCode')
-   Engine = CoreHash(Data.hashCode, Engine);
-else  % Most likely a user-defined object:
-   try
-      Engine = CoreHash(ConvertObject(Data), Engine);
-   catch
-      warning(['JSimon:', mfilename, ':BadDataType'], ...
-         ['Type of variable not considered: ', class(Data)]);
-   end
-end
-
-% return;
-
-% ******************************************************************************
-function FuncKey = ConvertFuncHandle(FuncH)
+function FuncKey = ConvertFuncHandle (FuncH)
 %   The subfunction ConvertFuncHandle converts function_handles to a struct
 %   using the Matlab function FUNCTIONS. The output of this function changes
 %   with the Matlab version, such that DataHash(@sin) replies different hashes
@@ -423,71 +354,125 @@ function FuncKey = ConvertFuncHandle(FuncH)
 %   Matlab's toolbox functions is (usually!) not influenced by the version.
 %   Finally I'm in doubt if there is a unique method to hash function handles.
 %   Please adjust the subfunction ConvertFuncHandles to your needs.
-
-% The Matlab version influences the conversion by FUNCTIONS:
-% 1. The format of the struct replied FUNCTIONS is not fixed,
-% 2. The full paths of toolbox function e.g. for @mean differ.
-FuncKey = functions(FuncH);
-
-% ALTERNATIVE: Use name and path. The <matlabroot> part of the toolbox functions
-% is replaced such that the hash for @mean does not depend on the Matlab
-% version.
-% Drawbacks: Anonymous functions, nested functions...
-% funcStruct = functions(FuncH);
-% funcfile   = strrep(funcStruct.file, matlabroot, '<MATLAB>');
-% FuncKey    = uint8([funcStruct.function, ' ', funcfile]);
-
-% Finally I'm afraid there is no unique method to get a hash for a function
-% handle. Please adjust this conversion to your needs.
-
-% return;
+    
+    % The Matlab version influences the conversion by FUNCTIONS:
+    % 1. The format of the struct replied FUNCTIONS is not fixed,
+    % 2. The full paths of toolbox function e.g. for @mean differ.
+    FuncKey = functions(FuncH);
+    
+    % Include modification file time and file size. Suggested by Aslak Grinsted:
+    if ~isempty(FuncKey.file)
+        d = dir(FuncKey.file);
+        if ~isempty(d)
+            FuncKey.filebytes = d.bytes;
+            FuncKey.filedate  = d.datenum;
+        end
+    end
+    
+    % ALTERNATIVE: Use name and path. The <matlabroot> part of the toolbox functions
+    % is replaced such that the hash for @mean does not depend on the Matlab version.
+    % Drawbacks: Anonymous functions, nested functions...
+    % funcStruct = functions(FuncH);
+    % funcfile   = strrep(funcStruct.file, matlabroot, '<MATLAB>');
+    % FuncKey    = uint8([funcStruct.function, ' ', funcfile]);
+    
+    % Finally I'm afraid there is no unique method to get a hash for a function handle.
+    % Please adjust this conversion to your needs.
+end
 
 % ******************************************************************************
 function DataBin = ConvertObject(DataObj)
-% Convert a user-defined object to a binary stream. There cannot be a unique
-% solution, so this part is left for the user...
-
-% Perhaps a direct conversion is implemented:
-DataBin = uint8(DataObj);
-
-% Or perhaps this is better:
-% DataBin = struct(DataObj);
-
-% return;
-
-% ******************************************************************************
-function Out = fBase64_enc(In)
-% Encode numeric vector of UINT8 values to base64 string.
-% The intention of this is to create a shorter hash than the HEX format.
-% Therefore a padding with '=' characters is omitted on purpose.
-
-Pool = [65:90, 97:122, 48:57, 43, 47];  % [0:9, a:z, A:Z, +, /]
-v8   = [128; 64; 32; 16; 8; 4; 2; 1];
-v6   = [32, 16, 8, 4, 2, 1];
-
-In  = reshape(In, 1, []);
-X   = rem(floor(In(ones(8, 1), :) ./ v8(:, ones(length(In), 1))), 2);
-Y   = reshape([X(:); zeros(6 - rem(numel(X), 6), 1)], 6, []);
-Out = char(Pool(1 + v6 * Y));
-
-% return;
-
-% ******************************************************************************
-function Ex = FileExist(FileName)
-% A more reliable version of EXIST(FileName, 'file'):
-dirFile = dir(FileName);
-if length(dirFile) == 1
-   Ex = ~(dirFile.isdir);
-else
-   Ex = false;
+    % Convert a user-defined object to a binary stream.
+    % There cannot be a unique solution, so this part is left for the user...
+    
+    try    % Perhaps a direct conversion is implemented:
+        DataBin = uint8(DataObj);
+        
+        % Matt Raum had this excellent idea - unfortunately this function is
+        % undocumented and might not be supported in te future:
+        % DataBin = getByteStreamFromArray(DataObj);
+    catch  % Or perhaps this is better:
+        WarnS   = warning('off', 'MATLAB:structOnObject');
+        DataBin = struct(DataObj);
+        warning(WarnS);
+    end
 end
 
-% return;
+% ******************************************************************************
+function Out = fBase64_enc(In, doPad)
+    % Encode numeric vector of UINT8 values to base64 string.
+    B64 = org.apache.commons.codec.binary.Base64;
+    Out = char(B64.encode(In)).';
+    if ~doPad
+        Out(Out == '=') = [];
+    end
+    
+    % Matlab method:
+    % Pool = [65:90, 97:122, 48:57, 43, 47];  % [0:9, a:z, A:Z, +, /]
+    % v8   = [128; 64; 32; 16; 8; 4; 2; 1];
+    % v6   = [32, 16, 8, 4, 2, 1];
+    %
+    % In = reshape(In, 1, []);
+    % X  = rem(floor(bsxfun(@rdivide, In, v8)), 2);
+    % d6 = rem(numel(X), 6);
+    % if d6 ~= 0
+    %    X = [X(:); zeros(6 - d6, 1)];
+    % end
+    % Out = char(Pool(1 + v6 * reshape(X, 6, [])));
+    %
+    % p = 3 - rem(numel(Out) - 1, 4);
+    % if doPad && p ~= 0  % Standard base64 string with trailing padding:
+    %    Out = [Out, repmat('=', 1, p)];
+    % end
+end
 
 % ******************************************************************************
-function Error_L(ID, varargin)
+function T = myIsString (S)
+    % isstring was introduced in R2016:
+    persistent hasString
+    if isempty(hasString)
+        matlabVer = [100, 1] * sscanf(version, '%d.', 2);
+        hasString = (matlabVer >= 901); % isstring existing since R2016b
+    end
+    
+    T = hasString && isstring(S); % Short-circuting
+end
 
-error(['JSimon:', mfilename, ':', ID], ['*** %s: ', varargin{1}], ...
-   mfilename, varargin{2:nargin - 1});
+% ******************************************************************************
+function R = Version_L ()
+    % The output differs between versions of this function. So give the user a chance to recognize the version:
+    % 1: 01-May-2011, Initial version
+    % 2: 15-Feb-2015, The number of dimensions is considered in addition.
+    %    In version 1 these variables had the same hash:
+    %    zeros(1,1) and zeros(1,1,0), complex(0) and zeros(1,1,0,0)
+    % 3: 29-Jun-2015, Struct arrays are processed field by field and not element
+    %    by element, because this is much faster. In consequence the hash value
+    %    differs, if the input contains a struct.
+    % 4: 28-Feb-2016 15:20, same output as GetMD5 for MD5 sums. Therefore the
+    %    dimensions are casted to UINT64 at first.
+    %    19-May-2018 01:13, STRING type considered.
+    R.HashVersion = 4;
+    R.Date        = [2018, 5, 19];
+    
+    R.HashMethod  = {};
+    try
+        Provider = java.security.Security.getProviders;
+        for iProvider = 1:numel(Provider)
+            S     = char(Provider(iProvider).getServices);
+            Index = strfind(S, 'MessageDigest.');
+            for iDigest = 1:length(Index)
+                Digest       = strtok(S(Index(iDigest):end));
+                Digest       = strrep(Digest, 'MessageDigest.', '');
+                R.HashMethod = cat(2, R.HashMethod, {Digest});
+            end
+        end
+    catch ME
+        fprintf(2, '%s\n', ME.message);
+        R.HashMethod = 'error';
+    end
+end
 
-% return;
+% ******************************************************************************
+function Error_L (ID, varargin)
+    error(['JSimon:', mfilename, ':', ID], ['*** %s: ', varargin{1}], mfilename, varargin{2:nargin - 1});
+end
