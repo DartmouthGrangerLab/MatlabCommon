@@ -10,6 +10,7 @@
 %RETURNS:
 %   dprime
 %   beta - only returned if using the TP, P, N format
+%Modified by Eli to add the second (signal,noise) formulation (https://en.wikipedia.org/wiki/Sensitivity_index)
 function [dprime,beta] = DPrime (TP, P, N, signal, noise)
     if exist('TP', 'var') && ~isempty(TP) && exist('P', 'var') && ~isempty(P) && exist('N', 'var') && ~isempty(N)
         assert((~exist('signal', 'var') || isempty(signal)) && (~exist('noise', 'var') || isempty(noise)), 'must either pass TP, P, N -or- signal, noise');

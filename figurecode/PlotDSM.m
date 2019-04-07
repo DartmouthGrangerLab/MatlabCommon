@@ -50,13 +50,22 @@ function [h] = PlotDSM (h, mat, xLabels, yLabels, precision, fontSize)
 %             'YTickLabel', yLabels, ...
 %             'TickLength', [0 0]);
     ax = gca();
-    ax.XTick = 1:size(mat, 2); %change the axes tick marks
     if exist('xLabels', 'var') && ~isempty(xLabels)
+        ax.XTick = 1:size(mat, 2); %change the axes tick marks
         ax.XTickLabel = xLabels;
+    elseif size(mat, 2) < 20
+        ax.XTick = 1:size(mat, 2); %change the axes tick marks
+    else
+        ax.XTick = 1:10:size(mat, 2); %change the axes tick marks
     end
-    ax.YTick = 1:size(mat, 1);
     if exist('yLabels', 'var') && ~isempty(yLabels)
+        ax.YTick = 1:size(mat, 1);
         ax.YTickLabel = yLabels;
+    elseif size(mat, 1) < 20
+        ax.YTick = 1:size(mat, 1);
+    else
+        ax.XTick = 1:10:size(mat, 2); %change the axes tick marks
     end
     ax.TickLength = [0,0];
+    ax.FontSize = fontSize; %default = 10
 end

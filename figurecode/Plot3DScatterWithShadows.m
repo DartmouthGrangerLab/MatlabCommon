@@ -9,9 +9,17 @@
 %   s - OPTIONAL - size: 4th param of matlab's scatter3()
 %   c - OPTIONAL - color: 5th param of matlab's scatter3()
 %   markertype - OPTIONAL - param of matlab's scatter3()
-function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype)
+%   xLimits - OPTIONAL - specify x axis limits (you can't change these later cuz the shadows are drawn on the axis mins)
+%   yLimits - OPTIONAL - specify x axis limits (you can't change these later cuz the shadows are drawn on the axis mins)
+%   zLimits - OPTIONAL - specify x axis limits (you can't change these later cuz the shadows are drawn on the axis mins)
+function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype, xLimits, yLimits, zLimits)
+    validateattributes(x, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'x', 2);
+    validateattributes(y, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'y', 3);
+    validateattributes(z, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'z', 4);
     assert(numel(x) == numel(y) && numel(x) == numel(z));
-    
+    x = x(:); %scatter3 seems to like these vectors to be juuust right
+    y = y(:); %scatter3 seems to like these vectors to be juuust right
+    z = z(:); %scatter3 seems to like these vectors to be juuust right
     if isempty(h)
         h = figure();
     end
@@ -27,20 +35,36 @@ function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype)
     
     hold on;
     %% draw points
-    scatterH = scatter3(x, y, z, s, c, markertype);
+    scatterH = scatter3(x, y, z, s, c, 'Marker', markertype, 'LineWidth', 1.0); %default LineWidth is 0.5
+    if exist('xLimits', 'var') && ~isempty(xLimits)
+        assert(isnumeric(xLimits) && numel(xLimits) == 2);
+        xlim(xLimits);
+    end
+    if exist('yLimits', 'var') && ~isempty(yLimits)
+        assert(isnumeric(yLimits) && numel(yLimits) == 2);
+        ylim(yLimits);
+    end
+    if exist('zLimits', 'var') && ~isempty(zLimits)
+        assert(isnumeric(zLimits) && numel(zLimits) == 2);
+        zlim(zLimits);
+    end
     
     %% draw shadows
     xlims = xlim();
     ylims = ylim();
     zlims = zlim();
     if size(c, 1) == numel(x) && size(c, 2) == 3 %if you specified a bunch of colors
-        shadowColor = c * 0.6;
+        if strcmp(markertype, 'none')
+            shadowColor = c; %shadows aren't behind real 3d points, so use high-contrast colors
+        else
+            shadowColor = 1 - ((1-c) * 0.5);
+        end
     else
         shadowColor = [0.5,0.5,0.5];
     end
-    scatter3(xlims(1)*ones(size(x)), y, z, round(s*0.4), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
-    scatter3(x, ylims(1)*ones(size(y)), z, round(s*0.4), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
-    scatter3(x, y, zlims(1)*ones(size(z)), round(s*0.4), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    scatter3(xlims(1)*ones(size(x)), y, z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    scatter3(x, ylims(1)*ones(size(y)), z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    scatter3(x, y, zlims(1)*ones(size(z)), round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
     
     %% draw lines down to bottom plane
     if numel(x) < 100

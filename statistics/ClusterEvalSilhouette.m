@@ -7,7 +7,9 @@
 %   clustAssignments - 1D vector (N elements) cluster ID assigned to each datapoint (e.g. a value of 2 indicates a point was assigned to the centroid with mean at the second row of 'centroids')
 %   distMeasure - OPTIONAL (default = 'Euclidean') - any valid input to matlab's silhouette (e.g. 'Euclidean', 'cosine', 'correlation')
 function [s] = ClusterEvalSilhouette (X, clustAssignments, distMeasure)
-    assert(isvector(clustAssignments) && size(X, 1) == numel(clustAssignments));
+    validateattributes(X, {'numeric'}, {}, 'ClusterEvalSilhouette', 'X', 1);
+    validateattributes(clustAssignments, {'numeric'}, {'vector','integer','positive'}, 'ClusterEvalSilhouette', 'clustAssignments', 2);
+    assert(size(X, 1) == numel(clustAssignments));
     if ~exist('distMeasure', 'var') || isempty(distMeasure)
         distMeasure = 'Euclidean';
     end

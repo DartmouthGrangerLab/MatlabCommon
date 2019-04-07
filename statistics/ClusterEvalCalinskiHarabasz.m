@@ -9,6 +9,9 @@
 %   X - NxD position of each data point
 %   clustAssignments - 1D vector (N elements) cluster ID assigned to each datapoint (e.g. a value of 2 indicates a point was assigned to the centroid with mean at the second row of 'centroids')
 function [ch] = ClusterEvalCalinskiHarabasz (X, clustAssignments)
+    validateattributes(X, {'numeric'}, {}, 'ClusterEvalCalinskiHarabasz', 'X', 1);
+    validateattributes(clustAssignments, {'numeric'}, {'vector','integer','positive'}, 'ClusterEvalCalinskiHarabasz', 'clustAssignments', 2);
+    assert(size(X, 1) == numel(clustAssignments));
     assert(~any(isnan(X(:))), 'X contains NaN values. TODO: code a way to handle this');
     if numel(unique(clustAssignments)) == 1
         ch = NaN; %only one cluster has assignments!
