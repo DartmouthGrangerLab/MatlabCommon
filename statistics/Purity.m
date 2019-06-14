@@ -13,8 +13,9 @@ function [purity,purity2] = Purity (clustMem, categoryLabels)
     temp = zeros(K, 1);
     tempCounts = zeros(K, 1);
     for i = 1:K
-        temp(i) = max(CountNumericOccurrences(categoryLabels(clustMem==uniqueClustMem(i))));
-        tempCounts(i) = sum(clustMem==uniqueClustMem(i));
+        clustIdxs = (clustMem==uniqueClustMem(i));
+        temp(i) = max(CountNumericOccurrences(categoryLabels(clustIdxs)));
+        tempCounts(i) = sum(clustIdxs);
     end
     purity = sum(temp) / N;
     purity2 = mean(temp ./ tempCounts);

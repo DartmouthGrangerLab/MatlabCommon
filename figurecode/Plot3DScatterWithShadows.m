@@ -13,9 +13,9 @@
 %   yLimits - OPTIONAL - specify x axis limits (you can't change these later cuz the shadows are drawn on the axis mins)
 %   zLimits - OPTIONAL - specify x axis limits (you can't change these later cuz the shadows are drawn on the axis mins)
 function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype, xLimits, yLimits, zLimits)
-    validateattributes(x, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'x', 2);
-    validateattributes(y, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'y', 3);
-    validateattributes(z, {'numeric'}, {'vector'}, 'Plot3DScatterWithShadows', 'z', 4);
+    validateattributes(x, {'numeric'}, {'vector'}, 2);
+    validateattributes(y, {'numeric'}, {'vector'}, 3);
+    validateattributes(z, {'numeric'}, {'vector'}, 4);
     assert(numel(x) == numel(y) && numel(x) == numel(z));
     x = x(:); %scatter3 seems to like these vectors to be juuust right
     y = y(:); %scatter3 seems to like these vectors to be juuust right
