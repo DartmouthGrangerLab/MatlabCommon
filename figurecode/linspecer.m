@@ -70,9 +70,9 @@ function lineStyles = linspecer (N,varargin)
                 if N>12 % go home, you just can't get this.
                     warning('qualitiative is not possible for greater than 12 items, please reconsider');
                 else
-                    if N>9
-                        warning(['Default may be nicer for ' num2str(N) ' for clearer colors use: whitebg(''black''); ']);
-                    end
+%                     if N>9
+%                         warning(['Default may be nicer for ' num2str(N) ' for clearer colors use: whitebg(''black''); ']);
+%                     end
                 end
                 qualFlag = 1;
             case {'sequential','seq'}
