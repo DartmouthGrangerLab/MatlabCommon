@@ -7,8 +7,8 @@
 %   units - 'deg' or 'rad' (what are the units of a and b?
 function [dist] = CircleDist (a, b, units)
     if strcmp(units, 'rad')
-        a = a * 180 / pi; %convert to degrees
-        b = b * 180 / pi; %convert to degrees
+        a = a .* (180 / pi); %convert to degrees
+        b = b .* (180 / pi); %convert to degrees
     else
         assert(strcmp(units, 'deg'));
     end
