@@ -49,8 +49,8 @@ function [model] = TrainLiblinear (solverType, labels, data, adjust4UnequalN, re
     
     if strcmp(regularizationLvl, 'optimize')
         regularizationLvl = train(labelsNum, sparse([data,ones(size(data, 1), 1)]), ['-q -s ',num2str(solverType),' -C -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
-        regularizationLvl = regularizationLvl(0);
-        warning('untested^');
+        regularizationLvl = regularizationLvl(1);
+        warning('^untested, unclear what train() is returning');
     end
     
     model = train(labelsNum, sparse([data,ones(size(data, 1), 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),' -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
