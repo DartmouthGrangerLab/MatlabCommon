@@ -1,0 +1,8 @@
+SpeechMark MATLAB Toolbox Installation Guide:
+version 0.1.10
+
+1- Change MATLAB current path to the folder containing this text file or
+   Put the contents of this folder into a folder, which can be found by Matlab
+2- Run "smmlt_installer.m" in MATLAB command window
+3- Select installation path when the dialog box for selecting directory opens
+

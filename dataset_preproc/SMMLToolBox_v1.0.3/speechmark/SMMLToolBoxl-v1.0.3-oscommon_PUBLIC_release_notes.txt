@@ -1,0 +1,59 @@
+SpeechMark Product Release Notes
+
+SpeechMark Product: The SpeechMark MATLAB Toolbox, Cross-Platform Edition
+Operating Systems Supported: Windows XP, Windows 7, OS X Version 10.7 ("Lion"), OS X Version 10.8 ("Mountain Lion")
+Product Version: 1.0.3
+Public Release Date : 
+
+---------------------------------------------------------------------------------
+Installation Notes--PLEASE READ
+===============================
+
+1) This product is a standard MATLAB toolbox. To use it, a valid instance of MATLAB (version R2010b or newer) must be installed, as well as a valid version of the MATLAB Signal Processing Toolbox.
+
+---------------------------------------------------------------------------------
+Resolved Problems:
+1) Incorrect placement of phonation onsets (+g) in landmarks and related functions, and utterance onsets in utt_starts.
+2) Construction of certain filename lists in listfiles.
+3) Errors when processing signals or spectrograms in deg_sigsgram_local.
+4) Errors computing SNR spectrograms in sgram_snr.
+5) Occasional incorrect processing of hand-marks (specified exclusion regions) in lm_hmfilt.
+
+---------------------------------------------------------------------------------
+Enhancements:
+1) Audio Signal-Processing Functions:
+	New: deg_audioarr_global & deg_audioarr_global_std perform simple automated checks to help guard against analysis of faulty audio data, especially if analyzing large numbers of files or waveforms.  
+	audio_asymmetry is the new name for former function sig_asymmetry .
+2) Signal Analysis-Related Functions:
+	sgram_snr now more efficiently handles storage for long signals when computing the “signal/noise-ratio (SNR) spectrogram”.  It also produces an image instead of returning the SNR spectrogram if no output argument is specified.  This behavior mimics the built-in spectrogram MATLAB function.
+	New: sgram_clip generates the spectrogram after clipping (or subtracting) all values below SNR = 1.  This optionally displays a corresponding less noisy spectrogram.
+	deg_sigsgram_local now uses a more robust computation and is based on a Chi-square test.
+	New: deg_sigsgram returns the degree to which neighborhoods of a waveform's spectrogram or squared envelope imply the presence of a signal, i.e., above the level of “noise”.
+	New: deg_sigsgsnr_local computes the degree to which a waveform's "SNR spectrogram" locally indicates the presence of some signal; i.e., of not only “noise”.
+3) Speech and Landmark-Related Functions:
+	New: jump_lms locates a new type of abrupt landmarks, those characterized by an abrupt increase (+) or decrease (-) of fundamental frequency.
+	lm_features now supports abrupt jump landmarks (+-j) and the new ORAL vs. LARYNGEAL groups of abrupt landmarks.
+	New: deg_voicedhnr_std generates the fuzzy degree to which speech shows strong vocal harmonics and/or stable pitch period, using standardized processing.
+	vowel_lms, vowel_segs_std, and vowel_segs_full now allow the MAX_F0 argument to be specified as a [maximum, minimum] pair of F0 values.
+	write_lms allows multiple comment lines in the output header.
+	New: fricative_lms locates the points of peak frication in a signal.  These are peak-type landmarks (as vowel landmarks are).
+	landmarks enhancements:
+	1. The MAX_F0 argument can now be specified as a [maximum, minimum] pair of F0 values.
+	2. Added support for F0-jump (+-j) abrupt landmarks based on jump_lms.
+	3. Added support for frication (F) peak landmarks based on fricative_lms.
+	4. Stereo input signals are now detected, generating an immediate error with an appropriate message.  Such input signals are not supported by landmarks. 
+4) Display related:
+	lm_draw enhancements:
+	1. Low-strength landmarks and corresponding syllable and utterance structures are rendered with dotted lines.
+	2. The function supports the display of the new F0-jump (+-j) abrupt landmarks.
+	3. The function now supports F-type (frication) peak landmarks from fricative_lms.  These are marked with “F” below the waveform, like vowel landmarks (the other currently supported type of peak landmark).
+	colormap_std now supports the “logbrt” option for logarithmic brightness.  This provides color muting between those of the “brt” and default colormaps, helpful when plotting colored graphs over a spectrogram.
+
+---------------------------------------------------------------------------------
+Other changes:
+1) lm_ndxs is obsolete and has been removed.
+2) All functions formerly prefixed with std_* have been renamed to *_std: e.g. maxf0_std.
+
+---------------------------------------------------------------------------------
+Known Bugs:
+1) Version number is not written to .lmmat (MAT-format binary) files by mat_conslms and mat_vowel_segs, and, if present, is ignored.
