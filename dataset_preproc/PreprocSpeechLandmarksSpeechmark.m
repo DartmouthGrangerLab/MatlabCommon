@@ -2,7 +2,7 @@
 %5/26/2018
 function [] = PreprocSpeechLandmarksSpeechmark (path)
     disp('PreprocSpeechLandmarksSpeechmark...');
-    tic;
+    t = tic();
     if logical(exist(fullfile(path, 'wordaudio.mat'), 'file')) && logical(exist(fullfile(path, 'wordsphonetic.mat'), 'file')) && logical(exist(fullfile(path, 'wordspeechmarks.mat'), 'file'))
         load(fullfile(path, 'wordaudio.mat'), 'wordAudio');
         load(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic');
@@ -18,5 +18,5 @@ function [] = PreprocSpeechLandmarksSpeechmark (path)
 
         save(fullfile(path, 'wordlandmarksspeechmark.mat'), 'wordLandmarksSpeechmark', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

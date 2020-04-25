@@ -2,7 +2,7 @@
 %5/26/2018
 function [] = PreprocSpeechSpeechmarkForcedAlignment (path)
     disp('PreprocSpeechSpeechmarkForcedAlignment...');
-    tic;    
+    t = tic();
     if logical(exist(fullfile(path, 'wordaudio.mat'), 'file')) && logical(exist(fullfile(path, 'wordsphonetic.mat'), 'file')) %we might not have phonetic spellings, e.g. if this is a foreign language
         load(fullfile(path, 'wordaudio.mat'), 'wordAudio');
         load(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic');
@@ -89,5 +89,5 @@ function [] = PreprocSpeechSpeechmarkForcedAlignment (path)
         wordSpeechmarks = struct('startPhon2', startPhon2, 'startPhon3', startPhon3, 'stopPhon3', stopPhon3);
         save(fullfile(path, 'wordspeechmarks.mat'), 'wordSpeechmarks', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

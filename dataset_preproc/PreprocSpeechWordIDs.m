@@ -3,7 +3,7 @@
 %build numeric word indices (translate words to numbers)
 function [] = PreprocSpeechWordIDs (path, vocabFile)
     disp('PreprocSpeechWordIDs...');
-    tic();
+    t = tic();
     if logical(exist(fullfile(path, 'words.mat'), 'file'))
         load(fullfile(path, 'words.mat'), 'words');
 
@@ -21,5 +21,5 @@ function [] = PreprocSpeechWordIDs (path, vocabFile)
         %% save
         save(fullfile(path, 'wordids.mat'), 'wordIDs', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

@@ -2,7 +2,7 @@
 % 5/25/2018
 function [] = PreprocSpeechWords (path)
     disp('PreprocSpeechWords...');
-    tic();
+    t = tic();
     
     listing = dir(fullfile(path, '*.wav'));
     timeOffset = 0;
@@ -10,17 +10,19 @@ function [] = PreprocSpeechWords (path)
     wordStartTimes = []; %in 32khz samples
     wordEndTimes = []; %in 32khz samples
     wordDurations = []; %in 32khz samples
-
+    
     for i = 1:numel(listing)
         disp(listing(i).name);
         [y,Fs] = audioread(fullfile(path, listing(i).name));
         assert(Fs==32000);
+        jsonFileName = strrep(listing(i).name, '.wav', '.json');
+        csvFileName = strrep(listing(i).name, '.wav', '.csv');
 
-        if logical(exist(fullfile(path, strrep(listing(i).name, '.wav', '.json')), 'file'))
-            data = loadjson(fullfile(path, strrep(listing(i).name, '.wav', '.json')));
+        if logical(exist(fullfile(path, jsonFileName), 'file'))
+            data = loadjson(fullfile(path, jsonFileName));
             wordInfo = data.words; %timepoints expected to be in units of SECONDS
-        elseif logical(exist(fullfile(path, strrep(listing(i).name, '.wav', '.csv')), 'file'))
-            fid = fopen(fullfile(path, strrep(listing(i).name, '.wav', '.csv')));
+        elseif logical(exist(fullfile(path, csvFileName), 'file'))
+            fid = fopen(fullfile(path, csvFileName));
             data = textscan(fid, '%s,%f,%f', 'headerlines', 0);
             fclose(fid);
             wordInfo = cell(numel(data), 1);
@@ -29,7 +31,7 @@ function [] = PreprocSpeechWords (path)
             end
             error('^validate');
         else
-            warning([fullfile(path, strrep(listing(i).name, '.wav', '.json')),' is missing!!!']);
+            warning([fullfile(path, jsonFileName),' is missing!!!']);
         end
         
         if exist('wordInfo', 'var') && ~isempty(wordInfo)
@@ -69,5 +71,5 @@ function [] = PreprocSpeechWords (path)
     if ~isempty(words)
         save(fullfile(path, 'words.mat'), 'words', 'wordStartTimes', 'wordEndTimes', 'wordDurations', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

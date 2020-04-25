@@ -2,13 +2,13 @@
 %5/25/18
 function [] = PreprocSpeechMarkSilenceAndJunk (path)
     disp('PreprocSpeechMarkSilenceAndJunk...');
-    tic;
+    t = tic();
     load(fullfile(path, 'audio.mat'), 'audio', 'duration');
     
     %% mark silence
     silence = false(duration, 1);
-    [stepSize,~] = StepSizeFromDatasetVersion(3);
-    specIsSilent = CalculateSpectrogram4Frontend(FeatureTransformAudio(audio, 32000, 3), 'power', 3);
+    stepSize = 1024;
+    specIsSilent = AudioCalculateSpectrogramFromFeats(AudioFeatTransform(audio, 32000, 'stft', stepSize), 'power', 'stft');
     specIsSilent = (sum(specIsSilent, 2) == 0); %like 10% for english, 35% for japanese
     for i = 1:size(specIsSilent, 1)-1
         if specIsSilent(i)
@@ -70,5 +70,5 @@ function [] = PreprocSpeechMarkSilenceAndJunk (path)
     end
     
     save(fullfile(path, 'silence.mat'), 'silence', '-v7.3');
-    toc
+    toc(t)
 end

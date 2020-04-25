@@ -5,7 +5,7 @@ function [] = PreprocSpeech ()
     %ASSUMES BuildTextVocabulary.m was run first
     
     %% Folders of audio to process
-    fileLocation = fullfile('/pdata', 'ebowen', 'audio');
+    fileLocation = fullfile('/pdata', 'ebowen', 'datasets', 'audio');
     paths = {};
 %     paths = [paths,'Moby_Dick-Anthony_Heald']; %this is the original one
 %     paths = [paths,'Moby_Dick-Norman_Dietz']; %(originally 32000Hz)
@@ -55,12 +55,12 @@ function [] = PreprocSpeech ()
         
 %         PreprocSpeechSpeechmarkForcedAlignment(path);
         PreprocSpeechLandmarksSpeechmark(path);
-        RenderSpeechLandmarksSpeechmark(path);
-
+%         RenderSpeechLandmarksSpeechmark(path); %in MatlabClusterNetwork
+        
 %         PreprocSpeechMontrealForcedAlignment(path); %must run ExtractWords4MontrealForcedAligner script, then the montreal forced aligner itself first
 %         PreprocSpeechFAVE(path); %must run ExtractWords4MontrealForcedAligner script, then the montreal forced aligner itself, then FAVE first
         PreprocSpeechLandmarksMontreal(path);
-        RenderSpeechLandmarksMontreal(path);
+%         RenderSpeechLandmarksMontreal(path); %in MatlabClusterNetwork
 
 %         vocabFile = fullfile(fileLocation, 'vocabulary.mat');
 %         PreprocSpeechWordIDs(path, vocabFile);

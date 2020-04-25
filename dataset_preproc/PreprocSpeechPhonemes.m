@@ -2,7 +2,7 @@
 % 5/25/2018
 function [] = PreprocSpeechPhonemes (path)
     disp('PreprocSpeechPhonemes...');
-    tic();
+    t = tic();
     listing = dir(fullfile(path, '*.wav'));
     timeOffset = 0;
     phonemes = {};
@@ -49,7 +49,7 @@ function [] = PreprocSpeechPhonemes (path)
         clearvars y;
     end
     
-    phonemes2Remove = false(numel(phonemes), 1);
+    phonemes2Remove = false(1, numel(phonemes));
     phonemes2Remove(StringFind(phonemes, 'sil', true)) = true; %silence isn't a phoneme bro
     phonemes2Remove(StringFind(phonemes, '+nsn+', true)) = true; %noise
     phonemes2Remove(StringFind(phonemes, '+spn+', true)) = true; %speechy noise
@@ -62,5 +62,5 @@ function [] = PreprocSpeechPhonemes (path)
     if ~isempty(phonemes)
         save(fullfile(path, 'phonemes.mat'), 'phonemes', 'phonemeStartTimes', 'phonemeEndTimes', 'phonemeDurations', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

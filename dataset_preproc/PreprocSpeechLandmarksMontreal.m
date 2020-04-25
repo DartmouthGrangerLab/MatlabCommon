@@ -2,7 +2,7 @@
 %5/26/2018
 function [] = PreprocSpeechLandmarksMontreal (path)
     disp('PreprocSpeechLandmarksMontreal...');
-    tic;
+    t = tic();
     if logical(exist(fullfile(path, 'wordaudio.mat'), 'file')) && logical(exist(fullfile(path, 'wordsphonetic.mat'), 'file')) && logical(exist(fullfile(path, 'wordsmontrealforcedalignment.mat'), 'file'))
         load(fullfile(path, 'wordaudio.mat'), 'wordAudio');
         load(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic');
@@ -18,5 +18,5 @@ function [] = PreprocSpeechLandmarksMontreal (path)
         
         save(fullfile(path, 'wordlandmarksmontreal.mat'), 'wordLandmarksMontreal', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

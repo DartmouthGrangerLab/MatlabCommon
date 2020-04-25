@@ -2,7 +2,7 @@
 %11/7/2018
 function [] = PreprocSpeechFAVE (path)
     disp('PreprocSpeechFAVE...');
-    tic;
+    t = tic();
     if logical(exist(fullfile(path, 'wordsphonetic.mat'), 'file')) && logical(exist(fullfile(path, 'wordsmontrealforcedalignment.mat'), 'file')) && logical(exist(fullfile(path, 'wordaudio.mat'), 'file'))
         load(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic');
         load(fullfile(path, 'wordsmontrealforcedalignment.mat'), 'wordsMontrealForcedAlignment');
@@ -11,7 +11,7 @@ function [] = PreprocSpeechFAVE (path)
         %TODO: verify the below works great - is it a cell or numeric array?
 %         wordDurations = cellfun(@numel, wordAudio); %duration in discrete timesteps
 %         clearvars wordAudio;
-
+        
         wordsFAVE = cell(numel(wordsPhonetic), 1);
         skipped = false(numel(wordsPhonetic), 1);
         for i = 1:1000:numel(wordsPhonetic)
@@ -139,5 +139,5 @@ function [] = PreprocSpeechFAVE (path)
         
         save(fullfile(path, 'wordsfave.mat'), 'wordsFAVE', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end

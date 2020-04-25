@@ -2,7 +2,7 @@
 %5/25/2018
 function [] = PreprocSpeechPhoneticSpellings (path, dictPath)
     disp('PreprocSpeechPhoneticSpellings...');
-    tic;
+    t = tic();
     if logical(exist(fullfile(path, 'words.mat'), 'file'))
         load(fullfile(path, 'words.mat'), 'words');
         uniqueWords = unique(words);
@@ -36,5 +36,5 @@ function [] = PreprocSpeechPhoneticSpellings (path, dictPath)
             save(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic', '-v7.3', '-nocompression');
         end
     end
-    toc %636sec
+    toc(t) %636sec
 end

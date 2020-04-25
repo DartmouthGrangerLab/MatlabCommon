@@ -2,7 +2,7 @@
 % 5/25/2018
 function [] = PreprocSpeechAudio (path)
     disp('PreprocSpeechAudio...');
-    tic();
+    t = tic();
     listing = dir(fullfile(path, '*.wav'));
     audio = [];
     for i = 1:numel(listing)
@@ -11,11 +11,11 @@ function [] = PreprocSpeechAudio (path)
         assert(Fs==32000);
         audio = [audio;y];
     end
-
+    
     duration = numel(audio);
     
     %% save
     save(fullfile(path, 'audio.mat'), 'audio', 'duration', '-v7.3', '-nocompression');
-    toc
+    toc(t)
 end
 

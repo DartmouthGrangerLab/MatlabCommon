@@ -2,7 +2,7 @@
 %11/7/2018
 function [] = PreprocSpeechMontrealForcedAlignment (path)
     disp('PreprocSpeechMontrealForcedAlignment...');
-    tic;
+    t = tic();
     if logical(exist(fullfile(path, 'wordsphonetic.mat'), 'file')) && logical(exist(fullfile(path, 'wordaudio.mat'), 'file'))
 %         load(fullfile(path, 'words.mat'), 'words'); %TEMP
         load(fullfile(path, 'wordsphonetic.mat'), 'wordsPhonetic');
@@ -115,5 +115,5 @@ function [] = PreprocSpeechMontrealForcedAlignment (path)
 
         save(fullfile(path, 'wordsmontrealforcedalignment.mat'), 'wordsMontrealForcedAlignment', '-v7.3', '-nocompression');
     end
-    toc
+    toc(t)
 end
