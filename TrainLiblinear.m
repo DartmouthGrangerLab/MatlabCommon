@@ -24,12 +24,17 @@
 %RETURNS:
 %   model - a struct as described in the 4 liblinear README files. The LAST feature is the bias/intercept term, which you may wish to remove. This struct will change in form depending on whether you passed 2 categories or more than 2
 function [model] = TrainLiblinear (solverType, labels, data, adjust4UnequalN, regularizationLvl)
-    assert(isnumeric(solverType) && isscalar(solverType) && any(solverType==[0,1,2,3,5,6,7,11]));
-    assert(isnumeric(labels) && isvector(labels));
-    assert(isnumeric(data) && size(data, 1) == numel(labels));
+    validateattributes(solverType, {'numeric'}, {'nonempty','scalar','nonnegative','integer'});
+    validateattributes(labels, {'numeric'}, {'nonempty','vector','positive','integer'});
+    validateattributes(data, {'double'}, {'nonempty','2d'});
+    validateattributes(adjust4UnequalN, {'numeric','logical'}, {'nonempty','scalar'});
+    validateattributes(regularizationLvl, {'numeric','char'}, {'nonempty'});
+    assert(any(solverType==[0,1,2,3,5,6,7,11]));
+    assert(size(data, 1) == numel(labels));
     assert((isnumeric(regularizationLvl) && isscalar(regularizationLvl)) || strcmp(regularizationLvl, 'optimize'));
     assert(solverType == 0 || solverType == 2, 'currently optimized regularizationLvl only supported by liblinear for solverType 0 or 2');
     
+    N = numel(labels);
     [uniqueLabels,~,labelsNum] = unique(labels);
     assert(all(labelsNum == labels)); %only required because otherwise the results of the model will be misinterpreted by the calling function
     counts = CountNumericOccurrences(labelsNum, 1:numel(uniqueLabels));
@@ -38,22 +43,22 @@ function [model] = TrainLiblinear (solverType, labels, data, adjust4UnequalN, re
     if adjust4UnequalN
         for i = 1:numel(uniqueLabels)
             if numel(uniqueLabels) == 2
-                weightString = [weightString,' -w',num2str(i),' ',num2str(1/(counts(i)/numel(labels)))];
+                weightString = [weightString,' -w',num2str(i),' ',num2str(1/(counts(i)/N))];
             else
                 if counts(i) > 0
-                    weightString = [weightString,' -w',num2str(i),' ',num2str(1/((counts(i)/numel(labels))*(numel(labels)/(numel(labels)-counts(i)))))];
+                    weightString = [weightString,' -w',num2str(i),' ',num2str(1/((counts(i)/N)*(N/(N-counts(i)))))];
                 end
             end
         end
     end
     
     if strcmp(regularizationLvl, 'optimize')
-        regularizationLvl = train(labelsNum, sparse([data,ones(size(data, 1), 1)]), ['-q -s ',num2str(solverType),' -C -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
+        regularizationLvl = train(labels, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -C -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
         regularizationLvl = regularizationLvl(1);
         warning('^untested, unclear what train() is returning');
     end
     
-    model = train(labelsNum, sparse([data,ones(size(data, 1), 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),' -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
+    model = train(labels, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),' -n ',num2str(DetermineNumJavaComputeCores()),weightString]); %appending a bias/intercept term
     
     assert(~isempty(model)); %if model is empty, liblinear crashed
     assert(model.bias < 0); %I think this is always -1 (aka "ignore me") unless we specify the bias beforehand, which we wouldn't normally do
