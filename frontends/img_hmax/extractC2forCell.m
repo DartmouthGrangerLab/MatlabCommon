@@ -21,17 +21,17 @@ function [c2,c1,bestBands,bestLocations,s2,s1] = extractC2forCell(filters,filter
 %     bestBands: a 1 x nPatchSizes cell array. Each cell is nPatches x nImgs array, the band whence came the maximal response for each patch and image.
 %     bestLocations: a 1 x nPatchSizes cell array. Each cell is nPatches x nImgs x 2 array, the (x,y) pair whence came the maximal response for each patch and image.
 %modified by Eli Bowen only for clarity
-
+    
     nImgs = length(imgs);
     nPatchSizes = size(patchSizes,2);
     nPatchesPerSize = size(linearPatches{1}, 2);
 %     nPatches = nPatchSizes * nPatchesPerSize;
-
+    
     if (nargin < 13) IGNOREPARTIALS = 0; end
     if (nargin < 12) ORIENTATIONS2C1PRUNE = 0; end
     if (nargin < 11 || isempty(c1)) c1 = cell(1,nImgs); end
     if (nargin < 10) ALLS2C1PRUNE = 0; end
-
+    
     c2            = cell(1, nPatchSizes);
     bestBands     = cell(1, nPatchSizes);
     bestLocations = cell(1, nPatchSizes);
