@@ -19,14 +19,15 @@ classdef VideoRetina < handle
             obj.numCols = numCols;
             obj.isInFullColor = isInFullColor;
             
-            if isempty(StringFind(javaclasspath(), '/ihome/ebowen/workspace/JavaCommon/JavaCommon.jar', true)) %for performance
-                javaaddpath('/ihome/ebowen/workspace/JavaCommon/JavaCommon.jar'); %for VideoRetina
+            rootPath = '/ihome/ebowen/workspace/JavaCommon';
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'JavaCommon.jar'), true)) %for performance
+                javaaddpath(fullfile(rootPath, 'JavaCommon.jar')); %for VideoRetina
             end
-            if isempty(StringFind(javaclasspath(), '/ihome/ebowen/workspace/JavaCommon/javacv/javacpp.jar', true)) %for performance
-                javaaddpath('/ihome/ebowen/workspace/JavaCommon/javacv/javacpp.jar'); %for VideoRetina
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv/javacpp.jar'), true)) %for performance
+                javaaddpath(fullfile(rootPath, 'javacv/javacpp.jar')); %for VideoRetina
             end
-            if isempty(StringFind(javaclasspath(), '/ihome/ebowen/workspace/JavaCommon/javacv/javacv.jar', true)) %for performance
-                javaaddpath('/ihome/ebowen/workspace/JavaCommon/javacv/javacv.jar'); %for VideoRetina
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv/javacv.jar'), true)) %for performance
+                javaaddpath(fullfile(rootPath, 'javacv/javacv.jar')); %for VideoRetina
             end
             obj.retina = common.video.VideoRetina(obj.numRows, obj.numCols, obj.isInFullColor); %prints lots of junk
         end
@@ -41,7 +42,7 @@ classdef VideoRetina < handle
                 dataType = 1;
             elseif isa(img, 'double')
                 assert(all(img(:) >= 0) && all(img(:) <= 1));
-                img = floor(img .* 255); %floor will be called implicitly
+                img = floor(img .* 255);
                 dataType = 2;
             else
                 error('invalid datatype for img');

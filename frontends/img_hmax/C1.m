@@ -1,6 +1,4 @@
-function [c1,s1] = C1(img,filters,filterSizes,c1Space,c1Scale,c1OL,INCLUDEBORDERS)
-% function [c1,s1] = C1(img,filters,filterSizes,c1Space,c1Scale,c1OL,INCLUDEBORDERS)
-%
+function [c1,s1] = C1 (img, sqfilter, filterSizes, c1Space, c1Scale, c1OL, INCLUDEBORDERS)
 % Given an image, returns C1 & S1 unit responses
 %
 % args:
@@ -34,84 +32,80 @@ function [c1,s1] = C1(img,filters,filterSizes,c1Space,c1Scale,c1OL,INCLUDEBORDER
 %     INCLUDEBORDERS: scalar, defines border treatment for 'img'.
 %
 % returns:
-%
 %     c1: a cell array [1 nBands], contains the C1 responses for img
-%
 %     s1: a cell array [1 nBands], contains the S1 responses for img
+%modified by Eli Bowen for readability and:
+%   for speed / memory fragmentation (preallocate variables etc.)
+%   changed s1 return structure slightly (it's never used by hmax outside this function)
 
     USECONV2 = 1; % should be faster if 1.
-    if(nargin < 7) INCLUDEBORDERS = 1; end;
+    if (nargin < 7); INCLUDEBORDERS = 1; end
 
-    nBands=length(c1Scale)-1;
-    nScales=c1Scale(end)-1; % remember, last element in c1Scale is max scale + 1
-    nFilters=floor(length(filterSizes)/nScales);
-    scalesInThisBand=cell(1,nBands);
+    nBands = numel(c1Scale) - 1;
+    nScales = c1Scale(end) - 1; % remember, last element in c1Scale is max scale + 1
+    nFilters = floor(numel(filterSizes) / nScales);
+    scalesInThisBand = cell(1, nBands);
     for iBand = 1:nBands
-        scalesInThisBand{iBand} = c1Scale(iBand):(c1Scale(iBand+1) -1);
+        scalesInThisBand{iBand} = c1Scale(iBand):(c1Scale(iBand+1) - 1);
     end
 
-    % rebuild all filters (of all sizes) %
-    nFilts = length(filterSizes);
-    for i = 1:nFilts
-        sqfilter{i} = reshape(filters(1:(filterSizes(i)^2),i),filterSizes(i),filterSizes(i));
-        if USECONV2 % flip to use conv2 instead of imfilter
-            sqfilter{i} = sqfilter{i}(end:-1:1,end:-1:1);
-        end
-    end
-
-    % compute all filter responses (s1) %
+    %% compute all filter responses (s1)
 
     % (1) precalculate normalizations for the usable filter sizes
-    imgSquared = img.^2;
+    imgSquared = img .^ 2;
     uFilterSizes = unique(filterSizes)';
+    s1Norm = cell(1, numel(uFilterSizes));
     for iFilterSize = uFilterSizes
-        s1Norm{iFilterSize} = (sumFilter(imgSquared,(iFilterSize-1)/2)).^0.5;
-        % avoid divide by zero later
-        s1Norm{iFilterSize} = s1Norm{iFilterSize}+~s1Norm{iFilterSize};
+        s1Norm{iFilterSize} = sumFilter(imgSquared, (iFilterSize-1)/2) .^ 0.5;
+        s1Norm{iFilterSize} = s1Norm{iFilterSize} + ~s1Norm{iFilterSize}; % avoid divide by zero later
     end
 
     % (2) apply filters
     iUFilterIndex = 0;
+    s1 = cell(nBands, numel(scalesInThisBand{iBand}), nFilters);
     for iBand = 1:nBands
-        for iScale = 1:length(scalesInThisBand{iBand})
+        for iScale = 1:numel(scalesInThisBand{iBand})
             for iFilt = 1:nFilters
-                iUFilterIndex = iUFilterIndex+1;
+                iUFilterIndex = iUFilterIndex + 1;
                 if USECONV2 % not 100% compatible but 20% faster at least
-                    s1{iBand}{iScale}{iFilt} = abs(conv2(img,sqfilter{iUFilterIndex},'same'));
+                    s1{iBand,iScale,iFilt} = abs(conv2(img, sqfilter{iUFilterIndex}(end:-1:1,end:-1:1), 'same')); %flip to use conv2 instead of imfilter
                 else
-                    s1{iBand}{iScale}{iFilt} = abs(imfilter(img,sqfilter{iUFilterIndex},'symmetric','same','corr'));
+                    s1{iBand,iScale,iFilt} = abs(imfilter(img, sqfilter{iUFilterIndex}, 'symmetric', 'same', 'corr'));
                 end
-                if(~INCLUDEBORDERS)
-                    s1{iBand}{iScale}{iFilt} = removeborders(s1{iBand}{iScale}{iFilt},filterSizes(iUFilterIndex));
+                if ~INCLUDEBORDERS
+                    s1{iBand,iScale,iFilt} = removeborders(s1{iBand,iScale,iFilt}, filterSizes(iUFilterIndex));
                 end
-                s1{iBand}{iScale}{iFilt} = im2double(s1{iBand}{iScale}{iFilt}) ./ s1Norm{filterSizes(iUFilterIndex)};
+                s1{iBand,iScale,iFilt} = im2double(s1{iBand,iScale,iFilt}) ./ s1Norm{filterSizes(iUFilterIndex)};
             end
         end
     end
 
-    % Calculate local pooling (c1) %
-
-    % (1) pool over scales within band
+    %% Calculate local pooling (c1)
+    c1 = cell(1, nBands);
     for iBand = 1:nBands
+        poolSize = c1Space(iBand);
+        
+        halfpool = poolSize / 2;
+        rowIndices = 1:halfpool:size(s1{iBand,1,1}, 1);
+        colIndices = 1:halfpool:size(s1{iBand,1,1}, 2);
+        c1{iBand} = zeros(numel(rowIndices), numel(colIndices), nFilters); %size determined by Eli reading through maxFilter()
+        
         for iFilt = 1:nFilters
-            c1PreFilter{iBand}(:,:,iFilt) = zeros(size(s1{iBand}{1}{iFilt}));
-            for iScale = 1:length(scalesInThisBand{iBand});
-                c1PreFilter{iBand}(:,:,iFilt) = max(c1PreFilter{iBand}(:,:,iFilt),s1{iBand}{iScale}{iFilt});
+            %(1) pool over scales within band
+            c1PreFilter = zeros(size(s1{iBand,1,iFilt}));
+            for iScale = 1:numel(scalesInThisBand{iBand})
+                c1PreFilter = max(c1PreFilter, s1{iBand,iScale,iFilt});
             end
-        end
-    end
-
-    % (2) pool over local neighborhood
-    for iBand = 1:nBands
-        poolRange = (c1Space(iBand));
-        for iFilt = 1:nFilters
-            c1{iBand}(:,:,iFilt)  = maxFilter(c1PreFilter{iBand}(:,:,iFilt),poolRange);
+            
+            %(2) pool over local neighborhood
+            c1{iBand}(:,:,iFilt) = maxFilter(c1PreFilter, poolSize);
         end
     end
 end
 
-function imgOut = removeborders(imgIn,siz)
-    imgMid1 = unpadImage(imgIn, [(siz+1)/2,(siz+1)/2,(siz-1)/2,(siz-1)/2]);
-    imgMid2 = padarray(imgMid1, [(siz+1)/2,(siz+1)/2],0,'pre');
-    imgOut = padarray(imgMid2, [(siz-1)/2,(siz-1)/2],0,'post');
+
+function [img] = removeborders (img, siz)
+    img = unpadImage(img, [(siz+1)/2,(siz+1)/2,(siz-1)/2,(siz-1)/2]);
+    img = padarray(img, [(siz+1)/2,(siz+1)/2], 0, 'pre');
+    img = padarray(img, [(siz-1)/2,(siz-1)/2], 0, 'post');
 end

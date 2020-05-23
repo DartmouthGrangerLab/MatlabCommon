@@ -1,6 +1,4 @@
-function [c2,s2,c1,s1,bestBands,bestLocations] = C2(img,filters,filterSizes,c1Space,c1Scale,c1OL,linearPatches,patchSize,c1,IGNOREPARTIALS,ALLS2C1PRUNE,ORIENTATIONS2C1PRUNE)
-% [c2,s2,c1,s1,bestBands,bestLocations] = C2(img,filters,filterSizes,c1Space,c1Scale,c1OL,linearPatches,patchSize,c1,IGNOREPARTIALS,ALLS2C1PRUNE,ORIENTATIONS2C1PRUNE)
-%
+function [c2,s2,bestBands,bestLocations] = C2 (img, filterSizes, c1Space, c1Scale, linearPatches, patchSize, c1, IGNOREPARTIALS, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE)
 % Given an image, filters, & patches, returns S1, C1, S2, & C2 unit responses.
 %
 % args:
@@ -36,43 +34,43 @@ function [c2,s2,c1,s1,bestBands,bestLocations] = C2(img,filters,filterSizes,c1Sp
 %     c1,s1: cell arrays, see C1.m
 %
 % See also C1 (C1.m)
-
-    s1 = []; % required for cached c1 activations
-    if (nargin < 12) ORIENTATIONS2C1PRUNE = 0; end;
-    if (nargin < 11) ALLS2C1PRUNE = 0; end;
-    if (nargin < 10) IGNOREPARTIALS = 0; end;
-    if (nargin <  9 || isempty(c1)) [c1,s1] = C1(img,filters,filterSizes,c1Space,c1Scale,c1OL,0); end;
+%modified by Eli Bowen only for clarity and to no longer call C1 within this function (call C1 first)
+    if (nargin < 10) ORIENTATIONS2C1PRUNE = 0; end;
+    if (nargin < 9) ALLS2C1PRUNE = 0; end;
+    if (nargin < 8) IGNOREPARTIALS = 0; end;
 
     c1BandImg = c1;
-    nBands = length(c1);
+    nBands = numel(c1);
     nOrientations = patchSize(3);
     nPatchRows = patchSize(1);
     nPatchCols = patchSize(2);
-    nPatches = size(linearPatches,2);
+    nPatches = size(linearPatches, 2);
 
     % Build s2:
-    s2 = cell(nPatches,1);
+    s2 = cell(nPatches, 1);
     for iPatch = 1:nPatches
-        squarePatch = reshape(linearPatches(:,iPatch),patchSize);
-        s2{iPatch} = cell(nBands,1);
+        squarePatch = reshape(linearPatches(:,iPatch), patchSize);
+        s2{iPatch} = cell(nBands, 1);
         for iBand = 1:nBands
-            s2{iPatch}{iBand} = windowedPatchDistance(c1BandImg{iBand},squarePatch,ALLS2C1PRUNE,ORIENTATIONS2C1PRUNE);  
+            s2{iPatch}{iBand} = windowedPatchDistance(c1BandImg{iBand}, squarePatch, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE);  
         end
     end
 
     % Build c2:
-    c2 = inf(1,nPatches);
+    c2 = inf(1, nPatches);
+    bestBands = zeros(1, nPatches);
+    bestLocations = zeros(nPatches, 2);
     for iPatch = 1:nPatches
         for iBand = 1:nBands
-            [nRows, nCols] = size(s2{iPatch}{iBand});
+            [nRows,nCols] = size(s2{iPatch}{iBand});
             if IGNOREPARTIALS
-                ignorePartials = inf(nRows,nCols);
-                [nRowsImg, nColsImg] = size(img);
+                ignorePartials = inf(nRows, nCols);
+                [nRowsImg,nColsImg] = size(img);
                 poolRange = c1Space(iBand);
                 maxFilterRows = 1:poolRange/2:nRowsImg;
                 maxFilterCols = 1:poolRange/2:nColsImg;
-                invalidS1Pre = ceil(filterSizes(c1Scale(iBand)*nOrientations)/2);
-                invalidS1Post = floor(filterSizes(c1Scale(iBand)*nOrientations)/2);
+                invalidS1Pre = ceil(filterSizes(c1Scale(iBand)*nOrientations) / 2);
+                invalidS1Post = floor(filterSizes(c1Scale(iBand)*nOrientations) / 2);
                 rMin = ceil(nPatchRows/2)+sum(ismember(maxFilterRows,1:invalidS1Pre));
                 rMax = nRows-floor(nPatchRows/2)-sum(ismember(maxFilterRows,(nRowsImg-(invalidS1Post+poolRange-1)):nRowsImg)); 
                 cMin = ceil(nPatchCols/2)+sum(ismember(maxFilterCols,1:invalidS1Pre));
@@ -80,14 +78,14 @@ function [c2,s2,c1,s1,bestBands,bestLocations] = C2(img,filters,filterSizes,c1Sp
                 if rMin < rMax && cMin < cMax
                     ignorePartials(rMin:rMax,cMin:cMax) = s2{iPatch}{iBand}(rMin:rMax,cMin:cMax);
                 end
-                [minValue minLocation] = min(ignorePartials(:));
+                [minValue,minLocation] = min(ignorePartials(:));
             else
-                [minValue minLocation] = min(s2{iPatch}{iBand}(:));
+                [minValue,minLocation] = min(s2{iPatch}{iBand}(:));
             end
             if minValue < c2(iPatch)
                 c2(iPatch) = minValue;
                 bestBands(iPatch) = iBand;
-                [bestLocations(iPatch,1) bestLocations(iPatch,2)] = ind2sub([nRows,nCols], minLocation);
+                [bestLocations(iPatch,1),bestLocations(iPatch,2)] = ind2sub([nRows,nCols], minLocation);
             end
         end
     end
