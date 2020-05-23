@@ -4,17 +4,17 @@
 %@return width x height x 3
 %converted from java: Frontend.RawOpponent() in ActiveCategorizerCommon on 5/3/2020
 function [image] = RGB2Opponent (image)
-    assert(max(image(:)) <= 1);
+    assert(max(image(:)) <= 1, 'images must be in the range 0-->1');
     
-    red   = image(:,:,1) .* 255;
-    green = image(:,:,2) .* 255;
-    blue  = image(:,:,3) .* 255;
+    red   = image(:,:,1);
+    green = image(:,:,2);
+    blue  = image(:,:,3);
     luminance = 0.2989 .* red + 0.5870 .* green + 0.1140 .* blue; %http://gimp-savvy.com/BOOK/index.html?node54.html
     white = max(max(red, green), blue);
     yellow = (white - blue) ./ white; %Y = (255-B-K) / (255-K)
     yellow(isnan(yellow) | yellow == Inf) = 1;
     
     image(:,:,1) = luminance; %whitevsblack
-    image(:,:,2) = (red - green + 255) ./ 2; %redvsgreen
-    image(:,:,3) = (yellow - blue + 255) ./ 2; %yellowvsblue
+    image(:,:,2) = (red - green + 1) ./ 2; %redvsgreen
+    image(:,:,3) = (yellow - blue + 1) ./ 2; %yellowvsblue
 end
