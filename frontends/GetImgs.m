@@ -11,7 +11,7 @@ function [count,descriptors,imgs] = GetImgs (filePath, colorScheme, scaleFactor)
         scaleFactor = [];
     end
     
-    fullCount = CountImgs(filePath);
+    fullCount = CountFileType(filePath, 'png');
     descriptors = cell(1, fullCount);
     [count,descriptors,imgs] = GetImgsHelper(filePath, colorScheme, scaleFactor, 0, fullCount, descriptors, [], '');
 end
@@ -24,7 +24,7 @@ function [count,descriptors,imgs] = GetImgsHelper (filePath, colorScheme, scaleF
         if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             if listing(i).isdir
                 [count,descriptors,imgs] = GetImgsHelper(fullfile(filePath, listing(i).name), colorScheme, scaleFactor, count, fullCount, descriptors, imgs, [append,'_',strrep(listing(i).name, '_', '-')]);
-            elseif ~isempty(regexp(lower(listing(i).name), '\.png$', 'ONCE'))
+            elseif ~isempty(regexp(listing(i).name, '\.png$', 'ignorecase', 'ONCE'))
                 count = count + 1;
                 descriptors{count} = strrep(regexprep(lower(listing(i).name), '\.png$', ''), '_', '-');
                 if ~isempty(append)
