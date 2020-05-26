@@ -9,7 +9,7 @@
 %   evalS - silhouette criterion
 function [evalCH,evalDB,evalS] = ClusterOptimalK (data, kList, clusterMethod, verbose)
     if isempty(kList)
-        kList = 1:6;
+        kList = 2:6;
     end
     if isempty(verbose)
         verbose = 0;
@@ -20,9 +20,7 @@ function [evalCH,evalDB,evalS] = ClusterOptimalK (data, kList, clusterMethod, ve
     
     N = size(data, 1);
     D = size(data, 2);
-    if N < D
-        error('N < D\n');
-    end
+    assert(N >= D);
     
     evalCH = evalclusters(data, clusterMethod, 'CalinskiHarabasz', 'klist', kList);
     evalDB = evalclusters(data, clusterMethod, 'DaviesBouldin', 'klist', kList);
