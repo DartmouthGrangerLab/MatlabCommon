@@ -66,24 +66,33 @@ function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype, 
     else
         shadowColor = [0.5,0.5,0.5];
     end
-    scatter3(xlims(1)*ones(size(x)), y, z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
-    scatter3(x, ylims(1)*ones(size(y)), z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
-    scatter3(x, y, zlims(1)*ones(size(z)), round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    h = scatter3(xlims(1)*ones(size(x)), y, z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+    h = scatter3(x, ylims(1)*ones(size(y)), z, round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+    h = scatter3(x, y, zlims(1)*ones(size(z)), round(s*0.35), shadowColor, 'filled', 'MarkerEdgeColor', 'none');
+    set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
     if drawGaussFitsOnShadows
         sdWidth = 1;
         gaussLineWidth = 1;
         if size(c, 1) == numel(x) && size(c, 2) == 3 %if you specified a bunch of colors
             [~,~,labels] = unique(c, 'rows', 'stable');
             for i = 1:numel(unique(labels))
-                scatter3(xlims(1) + (xlims(2)-xlims(1))*0.01, mean(y(labels==i)), mean(z(labels==i)), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
-                scatter3(mean(x(labels==i)), ylims(1) + (ylims(2)-ylims(1))*0.01, mean(z(labels==i)), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
-                scatter3(mean(x(labels==i)), mean(y(labels==i)), zlims(1) + (zlims(2)-zlims(1))*0.01, round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+                h = scatter3(xlims(1) + (xlims(2)-xlims(1))*0.01, mean(y(labels==i)), mean(z(labels==i)), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+                set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+                h = scatter3(mean(x(labels==i)), ylims(1) + (ylims(2)-ylims(1))*0.01, mean(z(labels==i)), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+                set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+                h = scatter3(mean(x(labels==i)), mean(y(labels==i)), zlims(1) + (zlims(2)-zlims(1))*0.01, round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+                set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
                 PlotGausses(x(labels==i), y(labels==i), z(labels==i), xlims, ylims, zlims, sdWidth, gaussLineWidth);
             end
         else
-            scatter3(xlims(1) + (xlims(2)-xlims(1))*0.01, mean(y), mean(z), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
-            scatter3(mean(x), ylims(1) + (ylims(2)-ylims(1))*0.01, mean(z), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
-            scatter3(mean(x), mean(y), zlims(1) + (zlims(2)-zlims(1))*0.01, round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+            h = scatter3(xlims(1) + (xlims(2)-xlims(1))*0.01, mean(y), mean(z), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+            set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+            h = scatter3(mean(x), ylims(1) + (ylims(2)-ylims(1))*0.01, mean(z), round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+            set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+            h = scatter3(mean(x), mean(y), zlims(1) + (zlims(2)-zlims(1))*0.01, round(s*0.35), 'k', 'filled', 'MarkerEdgeColor', 'none');
+            set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
             PlotGausses(x, y, z, xlims, ylims, zlims, sdWidth, gaussLineWidth);
         end
     end
@@ -91,7 +100,8 @@ function [h,scatterH] = Plot3DScatterWithShadows (h, x, y, z, s, c, markertype, 
     %% draw lines down to bottom plane
     if numel(x) < 100
         for i = 1:numel(x)
-            plot3([x(i),x(i)], [y(i),y(i)], [zlims(1),z(i)], ':', 'Color', [0.5,0.5,0.5]);
+            h = plot3([x(i),x(i)], [y(i),y(i)], [zlims(1),z(i)], ':', 'Color', [0.5,0.5,0.5]);
+            set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
         end
     end
     
@@ -115,18 +125,21 @@ function [] = PlotGausses (x, y, z, xlims, ylims, zlims, sdwidth, gaussLineWidth
         [v,d] = eig(GMModel.Sigma);
         d = sdwidth * sqrt(d); % convert variance to sdwidth*sd
         bp = (v*d*ap) + repmat(GMModel.mu(:), 1, size(ap, 2)); 
-        plot3(xlims(1).*ones(npts, 1) + (xlims(2)-xlims(1))*0.01, bp(1,:), bp(2,:), '-', 'Color', 'k', 'LineWidth', gaussLineWidth);
-
+        h = plot3(xlims(1).*ones(npts, 1) + (xlims(2)-xlims(1))*0.01, bp(1,:), bp(2,:), '-', 'Color', 'k', 'LineWidth', gaussLineWidth);
+        set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+        
         GMModel = fitgmdist([x(:),z(:)], 1);
         [v,d] = eig(GMModel.Sigma);
         d = sdwidth * sqrt(d); % convert variance to sdwidth*sd
         bp = (v*d*ap) + repmat(GMModel.mu(:), 1, size(ap, 2)); 
-        plot3(bp(1,:), ylims(1).*ones(npts, 1) + (ylims(2)-ylims(1))*0.01, bp(2,:), '-', 'Color', 'k', 'LineWidth', gaussLineWidth);
-
+        h = plot3(bp(1,:), ylims(1).*ones(npts, 1) + (ylims(2)-ylims(1))*0.01, bp(2,:), '-', 'Color', 'k', 'LineWidth', gaussLineWidth);
+        set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
+        
         GMModel = fitgmdist([x(:),y(:)], 1);
         [v,d] = eig(GMModel.Sigma);
         d = sdwidth * sqrt(d); % convert variance to sdwidth*sd
         bp = (v*d*ap) + repmat(GMModel.mu(:), 1, size(ap, 2)); 
-        plot3(bp(1,:), bp(2,:), zlims(1).*ones(npts, 1) + (zlims(2)-zlims(1))*0.01, '-', 'Color', 'k', 'LineWidth', gaussLineWidth); %default linewidth=0.5
+        h = plot3(bp(1,:), bp(2,:), zlims(1).*ones(npts, 1) + (zlims(2)-zlims(1))*0.01, '-', 'Color', 'k', 'LineWidth', gaussLineWidth); %default linewidth=0.5
+        set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off'); %omit from legends
     end
 end
