@@ -9,6 +9,7 @@ function [] = SetRNG (data2Hash)
         hash = GetMD5(data2Hash, 'array', 'hex');
         seed = hex2dec(hash(1:7)); %using 7 of the 32 chars in the MD5 hex as a seed - repeatable results
     end
+    rng('default'); %crashes may result if you don't call this before the next line
     rng(seed, 'simdTwister');
     gpurng(seed, 'Threefry'); %threefry is default, but let's keep it predictable in future matlab versions
     
