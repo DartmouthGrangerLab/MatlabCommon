@@ -47,6 +47,7 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
 %         for i = 1:numel(labelsNum)
 %             labels{i} = num2str(labelsNum(i));
 %         end
+        uniqueLabelsNum = cellfun(@str2num, uniqueLabels); %for later
     else %cell
         numericInLabels = false;
         [uniqueLabels,~,labelsNum] = unique(labels);
@@ -58,10 +59,13 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
 %         end
     end
     
+    if verbose
+        disp([num2str(numel(uniqueLabels)),'-class ',classifierType]);
+    end
+    
     %% equalize N
     if evenN
         counts = CountNumericOccurrences(labelsNum);
-        disp(['subsetting to equal N of ',num2str(min(counts))]);
         %form separate arrays for each category, subset to be of equal length, then recombine
         selectedIdx = [];
         for i = 1:numel(uniqueLabels)
@@ -72,6 +76,7 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
         data = data(selectedIdx,:);
         labels = labels(selectedIdx);
         labelsNum = labelsNum(selectedIdx);
+        disp(['subsetting to equal N of ',num2str(min(counts)),', total is now ',num2str(numel(selectedIdx)),' datapoints']);
         clearvars counts categoryIdx;
     else
         selectedIdx = 1:size(data, 1);
@@ -79,6 +84,7 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
     
     %% remove dimensions of zero variance (or learning algs will crash)
     variances = var(data, 0, 1);
+    assert(~all(variances==0));
     data(:,variances==0) = [];
     
     %% prepare variables
@@ -86,7 +92,7 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
         disp(uniqueLabels(:)');
     end
     if contains(classifierType, 'liblinear')
-        accs       = zeros(numFolds, 3); %[accuracy, MSE, squared correlation coeff]
+        accs = zeros(numFolds, 3); %[accuracy, MSE, squared correlation coeff]
         predLabels = zeros(numel(labels), 1);
         if numel(uniqueLabels) == 2 %this is some libsvm bull fucking shit
             scores = zeros(numel(labels), 1);
@@ -95,23 +101,19 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
         end
         %must implement our own crossvalidation, because liblinear's random number generator can't be seeded
         [trainIndices,testIndices] = CrossvalidationKFold(labelsNum, numFolds, true); %fitcecoc is random so we'll be random too
+    else
+        accs = zeros(numFolds, 1);
     end
     
     %% classify
     if strcmp(classifierType, 'lda')
-        if numel(uniqueLabels) == 2
-            if verbose
-                disp('two-class LDA');
-            end
+        if numel(uniqueLabels) == 2 %two class LDA
             if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
                 models = fitcdiscr(data, labels, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'KFold', numFolds, 'Cost', classifierParams.cost);
             else
                 models = fitcdiscr(data, labels, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'KFold', numFolds, 'discrimType', 'pseudoLinear');
             end
-        else
-            if verbose
-                disp('multiclass LDA');
-            end
+        else %multiclass LDA
             template = templateDiscriminant('discrimType', 'pseudoLinear');
             if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
                 models = fitcecoc(data, labels, 'Learners', template, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'Options', statset('UseParallel',1), 'KFold', numFolds, 'Cost', classifierParams.cost);
@@ -120,19 +122,13 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
             end
         end
     elseif strcmp(classifierType, 'svm')
-        if numel(uniqueLabels) == 2
-            if verbose
-                disp('two-class SVM');
-            end
+        if numel(uniqueLabels) == 2 %two class SVM
             if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
                 models = fitcsvm(data, labels, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'KFold', numFolds, 'KernelFunction', 'linear', 'Standardize', true, 'Cost', classifierParams.cost);
             else
                 models = fitcsvm(data, labels, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'KFold', numFolds, 'KernelFunction', 'linear', 'Standardize', true);
             end
-        else
-            if verbose
-                disp('multiclass SVM');
-            end
+        else %multiclass SVM
             template = templateSVM('Standardize', 1, 'KernelFunction', 'linear');
             if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
                 models = fitcecoc(data, labels, 'Learners', template, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'Options', statset('UseParallel',1), 'KFold', numFolds, 'Cost', classifierParams.cost);
@@ -140,18 +136,12 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
                 models = fitcecoc(data, labels, 'Learners', template, 'CrossVal', 'on', 'ClassNames', uniqueLabels, 'Options', statset('UseParallel',1), 'KFold', numFolds);
             end
         end
-    elseif strcmp(classifierType, 'svmjava')
-        if verbose
-            disp('SVM java');
-        end
+    elseif strcmp(classifierType, 'svmjava') %SVM via java
         error('TODO if we care');
 %         import matlabclusternetworkjavahelper.*;
 %         helper = matlabclusternetworkjavahelper.Logistic(??, ???);
 %         helper.Train(double[][] data, int[] labels, SolverType solver);
-    elseif strcmp(classifierType, 'svmliblinear')
-        if verbose
-            disp('SVM liblinear');
-        end
+    elseif strcmp(classifierType, 'svmliblinear') %SVM via liblinear-multicore
         if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
             error('not yet implemented: pass cost into TrainLiblinear()');
         end
@@ -170,13 +160,7 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
 %             model = train(labelsNum(trainIndices{fold}), sparse(data(trainIndices{fold},:)), ['-q -s 2 -n ',num2str(DetermineNumJavaComputeCores()),weightString]);
             [predLabels(testIndices{fold}),accs(fold,:),scores(testIndices{fold},:)] = predict(labelsNum(testIndices{fold}), sparse(data(testIndices{fold},:)), model, '-q');
         end
-        warning('off', 'backtrace');
-        warning('ClassifyCrossvalidate: it makes a big difference when we add a bias/intercept term. just did that here by switching to TrainLiblinear(), but this code has never been run this way!');
-        warning('on', 'backtrace');
-    elseif strcmp(classifierType, 'logregliblinear')
-        if verbose
-            disp('logistic regression liblinear');
-        end
+    elseif strcmp(classifierType, 'logregliblinear') %logistic regression via liblinear-multicore
         if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
             error('not yet implemented: pass cost into TrainLiblinear()');
         end
@@ -187,13 +171,8 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
             model = TrainLiblinear(0, labelsNum(trainIndices{fold}), data(trainIndices{fold},:), true, 1);
             [predLabels(testIndices{fold}),accs(fold,:),scores(testIndices{fold},:)] = predict(labelsNum(testIndices{fold}), sparse(data(testIndices{fold},:)), model, '-q');
         end
-        warning('off', 'backtrace');
         warning('TODO: this option not yet validated! all i did was change the TrainLiblinear param from 2 to 0');
-        warning('on', 'backtrace');
-    elseif strcmp(classifierType, 'knn')
-        if verbose
-            disp('KNN');
-        end
+    elseif strcmp(classifierType, 'knn') %KNN
         if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
             models = crossval(fitcknn(data, labels, 'ClassNames', uniqueLabels, 'NumNeighbors', classifierParams.K, 'Distance', classifierParams.distMeasure, 'Cost', classifierParams.cost), 'KFold', numFolds);
         else
@@ -210,29 +189,34 @@ function [acc,accStdErr,predLabels,scores,labels,selectedIdx,rocTPR,rocFPR] = Cl
         error('unknown classifierType');
     end
     
+    %% finalize acc and accStdErr
     if contains(classifierType, 'liblinear')
         accs(:,1) = accs(:,1) ./ 100; %accs(fold,:) is [accuracy,MSE,R^2]
-        if numericInLabels
-            uniqueLabelsNum = cellfun(@str2num, uniqueLabels);
-            predLabels = uniqueLabelsNum(predLabels); %predLabels are the same thing as labelsNum, which indexes into uniqueLabels, which are string versions of the original input labels
-        else
-            predLabels = uniqueLabels(predLabels); %convert back to strings. predLabels are the same thing as labelsNum - they index into uniqueLabels
-        end
     else
-        accs = zeros(numFolds, 1);
         for fold = 1:numFolds
             accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); %percent incorrect for each fold on testing data
-        end
-        [predLabels,scores] = kfoldPredict(models);
-        if numericInLabels
-            uniqueLabelsNum = cellfun(@str2num, uniqueLabels);
-            predLabels = uniqueLabelsNum(cellfun(@str2num, predLabels)); %predLabels are string versions of labelsNum, which indexes into uniqueLabels, which are string versions of the original input labels
         end
     end
     accStdErr = StdErr(accs);
     acc = mean(accs);
     
-    %ROC
+    %% finalize predLabels and scores
+    if nargout > 2 %for efficiency, only get predLabels and scores if necessary
+        if contains(classifierType, 'liblinear')
+            if numericInLabels
+                predLabels = uniqueLabelsNum(predLabels); %predLabels are the same thing as labelsNum, which indexes into uniqueLabels, which are string versions of the original input labels
+            else
+                predLabels = uniqueLabels(predLabels); %convert back to strings. predLabels are the same thing as labelsNum - they index into uniqueLabels
+            end
+        else
+            [predLabels,scores] = kfoldPredict(models);
+            if numericInLabels
+                predLabels = uniqueLabelsNum(cellfun(@str2num, predLabels)); %predLabels are string versions of labelsNum, which indexes into uniqueLabels, which are string versions of the original input labels
+            end
+        end
+    end
+    
+    %% ROC
     rocTPR = [];
     rocFPR = [];
     if nargout > 5 && numel(uniqueLabels) == 2
