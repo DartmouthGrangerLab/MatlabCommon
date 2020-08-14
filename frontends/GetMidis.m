@@ -3,17 +3,17 @@
 %wrapper around a matlab file exchange project for loading midi files (https://www.mathworks.com/matlabcentral/fileexchange/27470-midi-tools)
 %INPUT:
 %	filepath
-%RETURNS:\
-%   descriptors - cell aray of file descriptors for each file
+%RETURNS:
 %   noteList - N x 7 matrix:
 %       noteList(:,1) is pitch (60 --> C4 = middle C)
 %       noteList(:,2) is velocity
-%       noteList(:,3) is note start in seconds from start of file
-%       noteList(:,4) is note start in seconds from start of noteList
-%       noteList(:,5) is note duration in seconds
-%       noteList(:,6) is channel
-%       noteList(:,7) is track/file number (index into descriptors)
-function [descriptors,noteList] = GetMidis (filePath)
+%       noteList(:,3) is note start in seconds from start of track/file
+%       noteList(:,4) is note duration in seconds
+%       noteList(:,5) is channel
+%       noteList(:,6) is track/file number (index into descriptors)
+%   descriptors - 1 x numTracks cell array of file descriptors
+%   trackDuration - 1 x numTracks double array of durations in seconds
+function [noteList,descriptors,trackDuration] = GetMidis (filePath)
     rootPath = '/pdata/ebowen/MatlabCommon';
     if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'), true)) %for performance
         javaaddpath(fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'));
@@ -28,17 +28,21 @@ function [descriptors,noteList] = GetMidis (filePath)
     %noteMat{i}(:,6) is start seconds (for file descriptors{i})
     %noteMat{i}(:,7) is duration in seconds (for file descriptors{i})
     N = sum(cellfun(@numel, noteMat)) / 7;
-    noteList = zeros(N, 7);
+    noteList = zeros(N, 6);
     count = 1;
     for i = 1:numel(noteMat)
         noteList(count:count+size(noteMat{i}, 1)-1,1) = noteMat{i}(:,4);
         noteList(count:count+size(noteMat{i}, 1)-1,2) = noteMat{i}(:,5);
         noteList(count:count+size(noteMat{i}, 1)-1,3) = noteMat{i}(:,6);
-        noteList(count:count+size(noteMat{i}, 1)-1,4) = noteMat{i}(:,6) + noteList(max(count-1, 1),4) + noteList(max(count-1, 1),5);
-        noteList(count:count+size(noteMat{i}, 1)-1,5) = noteMat{i}(:,7);
-        noteList(count:count+size(noteMat{i}, 1)-1,6) = noteMat{i}(:,3);
-        noteList(count:count+size(noteMat{i}, 1)-1,7) = i;
+        noteList(count:count+size(noteMat{i}, 1)-1,4) = noteMat{i}(:,7);
+        noteList(count:count+size(noteMat{i}, 1)-1,5) = noteMat{i}(:,3);
+        noteList(count:count+size(noteMat{i}, 1)-1,6) = i;
         count = count + size(noteMat{i}, 1);
+    end
+    trackDuration = zeros(1, numel(descriptors));
+    for i = 1:numel(descriptors)
+        idx = find(noteList(:,6)==i, 1, 'last');
+        trackDuration(i) = noteList(idx,3) + noteList(idx,4);
     end
 end
 

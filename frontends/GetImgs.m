@@ -2,28 +2,53 @@
 %4/25/2020
 %INPUTS:
 %   filePath
-%   colorScheme - 'gray', 'rgb', 'opponency', 'retinalgray', 'retinalrgb', 'retinalopponency'
-%   scaleFactor - OPTIONAL - scale the images while loading!
-function [count,descriptors,imgs] = GetImgs (filePath, colorScheme, scaleFactor)
+%   filter - OPTIONAL - any option to ImgFilter, e.g. 'rgb2gray', 'opponency', 'retina', 'retinagray', 'gabor'
+%   resizeParam - OPTIONAL - scale the images while loading! (if scalar, this is a scaling factor e.g. 2 = double, if 1x2, this is desiredSize = [nRows,nCols])
+function [count,descriptors,imgsFiltered] = GetImgs (filePath, filter, resizeParam)
     validateattributes(filePath, {'char'}, {'nonempty'});
-    validateattributes(colorScheme, {'char'}, {'nonempty'});
-    if ~exist('scaleFactor', 'var')
-        scaleFactor = [];
+    if ~exist('resizeParam', 'var')
+        resizeParam = [];
+    end
+    if numel(resizeParam) == 1 % scale factor
+        validateattributes(resizeParam, {'numeric'}, {'nonempty','scalar','positive'});
+    elseif numel(resizeParam) == 2 % nRows x nCols desired
+        validateattributes(resizeParam, {'numeric'}, {'nonempty','vector','positive','integer'});
+    else
+        assert(isempty(resizeParam)); % only 2 options are above
     end
     
     fullCount = CountFileType(filePath, 'png');
     descriptors = cell(1, fullCount);
-    [count,descriptors,imgs] = GetImgsHelper(filePath, colorScheme, scaleFactor, 0, fullCount, descriptors, [], '');
+    [count,descriptors,imgs] = GetImgsHelper(filePath, scaleFactor, resizeParam, 0, fullCount, descriptors, [], '');
+    
+    if exist('filter', 'var') && ~isempty(filter)
+        f = ImgFilter(filter, 'rgb');
+        if f.nOutChannels == 1
+            imgsFiltered = zeros(size(imgs, 1), size(imgs, 2), fullCount);
+        else
+            imgsFiltered = zeros(size(imgs, 1), size(imgs, 2), f.nOutChannels, fullCount);
+        end
+        for i = 1:fullCount
+            img = f.Proc(imgs(:,:,:,i));
+            if f.nOutChannels == 1
+                imgsFiltered(:,:,i) = img;
+            else
+                imgsFiltered(:,:,:,i) = img;
+            end
+        end
+    else
+        imgsFiltered = imgs;
+    end
 end
 
 
 %gonna do this recursively
-function [count,descriptors,imgs] = GetImgsHelper (filePath, colorScheme, scaleFactor, count, fullCount, descriptors, imgs, append)
+function [count,descriptors,imgs] = GetImgsHelper (filePath, resizeParam, count, fullCount, descriptors, imgs, append)
     listing = dir(filePath);
     for i = 1:numel(listing)
         if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             if listing(i).isdir
-                [count,descriptors,imgs] = GetImgsHelper(fullfile(filePath, listing(i).name), colorScheme, scaleFactor, count, fullCount, descriptors, imgs, [append,'_',strrep(listing(i).name, '_', '-')]);
+                [count,descriptors,imgs] = GetImgsHelper(fullfile(filePath, listing(i).name), resizeParam, count, fullCount, descriptors, imgs, [append,'_',strrep(listing(i).name, '_', '-')]);
             elseif ~isempty(regexp(listing(i).name, '\.png$', 'ignorecase', 'ONCE'))
                 count = count + 1;
                 descriptors{count} = strrep(regexprep(lower(listing(i).name), '\.png$', ''), '_', '-');
@@ -31,43 +56,13 @@ function [count,descriptors,imgs] = GetImgsHelper (filePath, colorScheme, scaleF
                     descriptors{count} = [append,'_',descriptors{count}];
                 end
                 img = imread(fullfile(filePath,listing(i).name));
-                if ~isempty(scaleFactor)
-                    img = imresize(img, scaleFactor);
+                if ~isempty(resizeParam)
+                    img = imresize(img, resizeParam);
                 end
-                img = im2double(img);
-                if strcmp(colorScheme, 'gray')
-                    img = 0.2989 .* img(:,:,1) + 0.5870 .* img(:,:,2) + 0.1140 .* img(:,:,3);
-                elseif strcmp(colorScheme, 'rgb')
-                    %nothing to do
-                elseif strcmp(colorScheme, 'opponency')
-                    img = RGB2Opponent(img);
-                elseif strcmp(colorScheme, 'retinalgray')
-                    retina = VideoRetina(size(img, 1), size(img, 2), false); %prints lots of junk
-                    [img,~] = retina.ProcessFrame(img);
-                elseif strcmp(colorScheme, 'retinalrgb')
-                    retina = VideoRetina(size(img, 1), size(img, 2), true); %prints lots of junk
-                    [img,~] = retina.ProcessFrame(img);
-                elseif strcmp(colorScheme, 'retinalopponency')
-                    retina = VideoRetina(size(img, 1), size(img, 2), true); %prints lots of junk
-                    [img,~] = retina.ProcessFrame(img);
-                    img = RGB2Opponent(img);
-                else
-                    error('unknown colorScheme');
-                end
-                
                 if isempty(imgs)
-                    if strcmp(colorScheme, 'gray') || strcmp(colorScheme, 'retinalgray')
-                        imgs = zeros(size(img, 1), size(img, 2), fullCount);
-                    else
-                        imgs = zeros(size(img, 1), size(img, 2), 3, fullCount);
-                    end
+                    imgs = zeros(size(img, 1), size(img, 2), 3, fullCount);
                 end
-                
-                if strcmp(colorScheme, 'gray') || strcmp(colorScheme, 'retinalgray')
-                    imgs(:,:,count) = img;
-                else
-                    imgs(:,:,:,count) = img;
-                end
+                imgs(:,:,:,count) = img;
             end
         end
     end
