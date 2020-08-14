@@ -9,9 +9,6 @@ function [numCores] = DetermineNumJavaComputeCores ()
     elseif numCores ~= 16 %16 is the response of most worker nodes
         if strcmp(getComputerName(), 'eb-grangerlab')
             numCores = 4; %so I can still use the computer
-        else
-            disp(['WARNING: numCores == ',num2str(numCores)]);
-            numCores = 8; %seems safe
         end
     end
 end
