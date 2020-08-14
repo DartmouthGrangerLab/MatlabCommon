@@ -1,8 +1,6 @@
-function [c1,s1] = C1 (img, sqfilter, filterSizes, c1Space, c1Scale, c1OL, INCLUDEBORDERS)
+function [s1,c1] = C1 (img, sqfilter, filterSizes, c1Space, c1Scale, c1OL, INCLUDEBORDERS)
 % Given an image, returns C1 & S1 unit responses
-%
 % args:
-%
 %     img: a 2-dimensional matrix, the input image must be grayscale and of
 %     type 'double'
 %
@@ -37,6 +35,7 @@ function [c1,s1] = C1 (img, sqfilter, filterSizes, c1Space, c1Scale, c1OL, INCLU
 %modified by Eli Bowen for readability and:
 %   for speed / memory fragmentation (preallocate variables etc.)
 %   changed s1 return structure slightly (it's never used by hmax outside this function)
+%   switched return value order for efficiency
 
     USECONV2 = 1; % should be faster if 1.
     if (nargin < 7); INCLUDEBORDERS = 1; end
@@ -81,24 +80,26 @@ function [c1,s1] = C1 (img, sqfilter, filterSizes, c1Space, c1Scale, c1OL, INCLU
     end
 
     %% Calculate local pooling (c1)
-    c1 = cell(1, nBands);
-    for iBand = 1:nBands
-        poolSize = c1Space(iBand);
-        
-        halfpool = poolSize / 2;
-        rowIndices = 1:halfpool:size(s1{iBand,1,1}, 1);
-        colIndices = 1:halfpool:size(s1{iBand,1,1}, 2);
-        c1{iBand} = zeros(numel(rowIndices), numel(colIndices), nFilters); %size determined by Eli reading through maxFilter()
-        
-        for iFilt = 1:nFilters
-            %(1) pool over scales within band
-            c1PreFilter = zeros(size(s1{iBand,1,iFilt}));
-            for iScale = 1:numel(scalesInThisBand{iBand})
-                c1PreFilter = max(c1PreFilter, s1{iBand,iScale,iFilt});
+    if nargout() > 1
+        c1 = cell(1, nBands);
+        for iBand = 1:nBands
+            poolSize = c1Space(iBand);
+
+            halfpool = poolSize / 2;
+            rowIndices = 1:halfpool:size(s1{iBand,1,1}, 1);
+            colIndices = 1:halfpool:size(s1{iBand,1,1}, 2);
+            c1{iBand} = zeros(numel(rowIndices), numel(colIndices), nFilters); %size determined by Eli reading through maxFilter()
+
+            for iFilt = 1:nFilters
+                % (1) pool over scales within band
+                c1PreFilter = zeros(size(s1{iBand,1,iFilt}));
+                for iScale = 1:numel(scalesInThisBand{iBand})
+                    c1PreFilter = max(c1PreFilter, s1{iBand,iScale,iFilt});
+                end
+
+                % (2) pool over local neighborhood
+                c1{iBand}(:,:,iFilt) = maxFilter(c1PreFilter, poolSize);
             end
-            
-            %(2) pool over local neighborhood
-            c1{iBand}(:,:,iFilt) = maxFilter(c1PreFilter, poolSize);
         end
     end
 end
