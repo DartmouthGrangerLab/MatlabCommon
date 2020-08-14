@@ -11,8 +11,17 @@
 %   c1 - c1{numbands}(:,:,numfilters) contains ___
 %   s2 - s2{numpatchespersize,numpatchsizes}{numbands} contains ___
 %   c2 - c2(numpatchespersize,numpatchsizes) contains ___
+%   bestBands
+%   bestLocations
+%   patchCache
 function [s1,c1,s2,c2,bestBands,bestLocations,patchCache] = HMAX (img, patchCache)
     validateattributes(img, {'numeric'}, {'nonempty'});
+    assert(size(img, 3) == 1, 'img must be grayscale - if handling color, call HMAX on each channel separately');
+    if ~isa(img, 'double')
+        assert(isa(img, 'uint8'));
+        img = im2double(img); %image must be double
+    end
+    assert(max(img(:)) <= 1, 'img must be ranged 0-->1');
     
     %% init S1 gabor filters
     if ~exist('patchCache', 'var') || isempty(patchCache)
@@ -26,22 +35,17 @@ function [s1,c1,s2,c2,bestBands,bestLocations,patchCache] = HMAX (img, patchCach
         [patchCache.filterSizes,patchCache.filters,patchCache.sqfilter,patchCache.c1OL,~,patchCache.filterOrientations] = initGabor(orientations, RFsize, div);
     end
     
-    %% make sure image is in valid format
-    if size(img, 3) == 3
-        img = rgb2gray(img); %image must be grayscale
-    end
-    if ~isa(img, 'double')
-        img = im2double(img); %image must be double
-    end
-    assert(max(img(:)) <= 1, 'img must be ranged 0-->1');
-    
     %% C1
     includeBorders = true;
     c1Scale = 1:2:18; % defining 8 scale bands
     c1Space = 8:2:22; % defining spatial pooling range for each scale band
-    [c1,s1] = C1(img, patchCache.sqfilter, patchCache.filterSizes, c1Space, c1Scale, patchCache.c1OL, includeBorders);
+    if nargout() == 1
+        s1      = C1(img, patchCache.sqfilter, patchCache.filterSizes, c1Space, c1Scale, patchCache.c1OL, includeBorders);
+    else
+        [s1,c1] = C1(img, patchCache.sqfilter, patchCache.filterSizes, c1Space, c1Scale, patchCache.c1OL, includeBorders);
+    end
     
-    if nargout > 2
+    if nargout() > 2
         %% for each patch calculate C2 unit responses
         nPatchSizes     = size(patchCache.patchSizes, 2);
         nPatchesPerSize = size(patchCache.patches{1}, 2);
@@ -55,7 +59,7 @@ function [s1,c1,s2,c2,bestBands,bestLocations,patchCache] = HMAX (img, patchCach
         allS2C1Prune         = false; %dunno what this does - false was default
         orientations2C1Prune = false; %dunno what this does - false was default
         for i = 1:nPatchSizes
-            [c2(:,i),s2(:,i),bestBands(:,i),bestLocations(:,:,i)] =...
+            [s2(:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] =...
                 C2(img, patchCache.filterSizes, c1Space, c1Scale, patchCache.patches{i}, patchCache.patchSizes(1:3,i)', c1, ignorePartials, allS2C1Prune, orientations2C1Prune);
         end
     end
