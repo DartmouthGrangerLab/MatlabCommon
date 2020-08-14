@@ -5,33 +5,38 @@
 %which implements:
 %Benoit A., Caplier A., Durette B., Herault, J., "USING HUMAN VISUAL SYSTEM MODELING FOR BIO-INSPIRED LOW LEVEL IMAGE PROCESSING", Computer Vision and Image Understanding 114 (2010)
 %https://docs.opencv.org/trunk/dc/d54/classcv_1_1bioinspired_1_1Retina.html
+%TODO: consider using mexopencv or matlab's opencv module, which should be faster if either actually works (never tried)
+%       or do a matlab reimplementation of opencv_contrib/modules/bioinspired, which should be even fasterer (https://github.com/opencv/opencv_contrib/tree/master/modules/bioinspired/src)
 classdef VideoRetina < handle
     properties (SetAccess = protected)
-        retina
+        retina(1,1)
         nRows(1,1)
         nCols(1,1)
-        isInFullColor(1,1) logical
+        isColor(1,1) logical
     end
     
     
     methods
         %constructor
-        function [obj] = VideoRetina (nRows, nCols, isInFullColor)
+        function [obj] = VideoRetina (nRows, nCols, isColor)
             obj.nRows = nRows;
             obj.nCols = nCols;
-            obj.isInFullColor = isInFullColor;
+            obj.isColor = isColor;
             
-            rootPath = '/ihome/ebowen/workspace/JavaCommon';
+            [rootPath,~,~] = fileparts(mfilename('fullpath')); % jars expected in same folder as VideoRetina.m (should be MatlabCommon/frontends/vid_retina/)
             if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'JavaCommon.jar'), true)) % for performance
                 javaaddpath(fullfile(rootPath, 'JavaCommon.jar')); % for VideoRetina
             end
-            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv/javacpp.jar'), true)) % for performance
-                javaaddpath(fullfile(rootPath, 'javacv/javacpp.jar')); % for VideoRetina
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacpp.jar'), true)) % for performance
+                javaaddpath(fullfile(rootPath, 'javacpp.jar')); % for VideoRetina
             end
-            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv/javacv.jar'), true)) % for performance
-                javaaddpath(fullfile(rootPath, 'javacv/javacv.jar')); % for VideoRetina
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv.jar'), true)) % for performance
+                javaaddpath(fullfile(rootPath, 'javacv.jar')); % for VideoRetina
             end
-            obj.retina = common.video.VideoRetina(obj.nRows, obj.nCols, obj.isInFullColor); % prints lots of junk
+            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
+                javaaddpath(fullfile(rootPath, 'opencv.jar')); % for VideoRetina
+            end
+            obj.retina = common.video.VideoRetina(obj.nRows, obj.nCols, obj.isColor); % prints lots of junk
         end
         
         
@@ -47,13 +52,35 @@ classdef VideoRetina < handle
                 img = floor(img .* 255);
                 dataType = 2;
             else
-                error('invalid datatype for img');
+                error('unsupported datatype for img');
             end
             
             img = obj.Int2Unsigned(img);
-            obj.retina.ProcessFrame(common.utils.ImageUtils.Color2BufferedImage(img, 255));
-            parvo = obj.Unsigned2Int(common.utils.ImageUtils.BufferedImage2Color(obj.retina.getParvo())); % now an int32 in range 0-->255
-            magno = obj.Unsigned2Int(common.utils.ImageUtils.BufferedImage2Color(obj.retina.getMagno())); % now an int32 in range 0-->255
+            
+            if obj.isColor
+                assert(size(img, 3) == 3);
+                frameBI = common.utils.ImageUtils.Color2BufferedImage(img, 255);
+            else
+                assert(size(img, 3) == 1);
+%                 frameBI = common.utils.ImageUtils.Grayscale2SingleChannelBufferedImage(img); % converts grayscale matrix to grayscale BufferedImage
+                % due to some bug, retina code outputs the same thing for magno and parvo if we use above; must use below
+                frameBI = common.utils.ImageUtils.Grayscale2BufferedImage(img, 255); % converts grayscale matrix to RGB BufferedImage
+            end
+            
+            obj.retina.ProcessFrame(frameBI);
+            
+            parvoBI = obj.retina.getParvo(); % java BufferedImage
+            if obj.isColor
+                assert(parvoBI.getColorModel().getNumComponents() == 3);
+                parvo = obj.Unsigned2Int(common.utils.ImageUtils.BufferedImage2Color(parvoBI)); % now an int32 in range 0-->255
+            else
+                assert(parvoBI.getColorModel().getNumComponents() == 1);
+                parvo = obj.Unsigned2Int(common.utils.ImageUtils.BufferedImage2Grayscale(parvoBI)); % now an int32 in range 0-->255
+            end
+            
+            magnoBI = obj.retina.getMagno(); % java BufferedImage
+            assert(magnoBI.getColorModel().getNumComponents() == 1);
+            magno = obj.Unsigned2Int(common.utils.ImageUtils.BufferedImage2Grayscale(magnoBI)); % now an int32 in range 0-->255
             
             if dataType == 1 % uint8
                 parvo = uint8(parvo);
