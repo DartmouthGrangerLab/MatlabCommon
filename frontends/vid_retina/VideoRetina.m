@@ -33,9 +33,25 @@ classdef VideoRetina < handle
             if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'javacv.jar'), true)) % for performance
                 javaaddpath(fullfile(rootPath, 'javacv.jar')); % for VideoRetina
             end
-            if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
-                javaaddpath(fullfile(rootPath, 'opencv.jar')); % for VideoRetina
+            
+            if ismac && endsWith(computer('arch'), '64')
+                if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
+                    javaaddpath(fullfile(rootPath, 'opencv-macosx-x86_64.jar')); % for VideoRetina
+                end
+            elseif isunix && endsWith(computer('arch'), '64')
+                if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
+                    javaaddpath(fullfile(rootPath, 'opencv-linux-x86_64.jar')); % for VideoRetina
+                end
+            elseif ispc && endsWith(computer('arch'), '64')
+                if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
+                    javaaddpath(fullfile(rootPath, 'opencv-windows-x86_64.jar')); % for VideoRetina
+                end
+            else
+                if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'opencv.jar'), true)) % for performance
+                    javaaddpath(fullfile(rootPath, 'opencv.jar')); % for VideoRetina
+                end
             end
+            
             obj.retina = common.video.VideoRetina(obj.nRows, obj.nCols, obj.isColor); % prints lots of junk
         end
         
