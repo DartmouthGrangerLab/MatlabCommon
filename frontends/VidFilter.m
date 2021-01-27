@@ -5,11 +5,11 @@
 classdef VidFilter < handle
     properties (SetAccess = private)
         filters
-        nOutChannels(1,1)
+        nOutChannels(1,1) % scalar double
         
         % filter-specific stuff below
-        retina(1,1)
-        patchCache(1,1)
+        retina
+        patchCache
 %         imgSize(1,3) % [nRows,nCols,nChannels] size of frame
     end
     
@@ -37,11 +37,9 @@ classdef VidFilter < handle
             elseif strcmp(obj.filters{end}, 'opponencysplit')
                 obj.nOutChannels = 6;
             elseif strcmp(obj.filters{end}, 'retina')
-                obj.nOutChannels = 4;
-                error('^verify magno is 1 channel');
+                obj.nOutChannels = 7; % chan1 parvo+, chan1 parvo-, chan2 parvo+, chan2 parvo-, chan3 parvo+, chan3 parvo-, magno
             elseif strcmp(obj.filters{end}, 'retinagray')
-                obj.nOutChannels = 2;
-                error('^verify magno is 1 channel');
+                obj.nOutChannels = 3; % parvo+, parvo-, magno
             elseif strcmp(obj.filters{end}, 'gabor')
                 nGaborsPerInChannel = 64; % 64 is a function of constants defined in HMAX.m
                 if numel(obj.filters) == 1

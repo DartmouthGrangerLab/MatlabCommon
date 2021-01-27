@@ -5,11 +5,11 @@
 classdef ImgFilter < handle
     properties (SetAccess = private)
         filters
-        nOutChannels(1,1)
+        nOutChannels(1,1) % scalar double
         
         % filter-specific stuff below
-        retina(1,1)
-        patchCache(1,1)
+        retina
+        patchCache
     end
     
     
@@ -36,9 +36,9 @@ classdef ImgFilter < handle
             elseif strcmp(obj.filters{end}, 'opponencysplit')
                 obj.nOutChannels = 6;
             elseif strcmp(obj.filters{end}, 'retina')
-                obj.nOutChannels = 3;
+                obj.nOutChannels = 7; % chan1 parvo+, chan1 parvo-, chan2 parvo+, chan2 parvo-, chan3 parvo+, chan3 parvo-, magno
             elseif strcmp(obj.filters{end}, 'retinagray')
-                obj.nOutChannels = 1;
+                obj.nOutChannels = 3; % parvo+, parvo-, magno
             elseif strcmp(obj.filters{end}, 'gabor')
                 nGaborsPerInChannel = 64; % 64 is a function of constants defined in HMAX.m
                 if numel(obj.filters) == 1

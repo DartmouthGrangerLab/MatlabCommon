@@ -1,11 +1,11 @@
 %Eli Bowen
 %4/25/2020
 %INPUTS:
-%   filePath
+%   path - folder or valid image file
 %   filter - OPTIONAL - any option to ImgFilter, e.g. 'rgb2gray', 'opponency', 'retina', 'retinagray', 'gabor'
 %   resizeParam - OPTIONAL - scale the images while loading! (if scalar, this is a scaling factor e.g. 2 = double, if 1x2, this is desiredSize = [nRows,nCols])
-function [count,descriptors,imgsFiltered] = GetImgs (filePath, filter, resizeParam)
-    validateattributes(filePath, {'char'}, {'nonempty'});
+function [count,descriptors,imgsFiltered] = GetImgs (path, filter, resizeParam)
+    validateattributes(path, {'char'}, {'nonempty'});
     if ~exist('resizeParam', 'var')
         resizeParam = [];
     end
@@ -17,9 +17,9 @@ function [count,descriptors,imgsFiltered] = GetImgs (filePath, filter, resizePar
         assert(isempty(resizeParam)); % only 2 options are above
     end
     
-    fullCount = CountFileType(filePath, 'png');
+    fullCount = CountFileType(path, 'png');
     descriptors = cell(1, fullCount);
-    [count,descriptors,imgs] = GetImgsHelper(filePath, scaleFactor, resizeParam, 0, fullCount, descriptors, [], '');
+    [count,descriptors,imgs] = Helper(path, scaleFactor, resizeParam, 0, fullCount, descriptors, [], '');
     
     if exist('filter', 'var') && ~isempty(filter)
         f = ImgFilter(filter, 'rgb');
@@ -43,26 +43,31 @@ end
 
 
 %gonna do this recursively
-function [count,descriptors,imgs] = GetImgsHelper (filePath, resizeParam, count, fullCount, descriptors, imgs, append)
-    listing = dir(filePath);
+function [count,descriptors,imgs] = Helper (path, resizeParam, count, fullCount, descriptors, imgs, append)
+    listing = dir(path);
     for i = 1:numel(listing)
-        if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
-            if listing(i).isdir
-                [count,descriptors,imgs] = GetImgsHelper(fullfile(filePath, listing(i).name), resizeParam, count, fullCount, descriptors, imgs, [append,'_',strrep(listing(i).name, '_', '-')]);
-            elseif ~isempty(regexp(listing(i).name, '\.png$', 'ignorecase', 'ONCE'))
-                count = count + 1;
-                descriptors{count} = strrep(regexprep(lower(listing(i).name), '\.png$', ''), '_', '-');
-                if ~isempty(append)
-                    descriptors{count} = [append,'_',descriptors{count}];
-                end
-                img = imread(fullfile(filePath,listing(i).name));
+        if listing(i).isdir && ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
+            [count,descriptors,imgs] = Helper(fullfile(path, listing(i).name), resizeParam, count, fullCount, descriptors, imgs, [append,'_',strrep(listing(i).name, '_', '-')]);
+        end
+    end
+    for i = 1:numel(listing)
+        if ~listing(i).isdir
+            [~,fileNameNoExt,ext] = fileparts(listing(i).name);
+            if strcmpi(ext, '.png')
+                img = imread(fullfile(path, listing(i).name));
                 if ~isempty(resizeParam)
                     img = imresize(img, resizeParam);
                 end
                 if isempty(imgs)
                     imgs = zeros(size(img, 1), size(img, 2), 3, fullCount);
                 end
-                imgs(:,:,:,count) = img;
+                imgs(:,:,:,count+1) = img;
+
+                descriptors{count+1} = strrep(lower(fileNameNoExt), '_', '-');
+                if ~isempty(append)
+                    descriptors{count+1} = [append,'_',descriptors{count+1}];
+                end
+                count = count + 1;
             end
         end
     end
