@@ -144,6 +144,12 @@ function [anim,descriptors] = GetMotionCaptures (path)
             else
                 nodeName = repmat({''}, 1, nNodes);
             end
+            % above is junky - readMocap has a bug that causes jointNames to be wrong (off by one)
+            % instead, we use the industry-standard names, confusing as they are (the knee is named after the bone above the knee, etc)
+            for j = 1:size(skel.nameMap, 1)
+                nodeName{skel.nameMap{j,3}} = skel.nameMap{j,1};
+            end
+            
             if i == 1
                 anim{a}.nodeName = nodeName(:)';
             else

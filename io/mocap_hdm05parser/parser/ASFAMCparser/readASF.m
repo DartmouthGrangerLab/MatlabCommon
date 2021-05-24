@@ -137,7 +137,10 @@ function [skel] = constructAuxiliaryArrays (skel, currentNode_id)
     end
 
     if currentNode_id > 1 % leave the root alone!
-        skel.nodes(currentNode_id).jointName = [skel.nodes(skel.nodes(currentNode_id).parentID).boneName,'_@_',skel.nodes(currentNode_id).boneName];
+        % Eli FYI: the original way creates a "root@hipjoint" node, but hipjoint is the name of the bone that comes out from root (i know...), so first name should be hipjoint@femur
+        %   in other words, nodes must be named currentNode@child not parent@currentNode
+        %   but this is complicated - instead, we'll go back later and use nameMap to revise these
+        skel.nodes(currentNode_id).jointName = [skel.nodes(skel.nodes(currentNode_id).parentID).boneName,'@',skel.nodes(currentNode_id).boneName];
     end
 
     childCount = size(skel.nodes(currentNode_id).children, 1);

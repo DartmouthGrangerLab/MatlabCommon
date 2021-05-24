@@ -2,13 +2,11 @@
 % 1/7/2021
 % writes a video to file (just a wrapper around matlab code to save us time)
 % INPUTS:
-%   filePath - full path to file (including file name) (extension will be corrected if wrong)
+%   filePath - full path to file (including file name) - recommend .mj2 for lossless
 %   video - nCols x nRows x nChannels x nFrames uint8 (range 0-->255) or double (range 0-->1)
 %   frameRate
 %   isLossless - scalar logical (should video be lossless or lossy)
-% RETURNS:
-%   filePath - true written file path - extension may have been changed from input filePath
-function [filePath] = WriteVideo (filePath, video, frameRate, isLossless)
+function [] = WriteVideo (filePath, video, frameRate, isLossless)
     validateattributes(filePath, {'char'}, {'nonempty','vector'});
     validateattributes(video, {'uint8','double'}, {'nonempty','ndims',4});
     validateattributes(frameRate, {'numeric'}, {'nonempty','scalar','positive'});
@@ -51,30 +49,44 @@ function [filePath] = WriteVideo (filePath, video, frameRate, isLossless)
     end
     
     % strip extension
-    [path,fileName,requestedExt] = fileparts(filePath);
-    filePath = fullfile(path, fileName);
+    [path,fileNameNoExt,requestedExt] = fileparts(filePath);
     
     isUseFFMPEG = false;
-    if isLossless
-        filePath = [filePath,'.mj2'];
-        % using below (lossless mjpeg2000) because video files are tiny and lossy artifacts pop out in retina code
-        v = VideoWriter(filePath, 'Archival');
-        v.MJ2BitDepth = 8;
-        % we no longer save lossless as mat files, because turns out matlab loads .mj2 files 2x-10x faster than compressed mat files (and they're the same size at high quality mj2s)
-    elseif strcmpi(requestedExt, 'mp4') && (ispc() || ismac())
-        filePath = [filePath,'.mp4'];
-        v = VideoWriter(filePath, 'MPEG-4');
-        v.Quality = 75; % range [0,100], 100 is best
-    else
-        filePath = [filePath,'.mj2'];
-        % mjpeg2000 has smaller files for similar quality vs mjpeg avi (and takes less time to write due to it supporting grayscale)
-        v = VideoWriter([filePath,'.mj2'], 'Motion JPEG 2000');
-        v.CompressionRatio = 5; % only for motion jpeg 2000, default = 10
-        v.MJ2BitDepth = 8;
-        
-        if strcmpi(requestedExt, 'mp4') && isFFMPEG
-            isUseFFMPEG = true;
+    if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
+        if isLossless
+            warning('WriteVideo() will try to make .mp4/.m4v lossless, but we recommend .mj2 file extensions for true lossless video');
         end
+        if ispc() || ismac() % definitely can write mpeg-4, so let's use that
+            v = VideoWriter(filePath, 'MPEG-4');
+            if isLossless
+                v.Quality = 100; % range [0,100], 100 is best
+            else
+                v.Quality = 75; % range [0,100], 100 is best
+            end
+        else
+            isUseFFMPEG = true;
+            ffmpegTempFile = fullfile(path, [fileNameNoExt,'.mj2']);
+            v = VideoWriter(filePath, 'Archival'); % write as mj2, then convert via ffmpeg
+        end
+    elseif strcmpi(requestedExt, '.mj2')
+        if isLossless
+            % we no longer save lossless as mat files, because turns out matlab loads .mj2 files 2x-10x faster than compressed mat files (and they're the same size at high quality mj2s)
+            % using below (lossless mjpeg2000) because video files are tiny and lossy artifacts pop out in retina code
+            v = VideoWriter(filePath, 'Archival');
+        else
+            v = VideoWriter(filePath, 'Motion JPEG 2000');
+            v.CompressionRatio = 5; % only for motion jpeg 2000, default = 10
+        end
+    elseif strcmpi(requestedExt, '.avi')
+        if isLossless
+            error('.avi not supported with lossless - use .mj2');
+        else
+           % matlab only writes .avi files with mj2 compression - consider .mp4, which has superior compression
+            v = VideoWriter(filePath, 'Motion JPEG AVI');
+            v.CompressionRatio = 5; % only for motion jpeg 2000, default = 10
+        end
+    else
+        error('unsupported file extension - try mp4 or mj2');
     end
 
     v.FrameRate = frameRate; % fps
@@ -95,14 +107,26 @@ function [filePath] = WriteVideo (filePath, video, frameRate, isLossless)
             elseif aspectRatio == 16 / 9
                 aspectStr = '-aspect 16:9';
             else
-                aspectStr = '';
+                aspectStr = ''; % you're on your own kid
             end
-            status = system(['ffmpeg -i "',filePath,'.mj2" -c:v libx265 ',aspectStr,' -crf 5 "',filePath,'.mp4"']);
-            if status == 0
-                system(['rm ',filePath,'.mj2']);
+            if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
+                % crf 0 is lossless, 23 is default, 51 is worst (for both libx264 and libx265)
+                crf = '5';
+                if isLossless
+                    crf = '0';
+                end
+                status = system(['ffmpeg -i "',ffmpegTempFile,'" -pix_fmt yuv420p -c:v libx264 ',aspectStr,' -crf ',crf,' "',filePath,'"']);
+%                 status = system(['ffmpeg -i "',ffmpegTempFile,'" -c:v libx265 ',aspectStr,' -crf ',crf,' "',filePath,'"']); % matlab can't read these back in :(
             else
-                system(['rm ',filePath,'.mp4']); % something went wrong, remove duplicate if present
+                error('unexpected file extension for ffmpeg');
             end
+            if status ~= 0
+                system(['rm ',filePath]); % something went wrong, remove duplicate if present
+                warning(['WriteVideo() failed to create ',filePath]);
+            end
+        else
+            error('needed ffmpeg, which we cant find');
         end
+        system(['rm ',ffmpegTempFile]);
     end
 end
