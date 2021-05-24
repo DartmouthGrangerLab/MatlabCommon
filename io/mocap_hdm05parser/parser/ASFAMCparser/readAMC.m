@@ -1,5 +1,5 @@
 % mot = readAMC(filename,skel,range,compute_quats,do_FK,use_TXT_or_BIN)
-%modified by Eli Bowen 12/2020 for readability, bringing some functions in as local
+% modified by Eli Bowen 12/2020 for readability, bringing some functions in as local
 function [mot] = readAMC (varargin)
     switch (nargin)
         case 2
@@ -53,7 +53,8 @@ function [mot] = readAMC (varargin)
         mot.nameMap    = skel.nameMap;
         mot.animated   = skel.animated;
         mot.unanimated = skel.unanimated;    
-
+        mot.angleUnit  = skel.angleUnit;
+        
         idxBackSlash = findstr(filename, '\');
         if ~isempty(idxBackSlash)
             mot.filename = filename(idxBackSlash(end)+1:end);
@@ -61,16 +62,14 @@ function [mot] = readAMC (varargin)
             mot.filename = filename;
         end
 
-        mot.angleUnit = skel.angleUnit;
-
         mot = readSamplesPerSecond(mot, fid);
 
         if use_TXT_or_BIN
-            h = fopen([filename '.BIN'], 'r'); % first try to read compact BIN version of the file
+            h = fopen([filename,'.BIN'], 'r'); % first try to read compact BIN version of the file
             if h > 0 % does compact BIN file exist?
                 [result,mot] = readFramesBIN(skel, mot, h, range);
             else
-                h = fopen([filename '.TXT'], 'r'); % try reading compact TXT version of the file
+                h = fopen([filename,'.TXT'], 'r'); % try reading compact TXT version of the file
                 if h > 0 % does compact TXT file exist?
                     [result,mot] = readFramesTXT(skel, mot, h, range);
                 else
@@ -93,26 +92,25 @@ function [mot] = readAMC (varargin)
 
     if compute_quats
     %%%%%%%% convert rotation data to quaternion representation
-        tic();
+%         tic();
         mot = convert2quat(skel, mot);
-        disp(['converted motion data in ',num2str(toc(), '%.3f'),' s']);
+%         disp(['converted motion data in ',num2str(toc(), '%.3f'),' s']);
     end
 
     %%%%%%%%%%%%%%%%%% forward kinematics
     if do_FK
-        tic();
+%         tic();
         if compute_quats
             mot.jointTrajectories = forwardKinematicsQuat(skel, mot);
         else
             mot.jointTrajectories = forwardKinematicsEuler(skel, mot);
         end
-        disp(['computed joint trajectories in ',num2str(toc(), '%.3f'),' s']);
+%         disp(['computed joint trajectories in ',num2str(toc(), '%.3f'),' s']);
 
         %%%%%%%%%%%%%%%%%%%%%% bounding box
         mot.boundingBox = computeBoundingBox(mot);
     end
 end
-
 
 
 function [mot] = readSamplesPerSecond (mot, fid)
@@ -130,8 +128,8 @@ function [mot] = readSamplesPerSecond (mot, fid)
     end
 
     [token,lin] = strtok(lin);
-    mot.samplingRate = str2num(token);
+    mot.samplingRate = str2double(token); % eli converted from str2num to str2double
     mot.frameTime = 1 / mot.samplingRate;
 
-    fseek(fid,pos,'bof');
+    fseek(fid, pos, 'bof');
 end
