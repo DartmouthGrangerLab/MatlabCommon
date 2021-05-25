@@ -1,7 +1,12 @@
-%Eli Bowen
-%7/21/2020
-%unified wrapper around all of our video filters
-%written as a class so that it can store persistent variables (necessary for some video frontends)
+% Eli Bowen
+% 7/21/2020
+% unified wrapper around all of our video filters
+% written as a class so that it can store persistent variables (necessary for some video frontends)
+% vid = LoadVideo(path, fileName);
+% vf = VidFilter('rgb2gray', 'rgb');
+% for i = 1:size(vid, 4)
+%     newVid(:,:,:,i) = vf.Proc(vid(:,:,:,i));
+% end
 classdef VidFilter < handle
     properties (SetAccess = private)
         filters
@@ -12,11 +17,11 @@ classdef VidFilter < handle
         patchCache
 %         imgSize(1,3) % [nRows,nCols,nChannels] size of frame
     end
-    
-    
+
+
     methods
-        %constructor
-        %INPUTS:
+        % constructor
+        % INPUTS:
         %   filters - char or cell array of chars - each char one of 'rgb2gray', 'opponency', 'opponencysplit', 'retina', 'retinagray', 'gabor'
         %       if cell array of chars, filters will be applied in array order
         %   inFormat - 'gray' or 'rgb'
@@ -65,9 +70,9 @@ classdef VidFilter < handle
         end
 
 
-        %INPUTS:
+        % INPUTS:
         %   img - nRows x nCols x nInChannels frame, can be formatted as uint8 (range 0-->255) or double (range 0-->1)
-        %RETURNS:
+        % RETURNS:
         %   img - nRows x nCols x obj.nOutChannels usually in same format as input (filters like gabor must return double)
         function [img] = Proc (obj, img)
             validateattributes(img, {'uint8','double'}, {'nonempty', '3d'});
