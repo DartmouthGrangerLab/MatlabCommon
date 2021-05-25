@@ -17,7 +17,7 @@
 %           .line     - 2 x nTotLines double - index into node list ([start of line, end of line]) (assumed consistent set across frames - only their positions change)
 %           .joint    - 3 x nTotJoints double - index into node list ([end of line 1, pivot point, end of line 2]) (assumed consistent set across frames - only their angles and positions change)
 %   descriptors - 1 x N cell array of file descriptors
-function [anim,descriptors] = GetMotionCaptures (path)
+function [anim,descriptors] = LoadMotionCaptures (path)
     [~,descriptors,mocapAnims] = Helper(path, {}, 0, {}, '');
 %       mocapAnims{1,i} is one or more skeleton struct (1 unless there are two actors interacting in a single scene):
 %           .njoints       - scalar numeric
@@ -71,14 +71,14 @@ function [anim,descriptors] = GetMotionCaptures (path)
             descriptors(a) = [];
         end
     end
-    
+
     % compute a more machine-readable and vectorized version of each mocap
     anim = cell(1, size(mocapAnims, 2));
     for a = 1:numel(descriptors)
         skel = mocapAnims{1,a};
         mot  = mocapAnims{2,a};
-        
-        nTotNodes = 0; % constant across frames
+
+        nTotNodes  = 0; % constant across frames
         nTotLines  = 0; % constant across frames
         nTotJoints = 0; % constant across frames
         nFrames = mot(1).nframes;
@@ -96,7 +96,7 @@ function [anim,descriptors] = GetMotionCaptures (path)
             end
             nTotNodes = nTotNodes + nNodes;
         end
-        
+
         % path(j) is a pointer to a "node" - a *unique* point
         % NOTE: a node may have multiple points if it participates in multiple joints
         % skel.nameMap lists the pairwise connectivity between <lines> (I think)
@@ -118,7 +118,7 @@ function [anim,descriptors] = GetMotionCaptures (path)
             for j = 1:nPaths
                 path = skel(i).paths{j};
                 nNodes = max(nNodes, max(path));
-                
+
                 for k = 1:numel(path)
                     anim{a}.skelName{ndCount + path(k)} = skel(i).id;
                     if all(all(anim{a}.pos(:,:,ndCount + path(k)) == 0)) % if we're hitting this node for the first time
@@ -136,7 +136,7 @@ function [anim,descriptors] = GetMotionCaptures (path)
                     end
                 end
             end
-            
+
             if ~isempty(skel(i).jointNames)
                 nodeName = skel(i).jointNames;
             elseif ~isempty(mot(i).jointNames)
@@ -149,7 +149,7 @@ function [anim,descriptors] = GetMotionCaptures (path)
             for j = 1:size(skel.nameMap, 1)
                 nodeName{skel.nameMap{j,3}} = skel.nameMap{j,1};
             end
-            
+
             if i == 1
                 anim{a}.nodeName = nodeName(:)';
             else
@@ -158,7 +158,7 @@ function [anim,descriptors] = GetMotionCaptures (path)
             
             ndCount = ndCount + nNodes;
         end
-        
+
         % cleanup
         anim{a}.nodeName = strrep(anim{a}.nodeName, '_@_', '@'); % shortening a common pattern
         anim{a}.nodeName = strrep(anim{a}.nodeName, '_', '-'); % so we can use _ as a delimiter later

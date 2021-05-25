@@ -1,9 +1,9 @@
-%Eli Bowen
-%5/20/2020
-%wrapper around a matlab file exchange project for loading midi files (https://www.mathworks.com/matlabcentral/fileexchange/27470-midi-tools)
-%INPUT:
+% Eli Bowen
+% 5/20/2020
+% wrapper around a matlab file exchange project for loading midi files (https://www.mathworks.com/matlabcentral/fileexchange/27470-midi-tools)
+% INPUT:
 %	path - folder or valid midi file
-%RETURNS:
+% RETURNS:
 %   noteList - N x 7 matrix:
 %       noteList(:,1) is pitch (60 --> C4 = middle C)
 %       noteList(:,2) is velocity
@@ -13,20 +13,20 @@
 %       noteList(:,6) is track/file number (index into descriptors)
 %   descriptors - 1 x numTracks cell array of file descriptors
 %   trackDuration - 1 x numTracks double array of durations in seconds
-function [noteList,descriptors,trackDuration] = GetMidis (path)
+function [noteList,descriptors,trackDuration] = LoadMidis (path)
     rootPath = '/pdata/ebowen/MatlabCommon';
-    if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'), true)) %for performance
+    if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'), true)) % for performance
         javaaddpath(fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'));
     end
-    
+
     [~,descriptors,noteMat] = Helper(path, {}, 0, {}, '');
-    %noteMat{i}(:,1) is start beats (for file descriptors{i})
-    %noteMat{i}(:,2) is duration beats (for file descriptors{i})
-    %noteMat{i}(:,3) is channel (for file descriptors{i})
-    %noteMat{i}(:,4) is pitch (for file descriptors{i})
-    %noteMat{i}(:,5) is velocity (for file descriptors{i})
-    %noteMat{i}(:,6) is start seconds (for file descriptors{i})
-    %noteMat{i}(:,7) is duration in seconds (for file descriptors{i})
+    % noteMat{i}(:,1) is start beats (for file descriptors{i})
+    % noteMat{i}(:,2) is duration beats (for file descriptors{i})
+    % noteMat{i}(:,3) is channel (for file descriptors{i})
+    % noteMat{i}(:,4) is pitch (for file descriptors{i})
+    % noteMat{i}(:,5) is velocity (for file descriptors{i})
+    % noteMat{i}(:,6) is start seconds (for file descriptors{i})
+    % noteMat{i}(:,7) is duration in seconds (for file descriptors{i})
     N = sum(cellfun(@numel, noteMat)) / 7;
     noteList = zeros(N, 6);
     count = 1;
