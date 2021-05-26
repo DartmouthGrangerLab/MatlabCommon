@@ -10,7 +10,7 @@ function [h] = PlotROC (h, targetsWide, predWide, labels)
     markerTypes = ['o','+','*','.','x','s','d','^','v','p','h'];
     figColors = lines(1+numel(labels));
     set(h, 'Renderer', 'painters');
-%         plotroc(targetsWide{i}, predWide{i});
+%     plotroc(targetsWide{i}, predWide{i});
     [tpr,fpr,~] = roc(targetsWide, predWide);
     plot([0,1], [0,1], 'Color', [0.5,0.5,0.5]);
     hold on;
@@ -22,4 +22,5 @@ function [h] = PlotROC (h, targetsWide, predWide, labels)
     legend(labels);
     xlabel('FP Rate');
     ylabel('TP Rate');
+	axis(gca, 'equal');
 end

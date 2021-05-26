@@ -17,4 +17,5 @@ function [h] = PlotConfMat (h, targetsWide, predWide, labels)
     xticklabel_rotate([], 90, [], 'FontSize', 16);
 %     colorbar;
     set(gca, 'FontSize', 12);
+	axis(gca, 'equal');
 end
