@@ -23,17 +23,17 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
         cols2Add = 0;
         if aspectRatio > 16 / 9
             aspectRatio = 16 / 9; % pad vertically (rows) to reach 16:9
-            rows2Add = round(size(video, 2) / aspectRatio); % yes divide
+            rows2Add = round(size(video, 2) / aspectRatio - size(video, 1)); % yes divide
         else
             if aspectRatio < 4 / 3
                 aspectRatio = 4 / 3; % pad horizontally (cols) to reach 4:3
-                cols2Add = round(size(video, 1) * aspectRatio);
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
             elseif aspectRatio > 4 / 3 && aspectRatio < 16 / 10 % between 4:3 and 16:10
                 aspectRatio = 16 / 10; % pad horizontally (cols) to reach 16:10
-                cols2Add = round(size(video, 1) * aspectRatio);
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
             elseif aspectRatio > 16 / 10 && aspectRatio < 16 / 9 % between 16:10 and 16:9
                 aspectRatio = 16 / 9; % pad horizontally (cols) to reach 16:9
-                cols2Add = round(size(video, 1) * aspectRatio);
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
             end
         end
         if rows2Add > 0
@@ -64,9 +64,10 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
                 v.Quality = 75; % range [0,100], 100 is best
             end
         else
-            isUseFFMPEG = true;
-            ffmpegTempFile = fullfile(path, [fileNameNoExt,'.mj2']);
-            v = VideoWriter(filePath, 'Archival'); % write as mj2, then convert via ffmpeg
+            error('shitty centos doesnt support mpeg - even ffmpeg is a decade out of date - try .mj2');
+%             isUseFFMPEG = true;
+%             ffmpegTempFile = fullfile(path, [fileNameNoExt,'.mj2']);
+%             v = VideoWriter(filePath, 'Archival'); % write as mj2, then convert via ffmpeg
         end
     elseif strcmpi(requestedExt, '.mj2')
         if isLossless
@@ -97,36 +98,39 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
     end
     close(v);
     
-    if isUseFFMPEG
-        [~,cmdout] = system('command -v ffmpeg'); % unlikely to succeed on windows
-        if contains(cmdout, 'ffmpeg', 'IgnoreCase', true)
-            if aspectRatio == 4 / 3
-                aspectStr = '-aspect 4:3';
-            elseif aspectRatio == 16 / 10
-                aspectStr = '-aspect 16:10';
-            elseif aspectRatio == 16 / 9
-                aspectStr = '-aspect 16:9';
-            else
-                aspectStr = ''; % you're on your own kid
-            end
-            if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
-                % crf 0 is lossless, 23 is default, 51 is worst (for both libx264 and libx265)
-                crf = '5';
-                if isLossless
-                    crf = '0';
-                end
-                status = system(['ffmpeg -i "',ffmpegTempFile,'" -pix_fmt yuv420p -c:v libx264 ',aspectStr,' -crf ',crf,' "',filePath,'"']);
-%                 status = system(['ffmpeg -i "',ffmpegTempFile,'" -c:v libx265 ',aspectStr,' -crf ',crf,' "',filePath,'"']); % matlab can't read these back in :(
-            else
-                error('unexpected file extension for ffmpeg');
-            end
-            if status ~= 0
-                system(['rm ',filePath]); % something went wrong, remove duplicate if present
-                warning(['WriteVideo() failed to create ',filePath]);
-            end
-        else
-            error('needed ffmpeg, which we cant find');
-        end
-        system(['rm ',ffmpegTempFile]);
-    end
+    % nice try below, but centos cant even get ffmpeg working right
+%     if isUseFFMPEG
+%         [~,cmdout] = system('command -v ffmpeg'); % unlikely to succeed on windows
+%         if contains(cmdout, 'ffmpeg', 'IgnoreCase', true)
+%             if aspectRatio == 4 / 3
+%                 aspectStr = '-aspect 4:3';
+%             elseif aspectRatio == 16 / 10
+%                 aspectStr = '-aspect 16:10';
+%             elseif aspectRatio == 16 / 9
+%                 aspectStr = '-aspect 16:9';
+%             else
+%                 aspectStr = ''; % you're on your own kid
+%             end
+%             if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
+%                 % crf 0 is lossless, 23 is default, 51 is worst (for both libx264 and libx265)
+%                 crf = '5';
+%                 if isLossless
+%                     crf = '0';
+%                 end
+%                 status = system(['ffmpeg -i "',ffmpegTempFile,'" -c:v libx264 ',aspectStr,' -crf ',crf,' -pix_fmt yuv420p "',filePath,'"']);
+% %                 status = system(['ffmpeg -i "',ffmpegTempFile,'" -c:v libx265 ',aspectStr,' -crf ',crf,' "',filePath,'"']); % matlab can't read these back in :(
+%             else
+%                 error('unexpected file extension for ffmpeg');
+%             end
+%             if status ~= 0
+%                 if exist(filePath, 'file') > 0
+%                     system(['rm ',filePath]); % something went wrong, remove duplicate if present
+%                 end
+%                 warning(['WriteVideo() failed to create ',filePath]);
+%             end
+%         else
+%             error('needed ffmpeg, which we cant find');
+%         end
+%         system(['rm ',ffmpegTempFile]);
+%     end
 end
