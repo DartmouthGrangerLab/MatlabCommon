@@ -104,13 +104,13 @@ classdef VidFilter < handle
                 elseif strcmp(obj.filters{i}, 'retina')
                     assert(nInChannels == 3);
                     if isempty(obj.retina)
-                        obj.retina = VideoRetina(size(img, 1), size(img, 2), true); %prints lots of junk
+                        obj.retina = Retina(size(img, 1), size(img, 2), true); %prints lots of junk
                     end
                     [imgP,imgM] = obj.retina.ProcessFrame(img); % verifies img is retina.nRows x retina.nCols
                     img = cat(3, imgP, imgM);
                 elseif strcmp(obj.filters{i}, 'retinagray')
                     if isempty(obj.retina)
-                        obj.retina = VideoRetina(size(img, 1), size(img, 2), false); %prints lots of junk
+                        obj.retina = Retina(size(img, 1), size(img, 2), false); %prints lots of junk
                     end
                     [imgP,imgM] = obj.retina.ProcessFrame(img); % verifies img is retina.nRows x retina.nCols
                     img = cat(3, imgP, imgM);
