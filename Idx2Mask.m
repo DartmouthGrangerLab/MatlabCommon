@@ -7,10 +7,10 @@
 % RETURNS:
 %   data - 1 x nItems (logical)
 function [data] = Idx2Mask (data, nItems)
-    if islogical(data) % if logical, nothing to do (handle first = fastest)
-        validateattributes(data, {'logical'}, {'vector','numel',nItems});
-    elseif isempty(data) % again, nothing to do
+    if isempty(data) % if empty, nothing to do (handle first = fastest)
         data = logical([]); % just make sure return datatype is right
+    elseif islogical(data) % if logical, nothing to do (handle first = fastest)
+        validateattributes(data, {'logical'}, {'vector','numel',nItems});
     else % if data is an index not already a mask
         validateattributes(data, {'numeric'}, {'vector','positive','integer','<=',nItems});
         validateattributes(nItems, {'numeric'}, {'nonempty','scalar','positive','integer'});

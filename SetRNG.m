@@ -1,6 +1,6 @@
-%Eli Bowen
-%4/16/2020
-%INPUTS:
+% Eli Bowen
+% 4/16/2020
+% INPUTS:
 %   data2Hash - hash of this data will generate the seed (if a scalar numeric int, we will use this as the seed)
 function [] = SetRNG (data2Hash)
     if isnumeric(data2Hash) && numel(data2Hash) == 1 && mod(data2Hash, 1) == 0

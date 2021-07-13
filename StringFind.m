@@ -1,17 +1,16 @@
-%Like matlab's built in strfind(), but it also finds a string in a cell array of strings.
-%INPUTS:
+% Eli Bowen
+% Like matlab's built in strfind(), but it also finds a string in a cell array of strings
+% Note matlab's contains(), startsWith(), and endsWith() already support cell arrays of strings, but contains() is much slower than this function
+% INPUTS:
 %   str - variable to search within. If a string, returns the result of strfind(). If a cell array of strings (e.g. {'hi','there'}), returns indices into the cell array.
 %   pattern - search term (a string)
-%   exact - OPTIONAL if true, will only accept exact string matches. Note search is always case sensitive. Default = 0
-%RETURNS:
+%   exact - if true, will only accept exact string matches. Note search is always case sensitive. Default = 0
+% RETURNS:
 %   indices - empty array [] if nothing found, otherwise an array of integers
 function [indices] = StringFind (str, pattern, exact)
-    if ~exist('exact', 'var') || isempty(exact)
-        exact = false;
-    end
-    
     if iscellstr(str)
         if exact
+            indices = find(strcmp(str, pattern)); % 20x faster than below
 %             indices = find(not(cellfun('isempty', strfind(str, pattern))));
 %             exactIndices = [];
 %             for i = 1:numel(indices)
@@ -20,10 +19,9 @@ function [indices] = StringFind (str, pattern, exact)
 %                 end
 %             end
 %             indices = exactIndices;
-            indices = find(strcmp(str, pattern)); %20x faster
         else
-%             indices = find(contains(str, pattern, 'IgnoreCase', false)); %slower
-            indices = find(not(cellfun('isempty', strfind(str, pattern)))); %DON'T use contains, as recommended by matlab - it's twice as slow!
+%             indices = find(contains(str, pattern, 'IgnoreCase', false)); % slower
+            indices = find(not(cellfun('isempty', strfind(str, pattern)))); % DON'T USE CONTAINS, as recommended by matlab - it's twice as slow!
         end
     elseif ischar(str)
         if exact
@@ -36,6 +34,6 @@ function [indices] = StringFind (str, pattern, exact)
             indices = strfind(str, pattern);
         end
     else
-        error('Parameter str is neither string nor cell array of strings!');
+        error('parameter str is neither string nor cell array of strings!');
     end
 end

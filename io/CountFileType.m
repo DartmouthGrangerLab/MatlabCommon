@@ -10,6 +10,9 @@
 function [count,filePath] = CountFileType (path, extension)
     validateattributes(path, {'char'}, {'nonempty','vector'});
     validateattributes(extension, {'char'}, {'nonempty','vector'});
+    if startsWith(extension, '.')
+        extension = extension(2:end);
+    end
 
     if strcmp(extension, 'image')
         ext = {'png','jpg','jpeg','tiff','bmp'};
@@ -54,7 +57,7 @@ function [count] = CountFileTypeHelper1 (path, extension, count)
     for i = 1:numel(listing)
         if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             if listing(i).isdir
-                count = CountFileTypeHelper1(fullfile(path, listing(i).name), extension, count, filePath);
+                count = CountFileTypeHelper1(fullfile(path, listing(i).name), extension, count);
             elseif ~isempty(regexp(listing(i).name, ['\.',extension,'$'], 'ignorecase', 'ONCE'))
                 count = count + 1;
             end
