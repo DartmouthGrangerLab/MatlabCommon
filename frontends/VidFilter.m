@@ -64,6 +64,12 @@ classdef VidFilter < handle
                 elseif strcmp(obj.filters{end-1}, 'retinagray')
                     obj.nOutChannels = 2 * nGaborsPerInChannel;
                 end
+            elseif strcmp(obj.filters{end}, 'spatialpooledgabor') % spatially pooled gabors (bad for motion detection)
+                [~,c1,~,~,~,~,obj.patchCache] = HMAX(zeros(obj.sz(1), obj.sz(2), 1), []);
+                obj.nOutChannels = 3;%not sure what this should be
+            elseif strcmp(obj.filters{end}, 'hmax') % HMAX approach
+                [s1,c1,s2,c2,bestBands,bestLocations,obj.patchCache] = HMAX(zeros(obj.sz(1), obj.sz(2), 1), []);
+                obj.nOutChannels = 3;%not sure what this should be
             else
                 error('unknown filter');
             end
@@ -131,10 +137,57 @@ classdef VidFilter < handle
                         end
                         img = cat(3, val{:});
                     end
+                elseif strcmp(obj.filters{i}, 'spatialpooledgabor') % spatially pooled gabors (bad for motion detection)
+                    if nInChannels == 1
+                        if isempty(obj.patchCache)
+                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
+                        else
+                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
+                        end
+                        val = CellCat2Vec(c1, obj.nC1);
+                    elseif nInChannels == 3
+                        if isempty(obj.patchCache)
+                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
+                        else
+                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
+                        end
+                        val1 = CellCat2Vec(c1, obj.nC1);
+                        [~,c1] = HMAX(img(:,:,2), obj.patchCache);
+                        val2 = CellCat2Vec(c1, obj.nC1);
+                        [~,c1] = HMAX(img(:,:,3), obj.patchCache);
+                        val3 = CellCat2Vec(c1, obj.nC1);
+                        img = [val1,val2,val3];
+                    else
+                        error('unhandled nChan');
+                    end
+                elseif strcmp(obj.filters{i}, 'hmax') % HMAX approach
+                    if nInChannels == 1
+                        if isempty(obj.patchCache)
+                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
+                        else
+                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
+                        end
+                        img = [CellCat2Vec(c1, obj.nC1),c2(:)'];
+                    elseif nInChannels == 3
+                        if isempty(obj.patchCache)
+                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
+                        else
+                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
+                        end
+                        val1 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
+                        [~,c1,~,c2,~,~,~] = HMAX(img(:,:,2), obj.patchCache);
+                        val2 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
+                        [~,c1,~,c2,~,~,~] = HMAX(img(:,:,3), obj.patchCache);
+                        val3 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
+                        img = [val1,val2,val3];
+                    else
+                        error('unhandled nChan');
+                    end
                 else
-                    error('unknown filter');
+                    else
+                        error('unknown filter');
+                    end
                 end
-            end
-        end
+           end
     end
 end
