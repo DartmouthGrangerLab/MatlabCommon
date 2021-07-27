@@ -5,20 +5,19 @@
 %   powerHandling - either 'power' or 'real+imag'
 %   mode - mode used in AudioFeatTransform()
 function [spec] = AudioCalculateSpectrogramFromFeats (spec, powerHandling, mode)
-    validateattributes(data, {'numeric'}, {'nonempty'});
+    validateattributes(spec, {'numeric'}, {'nonempty'});
     validateattributes(powerHandling, {'char'}, {'nonempty'});
     validateattributes(mode, {'char'}, {'nonempty'});
     
     if strcmp(mode, 'dft')
         spectrogram_power = Convert2PowerPhase(spec);
-        %SHOULD be using the above rather than below, but too late to change it for this dataset version
         if strcmp(powerHandling, 'real+imag')
             spec = [real(spec),imag(spec)];
             spec = sign(spec) .* log10(1 + abs(spec));
         else
             spec = log10(1+spectrogram_power);
         end
-    elseif strcmp(mode, 'stft') %FFT
+    elseif strcmp(mode, 'stft') % FFT
         spec = Convert2PowerPhase(spec);
         % method used by the "ams" library, produces cleaner spectrograms than version 1
         if strcmp(powerHandling, 'real+imag')
@@ -47,22 +46,22 @@ function [spec] = AudioCalculateSpectrogramFromFeats (spec, powerHandling, mode)
         else
             spec = Magnitude2DB(spec);
         end
-    elseif strcmp(mode, 'melspec') %mel filtered spectrogram
+    elseif strcmp(mode, 'melspec') % mel filtered spectrogram
         if strcmp(powerHandling, 'real+imag')
             error('I haven''t bothered implementing this yet');
         else
             spec = Magnitude2DB(spec);
         end
     elseif strcmp(mode, 'mfcc')
-        %do nothing - we're already good
-    elseif strcmp(mode, 'plpfilteredspec') %PLP filtered spectrogram
-        %do nothing - we're already good
-    elseif strcmp(mode, 'plpfeats') %PLP features
-        %do nothing - we're already good
-    elseif strcmp(mode, 'rastaplpfilteredspec') %RASTA-PLP filtered spectrogram
-        %do nothing - we're already good
-    elseif strcmp(mode, 'rastaplpfeats') %RASTA-PLP features
-        %do nothing - we're already good
+        % do nothing - we're already good
+    elseif strcmp(mode, 'plpfilteredspec') % PLP filtered spectrogram
+        % do nothing - we're already good
+    elseif strcmp(mode, 'plpfeats') % PLP features
+        % do nothing - we're already good
+    elseif strcmp(mode, 'rastaplpfilteredspec') % RASTA-PLP filtered spectrogram
+        % do nothing - we're already good
+    elseif strcmp(mode, 'rastaplpfeats') % RASTA-PLP features
+        % do nothing - we're already good
     else
         error('invalid mode');
     end
