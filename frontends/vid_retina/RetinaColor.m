@@ -210,11 +210,10 @@ classdef RetinaColor < BasicRetinaFilter
             end
             
             % eliminate saturated colors by simple clipping values to the input range
-            if obj.demultiplexedColorFrame > 1
-                obj.demultiplexedColorFrame = 1;
-            elseif obj.demultiplexedColorFrame < 0
-                obj.demultiplexedColorFrame = 0;
-            end
+            above = obj.demultiplexedColorFrame > 1;
+            obj.demultiplexedColorFrame(above) = 1;
+            below = obj.demultiplexedColorFrame < 0;
+            obj.demultiplexedColorFrame(below) = 0;
             
             if obj.saturateColors
                 obj.demultiplexedColorFrame(:,:,1) = obj.demultiplexedColorFrame.normalizeGrayOutputCentredSigmoide(0, obj.colorSaturationValue, obj.demultiplexedColorFrame(:,:,1));
