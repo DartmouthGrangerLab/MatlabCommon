@@ -41,7 +41,7 @@ function [s1,c1,s2,c2,bestBands,bestLocations,patchCache] = HMAX (img, patchCach
         else
             error('unexpected nOrientations');
         end
-        [patchCache.filter_sz,patchCache.filters,patchCache.sqfilter,~,patchCache.filter_orientations] = initGabor(orientations);
+        [patchCache.filter_sz,patchCache.filters,patchCache.sqfilter,patchCache.filter_orientations] = initGabor(orientations);
     end
 
     %% C1

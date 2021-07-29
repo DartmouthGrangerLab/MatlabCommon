@@ -1,4 +1,4 @@
-function [filterSizes,filters,sqfilter,nOrientations,filterOrientations] = initGabor (orientations)
+function [filterSizes,filters,sqfilter,filterOrientations] = initGabor (orientations)
 % given orientations and receptive field sizes, returns a set of Gabor filters
 %
 % INPUTS:
@@ -12,7 +12,6 @@ function [filterSizes,filters,sqfilter,nOrientations,filterOrientations] = initG
 %       nFilters is the total number of filters. Column j of 'filters' contains a
 %       n_jxn_j filter, reshaped as a column vector and padded with zeros. n_j = filterSizes(j).
 %   sqfilter
-%   nOrientations
 %   filterOrientations
 % modified by Eli Bowen just for readability and to add the sqfilter, filterOrientations outputs
 
