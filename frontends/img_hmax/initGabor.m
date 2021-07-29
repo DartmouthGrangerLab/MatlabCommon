@@ -1,34 +1,26 @@
-function [filterSizes,filters,sqfilter,c1OL,nOrientations,filterOrientations] = initGabor (orientations, RFsize, div)
-% [filterSizes,filters,c1OL,nOrientations] = initGabor(orientations,RFsize,div)
+function [filterSizes,filters,sqfilter,nOrientations,filterOrientations] = initGabor (orientations)
 % given orientations and receptive field sizes, returns a set of Gabor filters
 %
-% args:
+% INPUTS:
+%   orientations: a list of filter orientations in degrees, ex. [90 45 0 -45]
 %
-%     orientations: a list of filter orientations in degrees, ex. [90 45 0 -45]
-%
-%     RFsize: a list of receptive field sizes for the filters
-%
-%     div: a list of scaling factors tuning the wavelength of the sinusoidal
-%     factor, 'lambda' in relation to the receptive field sizes
-%     length(div) = length(RFsize)
-%
-% returns:
-%
-%     filterSizes: (for S1 units) a vector, contains filter sizes.
-%     filterSizes(i) = n if filters(i) is n x n (see 'filters' above).
-%
-%     filters: (for S1 units) a matrix of Gabor filters of size max_filterSizes
-%     x nFilters, where max_filterSizes is the length of the largest filter &
-%     nFilters is the total number of filters. Column j of 'filters' contains a
-%     n_jxn_j filter, reshaped as a column vector and padded with zeros. n_j =
-%     filterSizes(j).
-%
-%     c1OL: (for C1 units) a scalar, defines the overlap between C1 units.
-%     In scale band i, C1 unit responses are computed every c1Space(i)/c1OL.
-%
-%     nOrientations: the number of orientations generated for each filter
-%modified by Eli Bowen just for readability and to add the sqfilter, filterOrientations outputs
-    c1OL          = 2;
+% RETURNS:
+%   filterSizes: a vector (numeric), contains filter sizes for S1 units
+%       filterSizes(i) = n if filters(i) is n x n (see 'filters' above)
+%   filters: (for S1 units) a matrix of Gabor filters of size max_filterSizes x nFilters,
+%       where max_filterSizes is the length of the largest filter &
+%       nFilters is the total number of filters. Column j of 'filters' contains a
+%       n_jxn_j filter, reshaped as a column vector and padded with zeros. n_j = filterSizes(j).
+%   sqfilter
+%   nOrientations
+%   filterOrientations
+% modified by Eli Bowen just for readability and to add the sqfilter, filterOrientations outputs
+
+    RFsize = 7:2:39;     % a list of receptive field sizes for the filters
+    div    = 4:-.05:3.2; % tuning parameters for the filters' "tightness"
+    % ^ div: a list of scaling factors tuning the wavelength of the sinusoidal factor, 'lambda' in relation to the receptive field sizes
+    % ^ numel(div) = numel(RFsize)
+
     nFilterSizes  = numel(RFsize);
     nOrientations = numel(orientations);
     nFilters      = nFilterSizes * nOrientations;
