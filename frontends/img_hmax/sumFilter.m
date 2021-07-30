@@ -1,30 +1,26 @@
-function imgOut = sumFilter(imgIn,radius)
-% imgOut = sumFilter(imgIn,radius);
-%
 % Given an image and pooling range, returns an image where each "pixel"
-% represents the sums of the pixel values within the pooling range of the
-% original pixel.
+% represents the sums of the pixel values within the pooling range of the original pixel
 %
-% args:
-%
-%     imgIn: a 2-dimensional matrix, the image to be filtered
-%
-%     radius: a scalar or vector, the additional radius of the filter pool,
-%     For a scalar, ex. radius = 5 means a filter pool of 11 x 11
-%     For a vector, use the order [left top right bottom].
-%
-% returns:
-%
-%     imgOut: a matrix the size of imgIn, where each pixel, imgOut(x,y),
-%     represents the sum of the values of all pixels in imgIn within the
-%     neighborhood of imgIn(x,y) defined by radius
+% INPUTS:
+%   imgIn: a 2-dimensional matrix, the image to be filtered
+%   radius: a scalar or vector, the additional radius of the filter pool,
+%       For a scalar, ex. radius = 5 means a filter pool of 11 x 11
+%       For a vector, use the order [left top right bottom].
+% RETURNS:
+%   img: a matrix the size of input img, where each pixel, img(x,y),
+%       represents the sum of the values of all pixels in imgIn within the
+%       neighborhood of input img(x,y) defined by radius
+% modified by Eli Bowen 7/2021 for readability, standardization, and performance
+function [img] = sumFilter (img, radius)
+    assert((size(img, 3) == 1), 'only single-channel images are allowed');
 
-    assert((size(imgIn,3) == 1), 'Only single-channel images are allowed');
-
-    switch length(radius)
-    case 4,
-        imgOut = conv2(imgIn, ones(radius(2)+radius(4)+1,radius(1)+radius(3)+1), 'same');
-    case 1,
-        imgOut = conv2(imgIn, ones(2*radius+1), 'same');
+    if numel(radius) == 1
+        kernel = ones(2*radius + 1);
+    elseif numel(radius) == 4
+        kernel = ones(radius(2)+radius(4)+1, radius(1)+radius(3)+1);
+    else
+        error('unexpected radius');
     end
+
+    img = conv2(img, kernel, 'same');
 end
