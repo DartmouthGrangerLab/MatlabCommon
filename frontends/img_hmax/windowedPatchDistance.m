@@ -21,7 +21,7 @@
 function [distances] = windowedPatchDistance (c1Img, patch, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE)
     c1ImgDepth = size(c1Img, 3);
     patchDepth = size(patch, 3);
-    assert(c1ImgDepth == patchDepth, 'windowedP...m: patch and c1Img depth differ');
+    assert(c1ImgDepth == patchDepth, 'windowedPatchDistance.m: patch and c1Img depth differ');
 
     if ALLS2C1PRUNE
         rmin = min(patch(:));

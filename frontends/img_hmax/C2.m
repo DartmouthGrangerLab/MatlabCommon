@@ -6,7 +6,7 @@
 %   linearPatches: nRows*nCols*nOrientations x nPatches (numeric), the prototypes (patches) used in the extraction of s2
 %       each patch of size nRows x nCols x nOrientations is stored as a row in linearPatches
 %   patchSize: 1 x 3 (numeric) - [nRows,nCols,nOrientations], describing the size of each patch in linearPatches
-%   c1: see C1.m
+%   c1: see C1.m (was called c1BandImg)
 %   IGNOREPARTIALS: scalar (logical) if true, "partial" activations will be
 %       ignored, and only filter and patch activations completely on the image
 %       will be used. If false, all S2 activations are used.
@@ -20,7 +20,6 @@
 % See also C1 (C1.m)
 % modified by Eli Bowen only for clarity and to no longer call C1 within this function (call C1 first) and to switch return value order for efficiency
 function [s2,c2,bestBands,bestLocations] = C2 (img, c1Space, c1Scale, filterSz, linearPatches, patchSize, c1, IGNOREPARTIALS, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE)
-    c1BandImg = c1;
     nBands = numel(c1);
     nPatchRows = patchSize(1);
     nPatchCols = patchSize(2);
@@ -31,7 +30,7 @@ function [s2,c2,bestBands,bestLocations] = C2 (img, c1Space, c1Scale, filterSz, 
     for iPatch = 1:nPatches
         squarePatch = reshape(linearPatches(:,iPatch), patchSize);
         for b = 1:nBands
-            s2{b,iPatch} = windowedPatchDistance(c1BandImg{b}, squarePatch, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE);  
+            s2{b,iPatch} = windowedPatchDistance(c1{b}, squarePatch, ALLS2C1PRUNE, ORIENTATIONS2C1PRUNE);  
         end
     end
 

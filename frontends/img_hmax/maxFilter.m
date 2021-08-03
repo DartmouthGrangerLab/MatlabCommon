@@ -1,31 +1,25 @@
-function maxValues = maxFilter(img,poolSize)
-% maxValues = maxFilter(img,poolSize)
 % given an image and pooling range, returns a matrix of the image's maximum
 % values in each neighborhood defined by the pooling range
 %
-% args:
+% INPUTS:
+%   img: a 2-dimensional matrix, the image to be filtered
+%   poolSize: a scalar, P, such that each maximum will be taken over a P x P area of pixels
 %
-%     img: a 2-dimensional matrix, the image to be filtered
-%
-%     poolSize: a scalar, P, such that each maximum will be taken over a PxP
-%     area of pixels
-%
-% returns:
-%
-%     maxValues: a matrix whose size depends on poolSize, contains the maximum
-%     values found in poolSize x poolSize areas across img.
-%modified by eli for readability and performance
-
+% RETURNS:
+%   maxValues: a matrix whose size depends on poolSize, contains the maximum
+%       values found in poolSize x poolSize areas across img
+% modified by eli for readability and performance
+function [maxValues] = maxFilter (img, poolSize)
     [nRows,nCols] = size(img);
     halfpool = poolSize / 2;
-    rowIndices = 1:halfpool:nRows;
-    colIndices = 1:halfpool:nCols;
-    maxValues = zeros(numel(rowIndices), numel(colIndices));
+    rowIdx = 1:halfpool:nRows;
+    colIdx = 1:halfpool:nCols;
+    maxValues = zeros(numel(rowIdx), numel(colIdx));
 
     cCount = 1;
-    for c = colIndices
+    for c = colIdx
         rCount = 1;
-        for r = rowIndices
+        for r = rowIdx
             maxValues(rCount,cCount) = max(max(img(r:min(r+poolSize-1,nRows),c:min(c+poolSize-1,nCols))));
             rCount = rCount + 1;
         end
