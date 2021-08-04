@@ -17,6 +17,7 @@ function [profile] = ComputerProfile ()
         'ebowen', 'bigbrain.dartmouth.edu',   '?',                     '?';...                       % Eli on bigbrain
         'eli',    'eb-inspiron',              'Z:\datasets',           'D:\tempcache';...            % Eli's laptop
         'eli',    'eb-desktop',               'Z:\datasets',           'D:\tempcache';...            % Eli's desktop
+        'grangerlab', 'grangerlab-aspire-m3985', '/home/grangerlab/Desktop/Projects/Logicnet/datasets', '/home/grangerlab/Desktop/Projects/Logicnet/tempcache';... %Anand's desktop
         };
 
     %% find current computer's profile
