@@ -1,10 +1,16 @@
-%Eli Bowen
-%2/14/2018 (earlier copy from 2017 was in FindGoodWords.m)
+% Eli Bowen
+% 2/14/2018 (earlier copy from 2017 was in FindGoodWords.m)
+% loads the CMU phonetic dictionary (file named e.g. 'cmudict-0.7b.txt')
+% INPUTS:
+%   dictPath
+% RETURNS:
+%   arpabetDictEnglish
+%   arpabetDictPhonetic
 function [arpabetDictEnglish,arpabetDictPhonetic] = LoadArpabet (dictPath)
     %% Load arpabet
-    %way 1 (not working)
+    % way 1 (not working)
     % arpabetDict = readtable(dictPath, 'Delimiter', ',', 'ReadVariableNames', false, 'CommentStyle', ';');
-    %way 2
+    % way 2
     fileID = fopen(dictPath);
     arpabetDict = textscan(fileID, '%s', 'EndOfLine', '\r\n', 'Delimiter', '\n', 'CommentStyle', ';');
     arpabetDict = arpabetDict{1};

@@ -1,6 +1,6 @@
 % [Y,F] = gammatonegram(X, SR, TIMEWINDOW, STRIDE, N, FMIN, FMAX, USEFFT, WIDTH)
-%    Calculate a spectrogram-like time frequency magnitude array based on Gammatone subband filters.
-%INPUTS:
+% calculate a spectrogram-like time frequency magnitude array based on Gammatone subband filters
+% INPUTS:
 %   Waveform X (at sample rate SR) is passed through an
 %   N (default 64) channel gammatone auditory model filterbank,
 %   with lowest frequency FMIN (50)
@@ -10,12 +10,12 @@
 %   These magnitudes are returned as an N-row nonnegative real matrix, Y.
 %	If USEFFT is present and zero, revert to actual filtering and summing energy within windows.
 %	WIDTH (default 1.0) is how to scale bandwidth of filters relative to ERB default (for fast method only).
-%RETURNS:
+% RETURNS:
 %    F returns the center frequencies in Hz of each row of Y (uniformly spaced on a Bark scale).
 %
 % 2009-02-18 DAn Ellis dpwe@ee.columbia.edu
 % Last updated: $Date: 2009/02/23 21:07:09 $
-%downloaded by Eli Bowen 2/3/2018 and tweaked only for readability
+% downloaded by Eli Bowen 2/3/2018 and tweaked only for readability
 function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX, USEFFT, WIDTH)
     if nargin < 2;  SR = 16000; end
     if nargin < 3;  TIMEWINDOW = 0.025; end
@@ -50,7 +50,7 @@ function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX
         %  end
         %  window = window/sum(window);
 %         XF = [zeros(numFreqs, round(nwin/2)),XF.^2,zeros(numFreqs, round(nwin/2))];
-        XF = XF.^2;
+        XF = XF .^ 2;
         
         hopsamps = round(STRIDE * SR);
         

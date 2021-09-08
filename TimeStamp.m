@@ -1,4 +1,6 @@
-%Prints the current time to standard out
-function [] = TimeStamp ()
-    fprintf(['Current time = ',datestr(now,'mm/dd/yyyy HH:MM:SS:FFF'),'\n']);
+% prints the current time to standard out
+% optionally returns what it just printed
+function [text] = TimeStamp ()
+    text = ['current time = ',datestr(now,'mm/dd/yyyy HH:MM:SS:FFF')];
+    fprintf('%s\n', text);
 end
