@@ -41,7 +41,7 @@ classdef VidFilter < handle
             
             obj.filters = filters;
 
-            %set gabor filter params to default value
+            % set gabor filter params to default value
             if ~exist('gaborNBands', 'var') || isempty(gaborNBands)
                 obj.gaborNBands = 8;
             else
@@ -52,8 +52,8 @@ classdef VidFilter < handle
             else
                 obj.gaborNScalesPerBand = gaborNScalesPerBand;
             end
-            
-            
+
+
             if strcmp(obj.filters{end}, 'rgb2gray')
                 obj.nOutChannels = 1;
             elseif strcmp(obj.filters{end}, 'opponency')
@@ -76,14 +76,14 @@ classdef VidFilter < handle
                     if strcmp(obj.filters{1} , 'retina')
                         %create some labels for output
                         %obj.nOutChannels = 2 * nGaborsPerInChannel;
-                        obj.nOutChannels = 2*4; %magno and parvo, times num orientations(taking only 1 band and scale)
+                        obj.nOutChannels = 2*4; % magno and parvo, times num orientations(taking only 1 band and scale)
                         obj.outChannels = 1:obj.nOutChannels;
-                        obj.retinaType = cell(1,obj.nOutChannels);
+                        obj.retinaType = cell(1, obj.nOutChannels);
                         retinaTypes = {'parvo','magno'};                  
-                        obj.orientation = cell(1,obj.nOutChannels);
-                        obj.bandScale = cell(1,obj.nOutChannels);
-                        obj.bandNum = cell(1,obj.nOutChannels);
-                        bandScale=[7,9]; %values from patchecache filter size param
+                        obj.orientation = cell(1, obj.nOutChannels);
+                        obj.bandScale = cell(1, obj.nOutChannels);
+                        obj.bandNum = cell(1, obj.nOutChannels);
+                        bandScale = [7,9]; % values from patchecache filter size param
                         idx=1;
                         for x=1:2 %parvo and magno
                             for i=1:4 %nOrientations
@@ -115,6 +115,9 @@ classdef VidFilter < handle
                 error('unknown filter');
             end
 
+            if any(strcmp(obj.filters, 'gabor')) || any(strcmp(obj.filters, 'spatialpooledgabor')) || any(strcmp(obj.filters, 'hmax'))
+                obj.patchCache = HMAXPatchCache([0,45,90,135], 8);
+            end
         end
 
 
@@ -173,40 +176,27 @@ classdef VidFilter < handle
                     imgM = obj.retina.getMagno();
                     img = cat(3, imgP, imgM);
                 elseif strcmp(obj.filters{i}, 'gabor')
-                    if isempty(obj.patchCache)
-                        obj.patchCache = HMAXPatchCache([0,45,90,135], 8);
-                    end
-                    [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img(:,:,1), obj.patchCache, false);
-                    %take just first band and first scale from s1 (8x2x4)
-                    s1=s1(1,1,:);
+                    s1 = HMAX(img(:,:,1), obj.patchCache, false);
+                    s1 = s1(1,1,:); % take just first band and first scale from s1 (8x2x4)
                     if nInChannels == 1
                         img = cat(3, s1{:});
                     else
                         val = cell(1, nInChannels);
                         val{1} = cat(3, s1{:});
                         for chan = 2:nInChannels
-                            [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img(:,:,chan), obj.patchCache, false);
-                            %take just first band and first scale from s1 (8x2x4)
-                            s1=s1(1,1,:);
+                            s1 = HMAX(img(:,:,chan), obj.patchCache, false);
+                            s1 = s1(1,1,:); % take just first band and first scale from s1 (8x2x4)
                             val{chan} = cat(3, s1{:});
                         end
                         img = cat(3, val{:});
                     end
                 elseif strcmp(obj.filters{i}, 'spatialpooledgabor') % spatially pooled gabors (bad for motion detection)
                     if nInChannels == 1
-                        if isempty(obj.patchCache)
-                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache, false);
-                        else
-                            [~,c1] = HMAX(img(:,:,1), obj.patchCache, false);
-                        end
+                        [~,c1] = HMAX(img(:,:,1), obj.patchCache, false);
                         val = CellCat2Vec(c1, obj.nC1);
                         img = [val,c2(:)'];
                     elseif nInChannels == 3
-                        if isempty(obj.patchCache)
-                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache, false);
-                        else
-                            [~,c1] = HMAX(img(:,:,1), obj.patchCache, false);
-                        end
+                        [~,c1] = HMAX(img(:,:,1), obj.patchCache, false);
                         val1 = CellCat2Vec(c1, obj.nC1);
                         [~,c1] = HMAX(img(:,:,2), obj.patchCache, false);
                         val2 = CellCat2Vec(c1, obj.nC1);
@@ -218,22 +208,14 @@ classdef VidFilter < handle
                     end
                 elseif strcmp(obj.filters{i}, 'hmax') % HMAX approach
                     if nInChannels == 1
-                        if isempty(obj.patchCache)
-                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
-                        else
-                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
-                        end
+                        [~,c1,~,c2] = HMAX(img(:,:,1), obj.patchCache);
                         img = [CellCat2Vec(c1, obj.nC1),c2(:)'];
                     elseif nInChannels == 3
-                        if isempty(obj.patchCache)
-                            [~,c1,~,c2,~,~,~] = HMAX(img(:,:,1), obj.patchCache);
-                        else
-                            [~,c1] = HMAX(img(:,:,1), obj.patchCache);
-                        end
+                        [~,c1,~,c2] = HMAX(img(:,:,1), obj.patchCache);
                         val1 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
-                        [~,c1,~,c2,~,~,~] = HMAX(img(:,:,2), obj.patchCache);
+                        [~,c1,~,c2] = HMAX(img(:,:,2), obj.patchCache);
                         val2 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
-                        [~,c1,~,c2,~,~,~] = HMAX(img(:,:,3), obj.patchCache);
+                        [~,c1,~,c2] = HMAX(img(:,:,3), obj.patchCache);
                         val3 = [CellCat2Vec(c1, obj.nC1),c2(:)'];
                         img = [val1,val2,val3];
                     else
