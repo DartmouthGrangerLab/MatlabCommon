@@ -15,7 +15,7 @@
 %   for speed / memory fragmentation (preallocate variables etc.)
 %   changed s1 return structure slightly (it's never used by hmax outside this function)
 %   switched return value order for efficiency
-function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder)
+function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder, normalizeGabors)
 %     c1OL = 2; % c1OL: (for C1 units) a scalar, defines the overlap between C1 units
 %     % ^ In scale band i, C1 unit responses are computed every c1Space(i)/c1OL
     nBands = numel(c1Space); % numel(c1Space) == numel(c1Scale) - 1
@@ -29,7 +29,7 @@ function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder)
         for s = 1:nScalesPerBand
             iUFilterIdx = iUFilterIdx + 1;
             for r = 1:nOrientations
-                s1{b,s,r} = ApplyGaborFilter(img, sqfilter{r,iUFilterIdx}, isIncludeBorder);
+                   s1{b,s,r} = ApplyGaborFilter(img, sqfilter{r,iUFilterIdx}, isIncludeBorder, normalizeGabors);
             end
         end
     end
