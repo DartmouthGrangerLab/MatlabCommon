@@ -16,8 +16,13 @@
 %   c2 - c2(nPatchesPerSz,nPatchSizes) contains ___
 %   bestBands
 %   bestLocations
-function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache)
+function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache, normalizeGabors)
     validateattributes(img, {'numeric'}, {'nonempty'});
+    
+    if ~exist('normalizeGabors', 'var')
+        normalizeGabors = false; % do not normalize as default
+    end
+    
     assert(size(img, 3) == 1, 'img must be grayscale - if handling color, call HMAX on each channel separately');
     if ~isa(img, 'double')
         assert(isa(img, 'uint8'));
@@ -33,9 +38,9 @@ function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache)
     %% C1
     isIncludeBorder = true; % true is the original default
     if nargout() == 1
-        s1      = C1(img, patchCache.c1_space, patchCache.sqfilter, isIncludeBorder);
+        s1      = C1(img, patchCache.c1_space, patchCache.sqfilter, isIncludeBorder, normalizeGabors);
     else
-        [s1,c1] = C1(img, patchCache.c1_space, patchCache.sqfilter, isIncludeBorder);
+        [s1,c1] = C1(img, patchCache.c1_space, patchCache.sqfilter, isIncludeBorder, normalizeGabors);
     end
 
     %% for each patch calculate C2 unit responses
@@ -55,8 +60,7 @@ function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache)
         allS2C1Prune         = 0; % dunno what this does - 0 was default
         orientations2C1Prune = 0; % dunno what this does - 0 was default
         for i = 1:nPatchSizes
-            [s2(:,:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] =...
-                C2(img, patchCache.c1_space, patchCache.c1_scale, patchCache.filter_sz, patchCache.patches{i}, patchCache.patch_sz(:,i)', c1, isIgnorePartials, allS2C1Prune, orientations2C1Prune);
+            [s2(:,:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] = C2(img, patchCache.c1_space, patchCache.c1_scale, patchCache.filter_sz, patchCache.patches{i}, patchCache.patch_sz(:,i)', c1, isIgnorePartials, allS2C1Prune, orientations2C1Prune);
         end
     end
 end
