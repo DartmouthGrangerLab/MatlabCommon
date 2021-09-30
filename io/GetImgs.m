@@ -19,7 +19,7 @@ function [count,descriptors,imgsFiltered] = GetImgs (path, filter, resizeParam)
     
     fullCount = CountFileType(path, 'png');
     descriptors = cell(1, fullCount);
-    [count,descriptors,imgs] = Helper(path, scaleFactor, resizeParam, 0, fullCount, descriptors, [], '');
+    [count,descriptors,imgs] = Helper(path, resizeParam, 0, fullCount, descriptors, [], '');
     
     if exist('filter', 'var') && ~isempty(filter)
         f = ImgFilter(filter, 'rgb');

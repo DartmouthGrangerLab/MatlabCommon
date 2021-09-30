@@ -11,11 +11,10 @@
 %   predStrength - 1 x nTstPts (double ranged 0-->1) - a measure of how strongly KNN believes in the prediction in predLabel (SLOW TO COMPUTE) (ONLY returned for euclidean or cosine distance)
 function [predLabel,predStrength] = ClassifyKNN (K, trnData, tstData, trnLabel, distance)
     validateattributes(K, 'numeric', {'nonempty','scalar','positive','integer'});
-    validateattributes(trnData, {'numeric','logical'}, {'nonempty','2d','nonnan'});
-    validateattributes(tstData, {'numeric','logical'}, {'nonempty','2d','nonnan'});
+    validateattributes(trnData, {'numeric','logical'}, {'nonempty','2d','nonnan','ncols',numel(trnLabel)});
+    validateattributes(tstData, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',size(trnData, 1)});
     validateattributes(trnLabel, {'cell','numeric','logical'}, {'nonempty','vector'});
     validateattributes(distance, {'char','function_handle'}, {'nonempty'});
-    assert(size(trnData, 1) == size(tstData, 1) && size(trnData, 2) == numel(trnLabel));
     assert((isnumeric(trnData) && isnumeric(tstData)) || (islogical(trnData) && islogical(tstData))); % inputs must be same datatype
 
     nTstPts = size(tstData, 2);
