@@ -1,12 +1,12 @@
 % Eli Bowen
 % 1/6/2017
 % INPUTS:
-%   data - N x D (double)
+%   data - n_datapts x n_dims (double)
 %   label - 
-%   classifierType - one of 'svm' (BROKEN), 'svmliblinear', 'lda', 'logreg', 'logregliblinear'
+%   classifierType - one of 'lda', 'svm' (BROKEN), 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear'
 %   verbose - OPTIONAL (default = true)
 % RETURNS:
-%   primaryAxis - a 1 x D vector
+%   primaryAxis - 1 x n_dims (numeric)
 function [primaryAxis] = Classify4DiscrimDim (data, label, classifierType, verbose)
     validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)});
     validateattributes(label, {'numeric','cell'}, {'nonempty','vector'});
@@ -15,7 +15,7 @@ function [primaryAxis] = Classify4DiscrimDim (data, label, classifierType, verbo
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = true;
     end
-    
+
     if isnumeric(label)
         label = strsplit(num2str(label(:)'));
     end
@@ -38,27 +38,27 @@ function [primaryAxis] = Classify4DiscrimDim (data, label, classifierType, verbo
     variances = var(data, 0, 1); % check for dimensions of zero variance (or learning algs will crash)
     data(:,variances==0) = [];
     
-    if verbose
-        t = tic();
-    end
-    if strcmp(classifierType, 'svm')
+    t = tic();
+    if strcmp(classifierType, 'lda')
         counts = CountNumericOccurrences(labelNum, 1:numel(uniqueLabels));
         cost = zeros(2, 2); % code for setting cost only works because this is 2-class problem - otherwise things get more complicated
         cost(1,2) = 1/(counts(1)/numel(label));
         cost(2,1) = 1/(counts(2)/numel(label)); % this appears correct (vs the transpose of this matrix) because it yields TP rates similar for both categories - the other way the smaller category is at chance (and worse than even costs).
-        model = fitcsvm(data, label, 'ClassNames', uniqueLabels, 'KernelFunction', 'linear', 'Standardize', false, 'Cost', cost);
+        model = fitcdiscr(data, label, 'ClassNames', uniqueLabels, 'Cost', cost, 'discrimType', 'pseudoLinear');
+        primaryAxis(variances~=0) = model.Coeffs(1,2).Linear; %corr(model.Coeffs(1,2).Linear,model.Coeffs(2,1).Linear) is exactly -1
+    elseif strcmp(classifierType, 'svm')
+        counts = CountNumericOccurrences(labelNum, 1:numel(uniqueLabels));
+        cost = zeros(2, 2); % code for setting cost only works because this is 2-class problem - otherwise things get more complicated
+        cost(1,2) = 1/(counts(1)/numel(label));
+        cost(2,1) = 1/(counts(2)/numel(label)); % this appears correct (vs the transpose of this matrix) because it yields TP rates similar for both categories - the other way the smaller category is at chance (and worse than even costs).
+        model = fitcsvm(data, label, 'ClassNames', uniqueLabels, 'Cost', cost, 'KernelFunction', 'linear', 'Standardize', false);
         primaryAxis(variances~=0) = model.Beta;
         error('can''t get betas because fitcsvm is solving the dual problem');
+    elseif strcmp(classifierType, 'svmjava')
+        error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % L2-regularized SVM using LIBLINEAR
         model = TrainLiblinear(2, labelNum, data, true, 1);
         primaryAxis(variances~=0) = model.w(:,1:end-1)'; % remove bias/intercept term - we just want the direction of the line
-    elseif strcmp(classifierType, 'lda')
-        counts = CountNumericOccurrences(labelNum, 1:numel(uniqueLabels));
-        cost = zeros(2, 2); % code for setting cost only works because this is 2-class problem - otherwise things get more complicated
-        cost(1,2) = 1/(counts(1)/numel(label));
-        cost(2,1) = 1/(counts(2)/numel(label)); % this appears correct (vs the transpose of this matrix) because it yields TP rates similar for both categories - the other way the smaller category is at chance (and worse than even costs).
-        model = fitcdiscr(data, label, 'ClassNames', uniqueLabels, 'discrimType', 'pseudoLinear', 'Cost', cost);
-        primaryAxis(variances~=0) = model.Coeffs(1,2).Linear; %corr(model.Coeffs(1,2).Linear,model.Coeffs(2,1).Linear) is exactly -1
     elseif strcmp(classifierType, 'logreg') % non-regularized logistic regression
         model = fitglm(data, labelNum-1, 'Distribution', 'binomial');
         primaryAxis(variances~=0) = model.Coefficients.Estimate(2:end); % first is intercept - we just want the direction of the line

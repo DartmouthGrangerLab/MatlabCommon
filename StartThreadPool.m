@@ -1,17 +1,17 @@
-%By Eli Bowen 2014
-%Inputs:
+% By Eli Bowen 2014
+% INPUTS:
 %   numThreads - number of threads requested. ignored exclusively when hardware = 'bigbrain'
 %   hardware - OPTIONAL - one of 'bigbrain', 'discovery', or 'local' (default = local pool)
-%   spmdEnabled - OPTIONAL - true or false (default = true, same as matlab's default) - can safely set to false iff you never use the spmd keyword. ignored exclusively when hardware = 'bigbrain'
-function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
-    if nargin < 2
+%   isSpmdEnabled - OPTIONAL - true or false (default = true, same as matlab's default) - can safely set to false iff you never use the spmd keyword. ignored exclusively when hardware = 'bigbrain'
+function [] = StartThreadPool (numThreads, hardware, isSpmdEnabled)
+    if nargin < 2 || isempty(hardware)
         hardware = '';
     end
-    if nargin < 3
-        spmdEnabled = true;
+    if nargin < 3 || isempty(isSpmdEnabled)
+        isSpmdEnabled = true;
     end
-    ver = version('-release'); %returns a string like '2014a'
-    
+    ver = version('-release'); % returns a string like '2014a'
+
     try
         if str2double(ver(1:4)) < 2014
             matlabpool close;
@@ -20,30 +20,30 @@ function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
         end
     end
 
-    if strcmp(hardware, 'bigbrain') %------------------------------
+    if strcmp(hardware, 'bigbrain') % ------------------------------
         prof = parallel.importProfile('torque_8node_bigbrain.settings');
         try
         	if str2double(ver(1:4)) < 2014
-                matlabpool open torque_8node_bigbrain;  %name of settings file
+                matlabpool open torque_8node_bigbrain;  % name of settings file
             else
                 parpool(prof);
             end
         catch
-            path('torque_8node_bigbrain.settings', path); %move profile to TOP of path
+            path('torque_8node_bigbrain.settings', path); % move profile to TOP of path
             prof = parallel.importProfile('torque_8node_bigbrain.settings');
             if str2double(ver(1:4)) < 2014
-                matlabpool open torque_8node_bigbrain;  %name of settings file
+                matlabpool open torque_8node_bigbrain; % name of settings file
             else
                 parpool(prof);
             end
         end
-        maxNumCompThreads(32); %limits total cores used
-    elseif strcmp(hardware, 'discovery') %------------------------------
-        %method 1 (should work)
+        maxNumCompThreads(32); % limits total cores used
+    elseif strcmp(hardware, 'discovery') % ------------------------------
+        % method 1 (should work)
 %         c = parcluster('local');
 %         c.JobStorageLocation = fullfile(outputFolder, 'temp');
         
-        %method 2 (should also work)
+        % method 2 (should also work)
         nTries = 0;
         hadSuccess = 0;
         while nTries < 25 && hadSuccess == 0 %on discovery, running qsub twice within 30 seconds can cause parpool to fail because of a race condition
@@ -64,8 +64,8 @@ function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
 %                 disp(myException);
 %             end
             
-            try %use the power of... java!!!
-                file = java.io.RandomAccessFile('StartThreadPool_lockfile.txt', 'rw'); %created in pwd
+            try % use the power of... java!!!
+                file = java.io.RandomAccessFile('StartThreadPool_lockfile.txt', 'rw'); % created in pwd
                 fileChannel = file.getChannel();
                 fileLock = fileChannel.tryLock();
                 if ~isempty(fileLock) && fileLock.isValid() == 1
@@ -75,7 +75,7 @@ function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
                         end
                     else
                         if isempty(gcp('nocreate'))
-                            parpool(numThreads, 'SpmdEnabled', spmdEnabled);
+                            parpool(numThreads, 'SpmdEnabled', isSpmdEnabled);
                         end
                     end
                     fileLock.release();
@@ -94,14 +94,14 @@ function [] = StartThreadPool (numThreads, hardware, spmdEnabled)
         if hadSuccess == 0
             error(['StartThreadPool(',num2str(numThreads),', ''discovery'') failed 25 times to create a parallel pool! Giving up.']);
         end
-    else %------------------------------
+    else % ------------------------------
         if str2double(ver(1:4)) < 2014
             if matlabpool('size') < 1
                 matlabpool(numThreads);
             end
         else
             if isempty(gcp('nocreate'))
-                parpool(numThreads, 'SpmdEnabled', spmdEnabled);
+                parpool(numThreads, 'SpmdEnabled', isSpmdEnabled);
             end
         end
     end

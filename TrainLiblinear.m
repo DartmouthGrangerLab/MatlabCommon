@@ -7,7 +7,7 @@
 % note liblinear uses its own RNG, which can't be controlled
 % USAGE:
 %   model = TrainLiblinear(0, labelNum, data, true, 1);
-%   [predLabel,acc,scores] = predict(labelNum, sparse(data), model, '-q');
+%   [predLabel,acc,score,mse,sqcorr] = LiblinearPredict(model, labelNum, data);
 % INPUTS:
 %   solverType - char or numeric, one of:
 %       For multi-class classification:
@@ -27,11 +27,11 @@
 %       21 (NOT SUPPORTED YET) -- one-class support vector machine (dual)
 %   label - 1 x N (int-valued numeric) vector of category IDs for the data
 %   data - N x D (numeric or logical)
-%   adjust4UnequalN - scalar (logical) - if true, categories will be weighted so that rare categories get the same importance as common categories
+%   doAdjust4UnequalN - scalar (logical) - if true, categories will be weighted so that rare categories get the same importance as common categories
 %   regularizationLvl - scalar (numeric) - how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
 % RETURNS:
 %   model - a struct as described in the 4 liblinear README files. The LAST feature is the bias/intercept term, which you may wish to remove. This struct will change in form depending on whether you passed 2 categories or more than 2
-function [model] = TrainLiblinear (solverType, label, data, adjust4UnequalN, regularizationLvl)
+function [model] = TrainLiblinear (solverType, label, data, doAdjust4UnequalN, regularizationLvl)
     if ischar(solverType)
         if strcmp(solverType, 'logreg')
             solverType = 0;
@@ -43,8 +43,8 @@ function [model] = TrainLiblinear (solverType, label, data, adjust4UnequalN, reg
     end
     validateattributes(solverType, {'numeric'}, {'nonempty','scalar','nonnegative','integer'});
     validateattributes(label, {'numeric'}, {'nonempty','vector','positive','integer'});
-    validateattributes(data, {'double','logical'}, {'nonempty','2d','nrows',numel(label)});
-    validateattributes(adjust4UnequalN, {'numeric','logical'}, {'nonempty','scalar'});
+    validateattributes(data, {'double','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
+    validateattributes(doAdjust4UnequalN, {'numeric','logical'}, {'nonempty','scalar'});
     validateattributes(regularizationLvl, {'numeric','char'}, {'nonempty'});
     assert(any(solverType == [0,1,2,3,5,6,11])); % only ones implemented by the version of the parralel library we use
     if any(solverType == [5,6])
@@ -61,7 +61,7 @@ function [model] = TrainLiblinear (solverType, label, data, adjust4UnequalN, reg
     counts = CountNumericOccurrences(labelNum, 1:numel(uniqueLabel));
 
     weightString = ''; % weightstring is probably more fair, but it's unclear
-    if adjust4UnequalN
+    if doAdjust4UnequalN
         for i = 1:numel(uniqueLabel)
             if numel(uniqueLabel) == 2
                 weightString = [weightString,' -w',num2str(i),' ',num2str(1/(counts(i)/N))];
