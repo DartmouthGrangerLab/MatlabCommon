@@ -15,9 +15,9 @@ function [img] = sumFilter (img, radius)
     assert((size(img, 3) == 1), 'only single-channel images are allowed');
 
     if numel(radius) == 1
-        kernel = ones(2*radius + 1);
+        kernel = ones(2*radius + 1, 'like', img);
     elseif numel(radius) == 4
-        kernel = ones(radius(2)+radius(4)+1, radius(1)+radius(3)+1);
+        kernel = ones(radius(2)+radius(4)+1, radius(1)+radius(3)+1, 'like', img);
     else
         error('unexpected radius');
     end

@@ -2,6 +2,7 @@
 % INPUTS:
 %   orientations - OPTIONAL 1 x nOrientations (numeric) - gabor angles in degrees, default = [0,45,90,135], good alternative for hex grids = [0,30,60,90,120,150]
 %   nBands - OPTIONAL scalar (int-valued numeric) - default = 8
+%   like - OPTIONAL the patches will be cast to the datatype of this variable - default = double
 % RETURNS:
 %   patchCache - struct with below fields:
 %       .orientations - vector (numeric) - copy of corresponding input param
@@ -14,12 +15,15 @@
 %       .c1_space - 1 x ? (numeric)
 %       .patches - 1 x 8 (cell)
 %       .patch_sz - 3 x 8 (numeric)
-function [patchCache] = HMAXPatchCache (orientations, nBands)
+function [patchCache] = HMAXPatchCache (orientations, nBands, like)
     if ~exist('orientations', 'var') || isempty(orientations)
         orientations = [0,45,90,135]; % originally, this was the only choice
     end
     if ~exist('nBands', 'var') || isempty(nBands)
         nBands = 8; % originally, this was the only choice
+    end
+    if ~exist('like', 'var') || isempty(like)
+        like = 0; % default = double
     end
     validateattributes(orientations, {'numeric'}, {'nonempty','vector'});
     validateattributes(nBands, {'numeric'}, {'nonempty','scalar','positive','integer'});
@@ -38,7 +42,7 @@ function [patchCache] = HMAXPatchCache (orientations, nBands)
     patchCache.filter_sz          = zeros(numel(orientations), nBands*nScalesPerBand); % IMPORTANT that this is nOrientations x nSizes not vice-versa (for linear indexing later)
     for i = 1:nBands*nScalesPerBand
         for r = 1:numel(orientations)
-            patchCache.sqfilter{r,i} = InitGabor(orientations(r), sz(i), gamma);
+            patchCache.sqfilter{r,i} = cast(InitGabor(orientations(r), sz(i), gamma), 'like', like);
             patchCache.filter_orientation(r,i) = orientations(r);
             patchCache.filter_sz(r,i) = sz(i);
         end
@@ -58,6 +62,9 @@ function [patchCache] = HMAXPatchCache (orientations, nBands)
 
     % for S2, C2
     load('universal_patch_set.mat', 'patches'); % mat file should be in path (found in ?/MatlabCommon/frontends/img_hmax/ folder)
+    for i = 1:numel(patches)
+        patches{i} = cast(patches{i}, 'like', like);
+    end
     patchCache.patches = patches; % 1 x 8 (cell)
     patchCache.patch_sz = [2,4,6,8,10,12,14,16;2,4,6,8,10,12,14,16;4,4,4,4,4,4,4,4]; % same as load('universal_patch_set.mat', 'patchSizes'); patchSizes=patchSizes(1:3,:)
 end

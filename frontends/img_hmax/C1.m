@@ -6,16 +6,16 @@
 %       band i is obtained by taking a max over a neighborhood of m x m S1 units
 %       If N bands, make length(c1Space) = N
 %   sqfilter - nOrientations x nFilters (cell) - matrix of Gabor filters
-%   isIncludeBorder: scalar (logical) - defines border treatment for 'img'
-%
+%   isIncludeBorder - scalar (logical) - defines border treatment for 'img'
+%   doNormalizeGabors - scalar (logical)
 % RETURNS:
-%   c1: 1 x nBands (cell) - contains the C1 responses for img
 %   s1: 1 x nBands (cell) - contains the S1 responses for img
+%   c1: 1 x nBands (cell) - contains the C1 responses for img
 % modified by Eli Bowen for readability and:
 %   for speed / memory fragmentation (preallocate variables etc.)
 %   changed s1 return structure slightly (it's never used by hmax outside this function)
 %   switched return value order for efficiency
-function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder, normalizeGabors)
+function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder, doNormalizeGabors)
 %     c1OL = 2; % c1OL: (for C1 units) a scalar, defines the overlap between C1 units
 %     % ^ In scale band i, C1 unit responses are computed every c1Space(i)/c1OL
     nBands = numel(c1Space); % numel(c1Space) == numel(c1Scale) - 1
@@ -29,12 +29,12 @@ function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder, normalizeGabors)
         for s = 1:nScalesPerBand
             iUFilterIdx = iUFilterIdx + 1;
             for r = 1:nOrientations
-                   s1{b,s,r} = ApplyGaborFilter(img, sqfilter{r,iUFilterIdx}, isIncludeBorder, normalizeGabors);
+                s1{b,s,r} = ApplyGaborFilter(img, sqfilter{r,iUFilterIdx}, isIncludeBorder, doNormalizeGabors, true);
             end
         end
     end
 
-    %% Calculate local pooling (c1)
+    %% calculate local pooling (c1)
     if nargout() > 1
         c1 = cell(1, nBands);
         for b = 1:nBands
@@ -43,11 +43,11 @@ function [s1,c1] = C1 (img, c1Space, sqfilter, isIncludeBorder, normalizeGabors)
             halfpool = poolSize / 2;
             rowIdx = 1:halfpool:size(s1{b,1,1}, 1);
             colIdx = 1:halfpool:size(s1{b,1,1}, 2);
-            c1{b} = zeros(numel(rowIdx), numel(colIdx), nOrientations); % size determined by Eli reading through maxFilter()
+            c1{b} = zeros(numel(rowIdx), numel(colIdx), nOrientations, 'like', img); % size determined by Eli reading through maxFilter()
 
             for r = 1:nOrientations
                 % (1) pool over scales within band
-                c1PreFilter = zeros(size(s1{b,1,r}));
+                c1PreFilter = zeros(size(s1{b,1,r}), 'like', img);
                 for s = 1:nScalesPerBand
                     c1PreFilter = max(c1PreFilter, s1{b,s,r});
                 end

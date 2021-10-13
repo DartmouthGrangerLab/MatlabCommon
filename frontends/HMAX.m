@@ -10,29 +10,31 @@
 %   img - one image (in a valid matlab image format), or a cell array of said images (not sure what the outputs look like in that case)
 %   patchCache - OPTIONAL struct returned from a call to HMAXPatchCache() - reuse for efficiency
 % RETURNS:
-%   s1 - s1{nBands,nScalesPerBand,nOrientations}(:,:) contains a gabor's responses at each location on the image
-%   c1 - c1{nBands}(:,:,nOrientations) contains ___
+%   s1 - s1{nBands,nScalesPerBand,nOrientations}(nImgRows,nImgCols) contains a gabor's responses at each location on the image
+%   c1 - c1{nBands}(nImgRows/poolingAmt,nImgCols/poolingAmt,nOrientations) contains spatially pooled s1
 %   s2 - s2{nBands,nPatchesPerSz,nPatchSizes} contains ___
 %   c2 - c2(nPatchesPerSz,nPatchSizes) contains ___
 %   bestBands
 %   bestLocations
 function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache, normalizeGabors)
-    validateattributes(img, {'numeric'}, {'nonempty'});
-    
-    if ~exist('normalizeGabors', 'var')
+    validateattributes(img, {'numeric','logical'}, {'nonempty','2d'}); % img must be grayscale - if handling color, call HMAX on each channel separately
+    if ~exist('normalizeGabors', 'var') || isempty(normalizeGabors)
         normalizeGabors = false; % do not normalize as default
     end
-    
-    assert(size(img, 3) == 1, 'img must be grayscale - if handling color, call HMAX on each channel separately');
-    if ~isa(img, 'double')
+
+    if isUnderlyingType(img, 'logical')
+        img = double(img);
+    elseif ~isUnderlyingType(img, 'double') && ~isUnderlyingType(img, 'single')
         assert(isa(img, 'uint8'));
-        img = im2double(img); % image must be double
+        img = im2double(img); % image must be a floating point type
     end
     assert(max(img(:)) <= 1, 'img must be ranged 0-->1');
 
     %% init S1 gabor filters
     if ~exist('patchCache', 'var') || isempty(patchCache)
-        patchCache = HMAXPatchCache([0,45,90,135], 8); % originally, these params were the only choices
+        patchCache = HMAXPatchCache([0,45,90,135], 8, img); % originally, these params were the only choices
+    else
+        assert(isUnderlyingType(patchCache.sqfilter{1}, underlyingType(img)));
     end
 
     %% C1
@@ -60,7 +62,7 @@ function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache, normaliz
         allS2C1Prune         = 0; % dunno what this does - 0 was default
         orientations2C1Prune = 0; % dunno what this does - 0 was default
         for i = 1:nPatchSizes
-            [s2(:,:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] = C2(img, patchCache.c1_space, patchCache.c1_scale, patchCache.filter_sz, patchCache.patches{i}, patchCache.patch_sz(:,i)', c1, isIgnorePartials, allS2C1Prune, orientations2C1Prune);
+            [s2(:,:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] = C2(c1, size(img), patchCache.c1_space, patchCache.c1_scale, patchCache.filter_sz, patchCache.patches{i}, patchCache.patch_sz(:,i)', isIgnorePartials, allS2C1Prune, orientations2C1Prune);
         end
     end
 end
