@@ -28,6 +28,7 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         verbose = false;
     end
 
+    %% clean up, standardize provided labels
     % some algs require labels to be the integers 1:numel(uniqueLabels)
     [uniqueLabel,~,trnLabelNum] = unique(trnLabel); % convert labels into index into uniqueLabels
     
@@ -38,13 +39,31 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
 %     for i = 1 : numel(tstLabel)
 %         tstLabelNum(i) = find(uniqueLabel == tstLabel(i));
 %     end
-
+    
+    %% remove dimensions of zero variance (or learning algs will crash)
+    variances = var(trnData, 0, 1);
+    assert(~all(variances == 0));
+    if any(variances == 0)
+        trnData(:,variances == 0) = [];
+        tstData(:,variances == 0) = [];
+    end
+    
+    %% print info
+    if verbose
+        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType]);
+        disp(uniqueLabel(:)');
+        if any(variances == 0)
+            disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
+        end
+        t = tic();
+    end
+    
+    %% prepare variables
     cost = [];
     if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
         cost = classifierParams.cost;
     end
 
-    t = tic();
     %% classify
     if strcmp(classifierType, 'lda') % --- lda via matlab ---
         if islogical(trnData) || islogical(tstData)
@@ -71,21 +90,26 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         end
         acc = 1 - loss(model, tstData, tstLabelNum, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
-        error('untested');
     elseif strcmp(classifierType, 'svmjava') % --- svm via java ---
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
         doAdjust4UnequalN = true;
+        [trnData,tstData] = ScaleData(trnData, tstData); % must pre-scale for runtime and accuracy
         model = TrainLiblinear('svm', trnLabelNum, trnData, doAdjust4UnequalN, 1);
         [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
     elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
         error('not yet implemented');
     elseif strcmp(classifierType, 'logregliblinear') % --- logistic regression via liblinear-multicore
         doAdjust4UnequalN = true;
+        [trnData,tstData] = ScaleData(trnData, tstData); % must pre-scale for runtime and accuracy
         model = TrainLiblinear('logreg', trnLabelNum, trnData, doAdjust4UnequalN, 1);
         [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
     elseif strcmp(classifierType, 'knn') % --- knn ---
-        [predLabel,score] = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+        if nargout() < 3 % for efficiency, only calc scores if needed
+            predLabel         = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+        else
+            [predLabel,score] = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+        end
         acc = sum(predLabel == tstLabelNum) / numel(tstLabelNum);
         % for knn, score is the "strength" of the classification
     end
@@ -94,4 +118,14 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
     predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
 
     if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
+end
+
+
+function [trnData,tstData] = ScaleData (trnData, tstData)
+    if ~islogical(trnData)
+        tstData = tstData - min(trnData, [], 1); % scale tst by trn mins
+        trnData = trnData - min(trnData, [], 1);
+        tstData = tstData ./ max(trnData, [], 1); % scale tst by trn maxes
+        trnData = trnData ./ max(trnData, [], 1);
+    end 
 end

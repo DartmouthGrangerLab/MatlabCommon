@@ -6,8 +6,8 @@
 %   label - 1 x n_datapts (int-valued numeric or cell array of chars)
 %   n_folds - scalar (int-valued numeric)
 %   classifierType - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   classifierParams - OPTIONAL struct - see Classify() for fields
-%   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
+%   classifierParams OPTIONAL - struct - see ClassifyCrossvalidate() for fields
+%   verbose OPTIONAL - scalar (logical) - should we print text? (default=false)
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   accStdErr

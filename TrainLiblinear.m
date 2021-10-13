@@ -54,6 +54,12 @@ function [model] = TrainLiblinear (solverType, label, data, doAdjust4UnequalN, r
     if islogical(data)
         data = double(data);
     end
+    assert(~isa(data, 'gpuArray')); % liblinear doesn't have gpu support
+    
+    n_cores = DetermineNumJavaComputeCores();
+    if ispc()
+        n_cores = 1; % cant get liblinear_multicore to compile for windows properly
+    end
 
     N = numel(label);
     [uniqueLabel,~,labelNum] = unique(label);
@@ -75,14 +81,21 @@ function [model] = TrainLiblinear (solverType, label, data, doAdjust4UnequalN, r
 
     if strcmp(regularizationLvl, 'optimize')
         assert(solverType == 0 || solverType == 2, 'currently, optimized regularizationLvl only supported by liblinear for solverType 0 or 2');
-        regularizationLvl = train(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -C -n ',num2str(DetermineNumJavaComputeCores()),weightString]); % appending a bias/intercept term
+        if n_cores == 1
+            regularizationLvl = train_liblinear(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -C ',weightString]); % appending a bias/intercept term
+        else
+            regularizationLvl = train_liblinear_multicore(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -C -m ',num2str(n_cores),weightString]); % appending a bias/intercept term
+        end
         regularizationLvl = regularizationLvl(1);
         warning('^untested, unclear what train() is returning');
     end
 
-    % train should be in MatlabCommon/liblinear-multicore - if matlab thinks this is a toolbox function, you need to compile liblinear-multicore
-    model = train(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),' -n ',num2str(DetermineNumJavaComputeCores()),weightString]); % appending a bias/intercept term
-
+    if n_cores == 1
+        model = train_liblinear(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),weightString]); % appending a bias/intercept term
+    else
+        model = train_liblinear_multicore(label, sparse([data,ones(N, 1)]), ['-q -s ',num2str(solverType),' -c ',num2str(regularizationLvl),' -m ',num2str(n_cores),weightString]); % appending a bias/intercept term
+    end
+    
     assert(~isempty(model)); % if model is empty, liblinear crashed
     assert(model.bias < 0); % I think this is always -1 (aka "ignore me") unless we specify the bias beforehand, which we wouldn't normally do
 end

@@ -9,10 +9,10 @@
 %   srcIdx - 1 x n_connec (int-valued numeric) - for each connection, the index of the source item (ranged 1 --> n_src)
 %   dstIdx - 1 x n_connec (int-valued numeric) - for each connection, the index of the destination item (ranged 1 --> n_dst)
 function [srcIdx,dstIdx] = ConnectHypergeometric (n_src, n_dst, n_per_src)
-    validateattributes(n_src, {'numeric'}, {'nonempty','scalar','positive','integer'});
-    validateattributes(n_dst, {'numeric'}, {'nonempty','scalar','positive','integer'});
-    validateattributes(n_per_src, {'numeric'}, {'nonempty','scalar','positive','integer'});
-    
+    validateattributes(n_src, 'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(n_dst, 'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(n_per_src, 'numeric', {'nonempty','scalar','positive','integer'});
+
     n_connec = n_per_src * n_src;
     n_per_dst = max(1, ceil(n_connec / n_dst));
     assert(n_per_src <= n_dst); % can't connect to more than everyone

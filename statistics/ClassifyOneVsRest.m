@@ -7,8 +7,8 @@
 %   tstData - n_tstpts x n_dims (numeric or logical)
 %   tstLabel - 1 x n_tstpts (int-valued numeric or cell array of chars)
 %   classifierType - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   classifierParams - OPTIONAL struct - see Classify() for fields
-%   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
+%   classifierParams OPTIONAL - struct - see Classify() for fields
+%   verbose OPTIONAL - scalar (logical) - should we print text? (default=false)
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   predLabel
@@ -37,9 +37,9 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
 
     acc       = NaN(1, n_classes);
     predLabel = NaN(n_tstpts, n_classes);
-    score     = NaN(n_tstpts, n_classes);
+    score     = NaN(n_tstpts, 2, n_classes);
     for i = 1 : n_classes
-        [acc(i),predLabel(:,i),score(:,i)] = Classify(trnData, (trnLabelNum == i) + 1, tstData, (tstLabelNum == i) + 1, classifierType, classifierParams, false);
+        [acc(i),predLabel(:,i),score(:,:,i)] = Classify(trnData, (trnLabelNum == i) + 1, tstData, (tstLabelNum == i) + 1, classifierType, classifierParams, false);
     end
     
     if nargout() > 3

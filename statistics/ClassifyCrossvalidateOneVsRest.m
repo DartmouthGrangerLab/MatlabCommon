@@ -6,8 +6,8 @@
 %   label - 1 x n_datapts (int-valued numeric or cell array of chars)
 %   n_folds - scalar (int-valued numeric)
 %   classifierType - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   classifierParams - OPTIONAL struct - see Classify() for fields
-%   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
+%   classifierParams OPTIONAL - struct - see ClassifyCrossvalidate() for fields
+%   verbose OPTIONAL - scalar (logical) - should we print text? (default=false)
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   accStdErr
@@ -29,11 +29,11 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateO
     acc       = NaN(1, n_classes);
     accStdErr = NaN(1, n_classes);
     predLabel = NaN(n_datapts, n_classes);
-    score     = NaN(n_datapts, n_classes);
+    score     = NaN(n_datapts, 2, n_classes);
     for i = 1 : n_classes
         [acc(i),accStdErr(i),predLabel(:,i),temp4] = ClassifyCrossvalidate(data, (labelNum == i) + 1, n_folds, classifierType, false, classifierParams, false);
         if ~isempty(temp4)
-            score(:,i) = temp4;
+            score(:,:,i) = temp4;
         end
     end
 
