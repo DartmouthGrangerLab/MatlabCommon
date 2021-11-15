@@ -17,20 +17,27 @@
 %   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
 function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
     validateattributes(trnData, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)});
-    validateattributes(trnLabel, {'numeric'}, {'nonempty','vector'});
+    validateattributes(trnLabel, 'numeric', {'nonempty','vector'});
     validateattributes(tstData, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)});
-    validateattributes(tstLabel, {'numeric'}, {'nonempty','vector'});
-    validateattributes(classifierType, {'char'}, {'nonempty'});
-    if ~exist('classifierParams', 'var') || isempty(classifierParams)
-        classifierParams = struct();
-    end
+    validateattributes(tstLabel, 'numeric', {'nonempty','vector'});
+    validateattributes(classifierType, 'char', {'nonempty'});
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
     end
+    
+    %% default classifier params
+    if ~exist('classifierParams', 'var') || isempty(classifierParams)
+        classifierParams = struct();
+        classifierParams.regularization_lvl = 'optimize'; % 1 (default) = much faster, default regularization, may be less successful
+        classifierParams.k = 1;
+        classifierParams.distance = 'euclidean';
+    end
 
     %% clean up, standardize provided labels
-    % some algs require labels to be the integers 1:numel(uniqueLabels)
-    [uniqueLabel,~,trnLabelNum] = unique(trnLabel); % convert labels into index into uniqueLabels
+    % some algs require labels to be the integers 1:numel(uniqueLabel)
+    trnLabel = trnLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
+    tstLabel = tstLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
+    [uniqueLabel,~,trnLabelNum] = unique(trnLabel, 'stable'); % convert labels into index into uniqueLabels
     
     tstLabelNum = tstLabel;
     [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
@@ -42,15 +49,15 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
     
     %% remove dimensions of zero variance (or learning algs will crash)
     variances = var(trnData, 0, 1);
-    assert(~all(variances == 0));
     if any(variances == 0)
+        assert(~all(variances == 0));
         trnData(:,variances == 0) = [];
         tstData(:,variances == 0) = [];
     end
     
     %% print info
     if verbose
-        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType]);
+        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(numel(trnLabelNum)),', n_tst = ',num2str(numel(tstLabelNum)),')...']);
         disp(uniqueLabel(:)');
         if any(variances == 0)
             disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
@@ -94,15 +101,13 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
         doAdjust4UnequalN = true;
-        [trnData,tstData] = ScaleData(trnData, tstData); % must pre-scale for runtime and accuracy
-        model = TrainLiblinear('svm', trnLabelNum, trnData, doAdjust4UnequalN, 1);
+        model = LiblinearTrain('svm', trnLabelNum, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
         [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
     elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
         error('not yet implemented');
     elseif strcmp(classifierType, 'logregliblinear') % --- logistic regression via liblinear-multicore
         doAdjust4UnequalN = true;
-        [trnData,tstData] = ScaleData(trnData, tstData); % must pre-scale for runtime and accuracy
-        model = TrainLiblinear('logreg', trnLabelNum, trnData, doAdjust4UnequalN, 1);
+        model = LiblinearTrain('logreg', trnLabelNum, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
         [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
     elseif strcmp(classifierType, 'knn') % --- knn ---
         if nargout() < 3 % for efficiency, only calc scores if needed
@@ -112,20 +117,12 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         end
         acc = sum(predLabel == tstLabelNum) / numel(tstLabelNum);
         % for knn, score is the "strength" of the classification
+    else
+        error('unexpected classifierType');
     end
 
     %% finalize predLabel
     predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
 
     if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
-end
-
-
-function [trnData,tstData] = ScaleData (trnData, tstData)
-    if ~islogical(trnData)
-        tstData = tstData - min(trnData, [], 1); % scale tst by trn mins
-        trnData = trnData - min(trnData, [], 1);
-        tstData = tstData ./ max(trnData, [], 1); % scale tst by trn maxes
-        trnData = trnData ./ max(trnData, [], 1);
-    end 
 end

@@ -57,14 +57,14 @@ function [primaryAxis] = Classify4DiscrimDim (data, label, classifierType, verbo
     elseif strcmp(classifierType, 'svmjava')
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % L2-regularized SVM using LIBLINEAR
-        model = TrainLiblinear(2, labelNum, data, true, 1);
+        model = LiblinearTrain(2, labelNum, data, true, 1);
         primaryAxis(variances~=0) = model.w(:,1:end-1)'; % remove bias/intercept term - we just want the direction of the line
     elseif strcmp(classifierType, 'logreg') % non-regularized logistic regression
         model = fitglm(data, labelNum-1, 'Distribution', 'binomial');
         primaryAxis(variances~=0) = model.Coefficients.Estimate(2:end); % first is intercept - we just want the direction of the line
         error('logreg not currently accounting for unequal N as it should');
     elseif strcmp(classifierType, 'logregliblinear') % L2-regularized logistic regression using LIBLINEAR
-        model = TrainLiblinear(0, labelNum, data, true, 1);
+        model = LiblinearTrain(0, labelNum, data, true, 1);
         primaryAxis(variances~=0) = model.w(:,1:end-1)'; % remove bias/intercept term - we just want the direction of the line
     else
         error('unknown classifierType');
