@@ -98,7 +98,7 @@ function S = GetMD5_helper (V)
             % S = getByteStreamFromArray(DataObj);
             
         catch ME % Or perhaps this is better:
-            fprintf(2, ['### %s: Convert object to struct as fallback.', char(10), '    %s\n'], ME.message);
+            % warning removed by eli
             WarnS = warning('off', 'MATLAB:structOnObject');
             S     = struct(V);
             warning(WarnS);

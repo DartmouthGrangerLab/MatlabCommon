@@ -9,6 +9,10 @@ function [cacheFile] = GetCacheFile (data2Hash, append)
     validateattributes(append, {'char'}, {'nonempty','vector'});
     
     profile = ComputerProfile();
-    hash = GetMD5(data2Hash, 'array', 'hex');
+    try
+        hash = GetMD5(data2Hash, 'array', 'hex');
+    catch
+        hash = GetMD5(getByteStreamFromArray(data2Hash), 'array', 'hex');
+    end
     cacheFile = fullfile(profile.cache_dir, [append,'_hash',hash,'.mat']);
 end

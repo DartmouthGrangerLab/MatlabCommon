@@ -5,7 +5,7 @@
 %   func - function to compute
 %   varargin - arguments to the function
 function [varargout] = CachedCompute (func, varargin)
-    validateattributes(func, {'function_handle'}, {'nonempty','scalar'});
+    validateattributes(func, 'function_handle', {'nonempty','scalar'});
 
     rng_state = rng();
 
@@ -15,7 +15,7 @@ function [varargout] = CachedCompute (func, varargin)
     cache_file = GetCacheFile(varargin, func_name);
     if isfile(cache_file)
         load(cache_file, 'varargout');
-        disp(['loading ',func_name,' took ',num2str(toc(t), '%.0f'),'s']);
+        disp([func_name,' cache hit took ',num2str(toc(t), '%.0f'),'s']);
     else
         [varargout{1:nargout}] = func(varargin{:});
 
