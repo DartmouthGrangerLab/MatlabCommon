@@ -17,9 +17,8 @@ function [counts] = CountNumericOccurrences (arr, uniqueArr)
         end
         return;
     end
-    isNan = isnan(arr);
-    if any(isNan)
-        arr(isNan) = []; % omit nans (for efficiency, don't change arr if not needed)
+    if any(isnan(arr))
+        arr(isnan(arr)) = []; % omit nans (for efficiency, don't change arr if not needed)
     end
     if exist('uniqueArr', 'var') && ~isempty(uniqueArr)
         validateattributes(uniqueArr, {'numeric'}, {'nonempty','vector','nonnan'});

@@ -98,13 +98,15 @@ void do_find_parameters(double *best_C, double *best_p, double *best_score)
 	else
 		start_p = -1.0;
 
-	mexPrintf("Doing parameter search with %d-fold cross validation.\n", nr_fold);
+    // commented out by eli - this is annoying
+	//mexPrintf("Doing parameter search with %d-fold cross validation.\n", nr_fold);
 	find_parameters(&prob, &param, nr_fold, start_C, start_p, best_C, best_p, best_score);
 
-	if(param.solver_type == L2R_LR || param.solver_type == L2R_L2LOSS_SVC)
-		mexPrintf("Best C = %g  CV accuracy = %g%%\n", *best_C, 100.0**best_score);
-	else if(param.solver_type == L2R_L2LOSS_SVR)
-		mexPrintf("Best C = %g Best p = %g  CV MSE = %g\n", *best_C, *best_p, *best_score);
+    // commented out by eli - this is annoying
+// 	if(param.solver_type == L2R_LR || param.solver_type == L2R_L2LOSS_SVC)
+// 		mexPrintf("Best C = %g  CV accuracy = %g%%\n", *best_C, 100.0**best_score);
+// 	else if(param.solver_type == L2R_L2LOSS_SVR)
+// 		mexPrintf("Best C = %g Best p = %g  CV MSE = %g\n", *best_C, *best_p, *best_score);
 }
 
 

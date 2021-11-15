@@ -6,9 +6,9 @@
 %   selectedIdx - 1 x n_returned_datapts (int-valued double)
 function [selectedIdx] = EqualizeN (label)
     [uniqueLabel,~,labelNum] = unique(label);
-    
+
     N = min(CountNumericOccurrences(labelNum, 1:numel(uniqueLabel)));
-    
+
     % form separate arrays for each category, subset to be of equal length, then recombine
     selectedIdx = zeros(N, numel(uniqueLabel));
     for i = 1 : numel(uniqueLabel)
