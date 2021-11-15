@@ -1,0 +1,65 @@
+% Eli Bowen
+% 10/1/2021
+% INPUTS:
+%   data - n_pts x n_dims (numeric or logical)
+%   label - 1 x n_pts (int-valued numeric or cell array of chars)
+%   classifierType - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
+%   classifierParams - OPTIONAL struct
+%       .cost - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
+%       .k - for KNN
+%       .distance - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
+%   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
+% RETURNS:
+%   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
+%   predLabel
+function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classifierParams, verbose)
+    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
+    validateattributes(label, {'numeric'}, {'nonempty','vector'});
+    validateattributes(classifierType, {'char'}, {'nonempty'});
+    if ~exist('verbose', 'var') || isempty(verbose)
+        verbose = false;
+    end
+    
+    %% default classifier params
+    if ~exist('classifierParams', 'var') || isempty(classifierParams)
+        classifierParams = struct();
+        classifierParams.regularization_lvl = 'optimize'; % 1 (default) = much faster, default regularization, may be less successful
+        classifierParams.k = 1;
+        classifierParams.distance = 'euclidean';
+    end
+
+    %% clean up, standardize provided labels
+    % some algs require labels to be the integers 1:numel(uniqueLabels)
+    [uniqueLabel,~,labelNum] = unique(label); % convert labels into index into uniqueLabels
+    
+    %% remove dimensions of zero variance (or learning algs will crash)
+    variances = var(data, 0, 1);
+    if any(variances == 0)
+        assert(~all(variances == 0));
+        data(:,variances == 0) = [];
+    end
+    
+    %% print info
+    if verbose
+        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(data, 2)),'-dim ',classifierType]);
+        disp(uniqueLabel(:)');
+        if any(variances == 0)
+            disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
+        end
+        t = tic();
+    end
+
+    %% classify
+    if strcmp(classifierType, 'knn') % --- knn ---
+        predLabel = ClassifyKNNHold1Out(classifierParams.k, data', labelNum, classifierParams.distance);
+        acc = sum(predLabel == labelNum) / numel(labelNum);
+        % for knn, score is the "strength" of the classification
+    else
+        error('unexpected classifierType');
+    end
+
+    %% finalize predLabel
+    predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
+
+    if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
+end
