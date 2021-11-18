@@ -83,7 +83,9 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
             model = fitcecoc(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', true));
         end
         acc = 1 - loss(model, tstData, tstLabelNum, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
-        [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', true));
+        if nargout > 1 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', true));
+        end
         error('untested');
     elseif strcmp(classifierType, 'svm') % --- svm via matlab ---
         if islogical(trnData) || islogical(tstData)
@@ -96,7 +98,9 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
             model = fitcecoc(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateSVM('Standardize', 1, 'KernelFunction', 'linear'), 'Options', statset('UseParallel', true));
         end
         acc = 1 - loss(model, tstData, tstLabelNum, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
-        [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
+        if nargout > 1 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
+        end
     elseif strcmp(classifierType, 'svmjava') % --- svm via java ---
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
@@ -110,10 +114,10 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         model = LiblinearTrain('logreg', trnLabelNum, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
         [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
     elseif strcmp(classifierType, 'knn') % --- knn ---
-        if nargout() < 3 % for efficiency, only calc scores if needed
-            predLabel         = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
-        else
+        if nargout() > 2 % for efficiency, only calc scores if needed
             [predLabel,score] = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+        else
+            predLabel         = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
         end
         acc = sum(predLabel == tstLabelNum) / numel(tstLabelNum);
         % for knn, score is the "strength" of the classification
@@ -121,8 +125,14 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         error('unexpected classifierType');
     end
 
-    %% finalize predLabel
-    predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
-
+    %% finalize
+    acc = gather(acc);
+    if nargout > 1 % for efficiency, only get predLabel and scores if necessary
+        predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
+    end
+    if nargout > 2
+        score = gather(score);
+    end
+    
     if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
 end

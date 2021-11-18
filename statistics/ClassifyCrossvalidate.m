@@ -24,7 +24,7 @@
 function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = ClassifyCrossvalidate (data, label, n_folds, classifierType, doEvenN, classifierParams, verbose)
     validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)});
     validateattributes(label, {'numeric','cell'}, {'nonempty','vector'});
-    validateattributes(n_folds, 'double', {'nonempty','scalar','positive','integer'});
+    validateattributes(n_folds, 'double', {'nonempty','scalar','positive','integer','>=',2});
     validateattributes(classifierType, 'char', {'nonempty'});
     validateattributes(doEvenN, {'double','logical'}, {'nonempty','scalar'});
     if ~exist('verbose', 'var') || isempty(verbose)
@@ -179,10 +179,11 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
     end
 
     %% finalize outputs
-    accStdErr = StdErr(accs);
-    acc = mean(accs);
+    acc = gather(mean(accs));
+    accStdErr = gather(StdErr(accs));
     if nargout > 2 % for efficiency, only get predLabel and scores if necessary
         predLabel = uniqueLabel(predLabel); % convert back to unique labels, which might be strings. predLabel is the same thing as labelNum - they index into uniqueLabel
+        score = gather(score);
     end
 
     %% ROC

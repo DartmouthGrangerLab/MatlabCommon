@@ -53,12 +53,12 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
     if strcmp(classifierType, 'knn') % --- knn ---
         predLabel = ClassifyKNNHold1Out(classifierParams.k, data', labelNum, classifierParams.distance);
         acc = sum(predLabel == labelNum) / numel(labelNum);
-        % for knn, score is the "strength" of the classification
     else
         error('unexpected classifierType');
     end
 
     %% finalize predLabel
+    acc = gather(acc);
     predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
 
     if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
