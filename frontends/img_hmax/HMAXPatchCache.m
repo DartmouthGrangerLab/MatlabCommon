@@ -22,7 +22,7 @@ function [patchCache] = HMAXPatchCache (orientations, nBands, like)
     if ~exist('nBands', 'var') || isempty(nBands)
         nBands = 8; % originally, this was the only choice
     end
-    if ~exist('like', 'var') || isempty(like)
+    if ~exist('like', 'var') || isempty(like) || islogical(like)
         like = 0; % default = double
     end
     validateattributes(orientations, {'numeric'}, {'nonempty','vector'});

@@ -28,7 +28,7 @@ function [profile] = ComputerProfile ()
             error('unrecognized computer / user - add your computer to MatlabCommon ComputerProfile.m');
         end
     end
-    
+
     profile = struct();
     profile.dataset_dir = computerProfile{profileIdx,3};
     profile.cache_dir   = computerProfile{profileIdx,4};
@@ -36,4 +36,8 @@ function [profile] = ComputerProfile ()
     if ~exist(profile.cache_dir, 'dir')
         mkdir(profile.cache_dir);
     end
+
+    %% validate
+    mustBeFolder(profile.dataset_dir);
+    mustBeFolder(profile.cache_dir);
 end

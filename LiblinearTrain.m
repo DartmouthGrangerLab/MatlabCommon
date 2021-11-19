@@ -48,7 +48,7 @@ function [model] = LiblinearTrain (solverType, label, data, doAdjust4UnequalN, r
     end
     validateattributes(solverType, 'numeric', {'nonempty','scalar','nonnegative','integer'});
     validateattributes(label, 'numeric', {'nonempty','vector','positive','integer'});
-    validateattributes(data, {'double','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
+    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
     validateattributes(doAdjust4UnequalN, 'logical', {'nonempty','scalar'});
     validateattributes(regularizationLvl, {'numeric','char'}, {'nonempty'});
     if any(solverType == 4:10)
@@ -71,7 +71,6 @@ function [model] = LiblinearTrain (solverType, label, data, doAdjust4UnequalN, r
     assert(all(labelNum == label)); % only required because otherwise the results of the model will be misinterpreted by the calling function
     counts = CountNumericOccurrences(labelNum, 1:numel(uniqueLabel));
     if islogical(data)
-        data = double(data);
         normMin = 0;
         normMax = 1;
     else
@@ -80,6 +79,7 @@ function [model] = LiblinearTrain (solverType, label, data, doAdjust4UnequalN, r
         normMax = max(data, [], 1);
         data = data ./ normMax; % must pre-scale for runtime and accuracy
     end
+    data = double(data);
     data = sparse([data,ones(N, 1)]); % sparse required by the alg, performance is often poor without a col of ones at the end
 
     weightStr = ''; % using weightStr is probably more fair, but it's unclear

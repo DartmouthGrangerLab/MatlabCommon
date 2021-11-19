@@ -18,18 +18,19 @@
 %   mse - scalar (numeric) - mean squared error
 %   sqcorr - scalar (numeric) - squared correlation coefficient
 function [predLabel,acc,score,mse,sqcorr] = LiblinearPredict (model, label, data)
-    validateattributes(model, {'struct'}, {'nonempty','scalar'});
-    validateattributes(label, {'numeric'}, {'nonempty','vector','positive','integer'});
-    validateattributes(data, {'double','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
+    validateattributes(model, 'struct',  {'nonempty','scalar'});
+    validateattributes(label, 'numeric', {'nonempty','vector','positive','integer'});
+    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
     assert(~isa(data, 'gpuArray')); % liblinear doesn't have gpu support
     
     label = label(:); % required orientation...
     if islogical(data)
-        data = double(data);
+        % data is already at its limits (0 --> 1)
     else
         data = data - model.norm_min;  % scale tst by trn mins
         data = data ./ model.norm_max; % scale tst by trn maxes
     end
+    data = double(data);
     data = sparse([data,ones(numel(label), 1)]); % sparse required by the alg, performance is often poor without a col of ones at the end
     
     [predLabel,temp,temp2] = predict_liblinear(label, data, model, '-q'); % temp = [accuracy out of 100, MSE, squared correlation coeff]
