@@ -2,9 +2,9 @@
 % 11/2021
 % INPUTS:
 %   kernelPath - (char)
-%   funcName - (char)
-%   vars - (cell)
-%   append - (char)
+%   funcName   - (char)
+%   vars       - 1 x n_func_args (cell)
+%   append     - (char)
 % RETURNS:
 %   funcHandle - function handle for the compiled gpu kernel
 function [funcHandle] = CompileGPUCoder (kernelPath, funcName, vars, append)
@@ -14,7 +14,7 @@ function [funcHandle] = CompileGPUCoder (kernelPath, funcName, vars, append)
     validateattributes(append,     'char', {'nonempty'});
 
     t = tic();
-    
+
     kernelFuncName = [funcName,'_',append,'_gpucoder'];
 
     args = cell(1, numel(vars));

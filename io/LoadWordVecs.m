@@ -1,7 +1,5 @@
 % Eli Bowen
 % 11/19/2021
-% INPUTS:
-%   datasetName
 % RETURNS:
 %   words - 1 x n_words (cell array of chars)
 %   vecs  - n_dims x n_words (numeric)
@@ -28,8 +26,13 @@ function [words,vecs] = LoadWordVecs (datasetName)
 
     %% parse
     text = strsplit(text, '\n');
+    dims = cellfun(@(x)sum(x==' '), text); % plus 1 (for the last element) minus 1 (for word);
+    if dims(end) == 0 % trailing new-line
+        text = text(1:end-1);
+        dims = dims(1:end-1);
+    end
     n_words = numel(text);
-    n_dims = unique(cellfun(@(x)sum(x==' '), text)) - 1;
+    n_dims = unique(dims);
     assert(numel(n_dims) == 1);
     words = cell(1, n_words);
     vecs = zeros(n_dims, n_words);

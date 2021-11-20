@@ -36,8 +36,4 @@ function [profile] = ComputerProfile ()
     if ~exist(profile.cache_dir, 'dir')
         mkdir(profile.cache_dir);
     end
-
-    %% validate
-    mustBeFolder(profile.dataset_dir);
-    mustBeFolder(profile.cache_dir);
 end
