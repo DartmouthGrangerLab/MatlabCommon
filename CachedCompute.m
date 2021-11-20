@@ -4,8 +4,13 @@
 % INPUTS:
 %   func - function to compute
 %   varargin - arguments to the function
+% RETURNS:
+%   whatever func would return
 function [varargout] = CachedCompute (func, varargin)
-    validateattributes(func, 'function_handle', {'nonempty','scalar'});
+    validateattributes(func, {'char','function_handle'}, {'nonempty'});
+    if ischar(func)
+        func = str2func(func);
+    end
 
     rng_state = rng();
 

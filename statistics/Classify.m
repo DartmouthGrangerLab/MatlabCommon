@@ -1,36 +1,31 @@
 % Eli Bowen
 % 10/1/2021
 % INPUTS:
-%   trnData - n_trnpts x n_dims (numeric or logical)
-%   trnLabel - 1 x n_trnpts (int-valued numeric or cell array of chars)
-%   tstData - n_tstpts x n_dims (numeric or logical)
-%   tstLabel - 1 x n_tstpts (int-valued numeric or cell array of chars)
-%   classifierType - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
+%   trnData          - n_trnpts x n_dims (numeric or logical)
+%   trnLabel         - 1 x n_trnpts (int-valued numeric or cell array of chars)
+%   tstData          - n_tstpts x n_dims (numeric or logical)
+%   tstLabel         - 1 x n_tstpts (int-valued numeric or cell array of chars)
+%   classifierType   - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
 %   classifierParams - OPTIONAL struct
-%       .cost - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
-%       .k - for KNN
-%       .distance - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
+%       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
+%       .k           - for KNN
+%       .distance    - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
 %   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   predLabel
 %   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
 function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
-    validateattributes(trnData, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)});
-    validateattributes(trnLabel, 'numeric', {'nonempty','vector'});
-    validateattributes(tstData, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)});
-    validateattributes(tstLabel, 'numeric', {'nonempty','vector'});
-    validateattributes(classifierType, 'char', {'nonempty'});
+    validateattributes(trnData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)});
+    validateattributes(trnLabel,       'numeric',             {'nonempty','vector'});
+    validateattributes(tstData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)});
+    validateattributes(tstLabel,       'numeric',             {'nonempty','vector'});
+    validateattributes(classifierType, 'char',                {'nonempty'});
+    if ~exist('classifierParams', 'var') || isempty(classifierParams)
+        classifierParams = struct('regularization_lvl', 'optimize', 'k', 1, 'distance', 'euclidean');
+    end
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
-    end
-    
-    %% default classifier params
-    if ~exist('classifierParams', 'var') || isempty(classifierParams)
-        classifierParams = struct();
-        classifierParams.regularization_lvl = 'optimize'; % 1 (default) = much faster, default regularization, may be less successful
-        classifierParams.k = 1;
-        classifierParams.distance = 'euclidean';
     end
 
     %% clean up, standardize provided labels
