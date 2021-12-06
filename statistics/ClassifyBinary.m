@@ -23,14 +23,14 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyBinary (trnData, trnLabe
     end
     t = tic();
 
-    [uniqueLabel,~,trnLabelNum] = unique(trnLabel, 'stable');
+    [uniqueLabel,~,trnLabelIdx] = unique(trnLabel, 'stable');
     
-    tstLabelNum = tstLabel;
+    tstLabelIdx = tstLabel;
     [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
-    tstLabelNum(c) = r;
+    tstLabelIdx(c) = r;
     % above is faster than below, same result
 %     for i = 1 : numel(tstLabel)
-%         tstLabelNum(i) = find(uniqueLabel == tstLabel(i));
+%         tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
 %     end
 
     n_classes = numel(uniqueLabel);
@@ -41,9 +41,15 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyBinary (trnData, trnLabe
     score     = cell(n_classes, n_classes);
     for i = 1 : n_classes
         for j = i + 1 : n_classes
-            trnKeep = (trnLabelNum == i | trnLabelNum == j);
-            tstKeep = (tstLabelNum == i | tstLabelNum == j);
-            [acc(i,j),predLabel{i,j},score{i,j}] = Classify(trnData(trnKeep,:), (trnLabelNum(trnKeep) == i) + 1, tstData(tstKeep,:), (tstLabelNum(tstKeep) == i) + 1, classifierType, classifierParams, false);
+            trnKeep = (trnLabelIdx == i | trnLabelIdx == j);
+            tstKeep = (tstLabelIdx == i | tstLabelIdx == j);
+            if nargout() > 2
+                [acc(i,j),predLabel{i,j},score{i,j}] = Classify(trnData(trnKeep,:), (trnLabelIdx(trnKeep) == i) + 1, tstData(tstKeep,:), (tstLabelIdx(tstKeep) == i) + 1, classifierType, classifierParams, false);
+            elseif nargout() > 1 % faster
+                [acc(i,j),predLabel{i,j}]            = Classify(trnData(trnKeep,:), (trnLabelIdx(trnKeep) == i) + 1, tstData(tstKeep,:), (tstLabelIdx(tstKeep) == i) + 1, classifierType, classifierParams, false);
+            else % fasterer
+                acc(i,j)                             = Classify(trnData(trnKeep,:), (trnLabelIdx(trnKeep) == i) + 1, tstData(tstKeep,:), (tstLabelIdx(tstKeep) == i) + 1, classifierType, classifierParams, false);
+            end
         end
     end
 
@@ -57,5 +63,5 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyBinary (trnData, trnLabe
         end
     end
 
-    if verbose; disp(['ClassifyBinary took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_trn = ',num2str(numel(trnLabelIdx)),', n_tst = ',num2str(numel(tstLabelIdx)),') took ',num2str(toc(t)),' s']); end
 end

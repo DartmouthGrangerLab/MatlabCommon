@@ -27,20 +27,25 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
     end
+    assert((islogical(trnData) && islogical(tstData)) || (~islogical(trnData) && ~islogical(tstData)));
 
     %% clean up, standardize provided labels
-    % some algs require labels to be the integers 1:numel(uniqueLabel)
+    % some algs require labels to be the integers 1:n_classes
     trnLabel = trnLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
     tstLabel = tstLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
-    [uniqueLabel,~,trnLabelNum] = unique(trnLabel, 'stable'); % convert labels into index into uniqueLabels
+    [uniqueLabel,~,trnLabelIdx] = unique(trnLabel, 'stable'); % convert labels into index into uniqueLabels
+    n_classes = numel(uniqueLabel);
     
-    tstLabelNum = tstLabel;
+    tstLabelIdx = tstLabel;
     [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
-    tstLabelNum(c) = r;
+    tstLabelIdx(c) = r;
     % above is faster than below, same result
 %     for i = 1 : numel(tstLabel)
-%         tstLabelNum(i) = find(uniqueLabel == tstLabel(i));
+%         tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
 %     end
+
+    n_trn = numel(trnLabelIdx);
+    n_tst = numel(tstLabelIdx);
     
     %% remove dimensions of zero variance (or learning algs will crash)
     variances = var(trnData, 0, 1);
@@ -50,49 +55,80 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         tstData(:,variances == 0) = [];
     end
     
+    %% prepare variables
+    cost = [];
+    if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
+        cost = classifierParams.cost;
+    end
+    do_parallel = true;
+    
     %% print info
     if verbose
-        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(numel(trnLabelNum)),', n_tst = ',num2str(numel(tstLabelNum)),')...']);
+        disp([classifierType,'...']);
         disp(uniqueLabel(:)');
         if any(variances == 0)
             disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
         end
         t = tic();
     end
-    
-    %% prepare variables
-    cost = [];
-    if isfield(classifierParams, 'cost') && ~isempty(classifierParams.cost)
-        cost = classifierParams.cost;
-    end
 
     %% classify
-    if strcmp(classifierType, 'lda') % --- lda via matlab ---
-        if islogical(trnData) || islogical(tstData)
+    score = [];
+    if strcmp(classifierType, 'nb') % --- naive bayes via matlab ---
+        if islogical(trnData)
             trnData = double(trnData);
             tstData = double(tstData);
         end
-        if numel(uniqueLabel) == 2 % 2-class lda
-            model = fitcdiscr(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'discrimType', 'pseudoLinear');
+        if n_classes == 2 % 2-class lda
+            model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost);
         else % multiclass lda
-            model = fitcecoc(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', true));
+            model = fitcecoc(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateNaiveBayes(), 'Options', statset('UseParallel', do_parallel));
         end
-        acc = 1 - loss(model, tstData, tstLabelNum, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
+        acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', true));
+            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
         end
-        error('untested');
-    elseif strcmp(classifierType, 'svm') % --- svm via matlab ---
-        if islogical(trnData) || islogical(tstData)
+        warning('nb untested');
+    elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
+        if islogical(trnData) || all(trnData(:) == 0 | trnData(:) == 1)
+            if islogical(trnData)
+                trnData = double(trnData);
+                tstData = double(tstData);
+            end
+            model = nbBern(trnData', trnLabelIdx(:)');
+            predLabel = nbBernPred(model, tstData');
+        else % gaussian dist NOT appropriate for count data! use 'nb' with a better distribution instead!
+            model = nbGauss(trnData', trnLabelIdx(:)');
+            predLabel = nbGaussPred(model, tstData');
+        end
+        predLabel = predLabel';
+        acc = sum(predLabel == tstLabelIdx) / n_tst;
+    elseif strcmp(classifierType, 'lda') % --- lda via matlab ---
+        if islogical(trnData)
             trnData = double(trnData);
             tstData = double(tstData);
         end
-        if numel(uniqueLabel) == 2 % 2-class svm
-            model = fitcsvm(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'KernelFunction', 'linear', 'Standardize', true);
-        else % multiclass svm
-            model = fitcecoc(trnData, trnLabelNum, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateSVM('Standardize', 1, 'KernelFunction', 'linear'), 'Options', statset('UseParallel', true));
+        if n_classes == 2 % 2-class lda
+            model = fitcdiscr(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost, 'discrimType', 'pseudoLinear');
+        else % multiclass lda
+            model = fitcecoc(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', do_parallel));
         end
-        acc = 1 - loss(model, tstData, tstLabelNum, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
+        acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
+        if nargout > 1 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
+        end
+        error('lda untested');
+    elseif strcmp(classifierType, 'svm') % --- svm via matlab ---
+        if islogical(trnData)
+            trnData = double(trnData);
+            tstData = double(tstData);
+        end
+        if n_classes == 2 % 2-class svm
+            model = fitcsvm(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost, 'KernelFunction', 'linear', 'Standardize', true);
+        else % multiclass svm
+            model = fitcecoc(trnData, trnLabelIdx, 'ClassNames', uniqueLabel, 'Cost', cost, 'Learners', templateSVM('Standardize', 1, 'KernelFunction', 'linear'), 'Options', statset('UseParallel', do_parallel));
+        end
+        acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
             [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
         end
@@ -100,21 +136,21 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
         doAdjust4UnequalN = true;
-        model = LiblinearTrain('svm', trnLabelNum, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
-        [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
+        model = LiblinearTrain('svm', trnLabelIdx, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
+        [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelIdx, tstData);
     elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
         error('not yet implemented');
     elseif strcmp(classifierType, 'logregliblinear') % --- logistic regression via liblinear-multicore
         doAdjust4UnequalN = true;
-        model = LiblinearTrain('logreg', trnLabelNum, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
-        [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelNum, tstData);
+        model = LiblinearTrain('logreg', trnLabelIdx, trnData, doAdjust4UnequalN, classifierParams.regularization_lvl);
+        [predLabel,acc,score,~,~] = LiblinearPredict(model, tstLabelIdx, tstData);
     elseif strcmp(classifierType, 'knn') % --- knn ---
         if nargout() > 2 % for efficiency, only calc scores if needed
-            [predLabel,score] = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+            [predLabel,score] = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelIdx, classifierParams.distance);
         else
-            predLabel         = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelNum, classifierParams.distance);
+            predLabel         = ClassifyKNN(classifierParams.k, trnData', tstData', trnLabelIdx, classifierParams.distance);
         end
-        acc = sum(predLabel == tstLabelNum) / numel(tstLabelNum);
+        acc = sum(predLabel == tstLabelIdx) / n_tst;
         % for knn, score is the "strength" of the classification
     else
         error('unexpected classifierType');
@@ -129,5 +165,5 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         score = gather(score);
     end
     
-    if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc),') took ',num2str(toc(t)),' s']); end
 end

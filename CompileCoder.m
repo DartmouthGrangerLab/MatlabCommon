@@ -56,7 +56,7 @@ function [funcHandle] = CompileCoder (funcName, vars, is_gpu, append)
 
     %% compile
     if is_gpu
-        kernelFuncName = [funcName,'_',append,'_gpucoder'];
+        kernelFuncName = [funcName,'_',append,'_gpucdr'];
     else
         kernelFuncName = [funcName,'_',append,'_coder'];
     end
@@ -65,5 +65,13 @@ function [funcHandle] = CompileCoder (funcName, vars, is_gpu, append)
 
     funcHandle = str2func(kernelFuncName);
 
-    disp(['recompiling code for ',kernelFuncName,'(',strjoin(cellfun(@(X)X.ClassName, args, 'UniformOutput', false), ', '),')',' took ',num2str(toc(t)),' s']);
+    argTxt = cell(1, numel(args));
+    for i = 1 : numel(args)
+        try
+            argTxt{i} = args{i}.ClassName;
+        catch
+            argTxt{i} = class(args{i});
+        end
+    end
+    disp(['recompiling code for ',kernelFuncName,'(',strjoin(argTxt, ', '),')',' took ',num2str(toc(t)),' s']);
 end

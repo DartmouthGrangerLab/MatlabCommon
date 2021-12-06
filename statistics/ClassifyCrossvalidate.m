@@ -43,9 +43,11 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
     end
 
     %% clean up, standardize provided labels
-    % some algs require labels to be the integers 1:numel(uniqueLabel)
+    % some algs require labels to be the integers 1:n_classes
     label = label(:); % input label can be either 1 x N or N x 1, below code requires consistency
     [uniqueLabel,~,labelIdx] = unique(label); % even if label is numeric, must get rid of labels with no exemplars
+    n_classes = numel(uniqueLabel);
+    n_pts = numel(labelIdx);
     % above is same as below but WAY (>5x) faster
 %     uniqueLabel = unique(label);
 %     labelIdx = zeros(numel(label), 1);
@@ -64,7 +66,6 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
 % %         end
 %     end
     
-    n_classes = numel(uniqueLabel);
     classNames = 1:n_classes;
 
     %% equalize N
@@ -73,6 +74,7 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         data = data(selectedIdx,:);
         label = label(selectedIdx);
         labelIdx = labelIdx(selectedIdx);
+        n_pts = numel(labelIdx);
     else
         selectedIdx = 1:size(data, 1);
     end
@@ -86,10 +88,10 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
     
     %% print info
     if verbose
-        disp([num2str(n_classes),'-class ',num2str(size(data, 2)),'-dim ',classifierType,' (n_pts = ',num2str(numel(labelIdx)),')...']);
+        disp([classifierType,'...']);
         disp(uniqueLabel(:)');
         if doEvenN
-            disp(['subsetting to equal N of ',num2str(numel(selectedIdx)/n_classes),', total is now ',num2str(numel(selectedIdx)),' datapoints']);
+            disp(['subsetting to equal N of ',num2str(n_pts/n_classes),', total is now ',num2str(n_pts),' datapoints']);
         end
         if any(variances == 0)
             disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
@@ -103,17 +105,45 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         cost = classifierParams.cost;
     end
     accs = zeros(1, n_folds);
-    if contains(classifierType, 'liblinear')
+    if contains(classifierType, 'liblinear') || strcmp(classifierType, 'nbfast')
         % must implement our own crossvalidation, because liblinear's random number generator can't be seeded
         [trnIdx,tstIdx] = CrossvalidationKFold(labelIdx, n_folds, true); % fitcecoc is random so we'll be random too
     end
+    do_parallel = ~isa(data, 'gpuArray');
 
     %% classify
-    if strcmp(classifierType, 'lda') % --- lda via matlab ---
+    score = [];
+    if strcmp(classifierType, 'nb') % --- naive bayes via matlab ---
+        if n_classes == 2 % 2-class lda
+            models = fitcnb(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds);
+        else % multiclass lda
+            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateNaiveBayes(), 'Options', statset('UseParallel', do_parallel));
+        end
+        for fold = 1 : n_folds
+            accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
+        end
+        if nargout > 2 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,score] = kfoldPredict(models);
+            predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
+        end
+        warning('nb untested!');
+    elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
+        predLabel = zeros(size(labelIdx));
+        for fold = 1 : n_folds
+            if islogical(data) || all(data(:) == 0 | data(:) == 1)
+                model = nbBern(data(trnIdx{fold},:)', labelIdx(trnIdx{fold}));
+                predLabel(tstIdx{fold}) = nbBernPred(model, data(tstIdx{fold},:)');
+            else % gaussian dist NOT appropriate for count data! use 'nb' with a better distribution instead!
+                model = nbGauss(data(trnIdx{fold},:)', labelIdx(trnIdx{fold}));
+                predLabel(tstIdx{fold}) = nbGaussPred(model, data(tstIdx{fold},:)');
+            end
+            accs(fold) = sum(predLabel(tstIdx{fold}) == labelIdx(tstIdx{fold})) / numel(labelIdx(tstIdx{fold}));
+        end
+    elseif strcmp(classifierType, 'lda') % --- lda via matlab ---
         if n_classes == 2 % 2-class lda
             models = fitcdiscr(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'discrimType', 'pseudoLinear');
         else % multiclass lda
-            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', ~isa(data, 'gpuArray')));
+            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', do_parallel));
         end
         for fold = 1 : n_folds
             accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
@@ -126,7 +156,7 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         if n_classes == 2 % 2-class svm
             models = fitcsvm(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'KernelFunction', 'linear', 'Standardize', true);
         else % multiclass svm
-            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateSVM('Standardize', true, 'KernelFunction', 'linear'), 'Options', statset('UseParallel', ~isa(data, 'gpuArray')));
+            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateSVM('Standardize', true, 'KernelFunction', 'linear'), 'Options', statset('UseParallel', do_parallel));
         end
         for fold = 1 : n_folds
             accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
@@ -160,10 +190,10 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         end
         warning('TODO: this option not yet validated! all i did was change the TrainLiblinear param from 2 to 0');
     elseif strcmp(classifierType, 'knn') % --- knn ---
-        models = crossval(fitcknn(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'NumNeighbors', classifierParams.k, 'Distance', classifierParams.distMeasure), 'KFold', n_folds);
+        models = crossval(fitcknn(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'NumNeighbors', classifierParams.k, 'Distance', classifierParams.distance), 'KFold', n_folds);
         % below code is a different way of doing things, but it's rather unusual
 %         template = templateKNN('Standardize', 1, 'NumNeighbors', classifierParams.k);
-%         models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'KFold', n_folds, 'Learners', template, 'CrossVal', 'on', 'Options', statset('UseParallel', true));
+%         models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'KFold', n_folds, 'Learners', template, 'CrossVal', 'on', 'Options', statset('UseParallel', do_parallel));
         for fold = 1 : n_folds
             accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
         end
@@ -171,6 +201,18 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
             [predLabel,score] = kfoldPredict(models);
             predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
         end
+%         predLabel = zeros(size(labelIdx));
+%         score = NaN(numel(labelIdx), n_classes);
+%         for fold = 1 : n_folds
+%             model = LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+%             [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
+%             if nargout() > 3 % for efficiency, only calc scores if needed
+%                 [predLabel(tstIdx{fold}),score(tstIdx{fold},:)] = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
+%             else
+%                 predLabel(tstIdx{fold})                         = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
+%             end
+%             accs(fold) = sum(predLabel == labelIdx(tstIdx{fold})) / n_pts;
+%         end
     else
         error('unknown classifierType');
     end
@@ -187,14 +229,14 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
     rocTPR = [];
     rocFPR = [];
     if nargout > 5 && numel(uniqueLabel) == 2
-        trueOneHot = zeros(numel(labelIdx), 2); % binary version of the labels, in wide/orthogonal format
-        for i = 1 : numel(labelIdx)
+        trueOneHot = zeros(n_pts, 2); % binary version of the labels, in wide/orthogonal format
+        for i = 1 : n_pts
             trueOneHot(i,labelIdx) = 1;
         end
         [rocTPR,rocFPR,~] = roc(trueOneHot', score');
     end
 
     if verbose
-        disp(['ClassifyCrossvalidate took ',num2str(toc(t)),' s']);
+        disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(data, 2)),'-dim ',classifierType,' (n_pts = ',num2str(n_pts),') took ',num2str(toc(t)),' s']);
     end
 end

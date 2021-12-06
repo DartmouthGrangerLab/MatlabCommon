@@ -26,6 +26,8 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
     %% clean up, standardize provided labels
     % some algs require labels to be the integers 1:numel(uniqueLabels)
     [uniqueLabel,~,labelIdx] = unique(label); % convert labels into index into uniqueLabels
+    n_classes = numel(uniqueLabel);
+    n_pts = numel(labelIdx);
 
     %% remove dimensions of zero variance (or learning algs will crash)
     variances = var(data, 0, 1);
@@ -36,7 +38,7 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
 
     %% print info
     if verbose
-        disp([num2str(numel(uniqueLabel)),'-class ',num2str(size(data, 2)),'-dim ',classifierType]);
+        disp([classifierType,'...']);
         disp(uniqueLabel(:)');
         if any(variances == 0)
             disp(['removed ',num2str(sum(variances==0)),' dims with zero variance']);
@@ -47,7 +49,7 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
     %% classify
     if strcmp(classifierType, 'knn') % --- knn ---
         predLabel = ClassifyKNNHold1Out(classifierParams.k, data', labelIdx, classifierParams.distance);
-        acc = sum(predLabel == labelIdx) / numel(labelIdx);
+        acc = sum(predLabel == labelIdx) / n_pts;
     else
         error('unexpected classifierType');
     end
@@ -56,5 +58,5 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
     acc = gather(acc);
     predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
 
-    if verbose; disp([classifierType,' took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(data, 2)),'-dim ',classifierType,' (n_pts = ',num2str(n_pts),', acc = ',num2str(acc),') took ',num2str(toc(t)),' s']); end
 end

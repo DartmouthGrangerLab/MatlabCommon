@@ -1,9 +1,9 @@
 % Eli Bowen
 % 11/19/2021
 % RETURNS:
-%   words - 1 x n_words (cell array of chars)
-%   vecs  - n_dims x n_words (numeric)
-function [words,vecs] = LoadWordVecs (datasetName)
+%   word - 1 x n_words (cell array of chars)
+%   vec  - n_dims x n_words (numeric)
+function [word,vec] = LoadWordVecs (datasetName)
     arguments
         datasetName (1,:) char
     end
@@ -38,13 +38,19 @@ function [words,vecs] = LoadWordVecs (datasetName)
     n_words = numel(text);
     n_dims = unique(dims);
     assert(numel(n_dims) == 1);
-    words = cell(1, n_words);
-    vecs = zeros(n_dims, n_words);
+    word = cell(1, n_words);
+    vec = zeros(n_dims, n_words);
     for i = 1 : n_words
         line = strsplit(text{i}, ' ');
-        words{i} = line{1};
-        vecs(:,i) = str2double(line(2:end));
+        word{i} = line{1};
+        vec(:,i) = str2double(line(2:end));
     end
+    
+    %% clean up
+    word = lower(word);
+    [~,idx] = sort(word);
+    word = word(idx);
+    vec = vec(:,idx);
 
     %% remove vectors for words we don't like
     %TODO: consider doing in the future if we want
@@ -52,4 +58,7 @@ function [words,vecs] = LoadWordVecs (datasetName)
 %     for j = find(counts2 > 0)
 %         disp(text{j});
 %     end
+
+    %% validate
+    assert(numel(word) == numel(unique(word)));
 end

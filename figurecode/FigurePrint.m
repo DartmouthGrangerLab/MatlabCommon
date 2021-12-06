@@ -8,8 +8,8 @@
 %   dpi OPTIONAL - scalar (int-valued numeric) - resolution (default = 300)
 %   do_close_when_done OPTIONAL - scalar (logical) - if true, close figure when done printing (default = true)
 function [] = FigurePrint (h, outDir, file, paperSz, dpi, do_close_when_done)
-    validateattributes(outDir, 'char', {'nonempty'});
-    validateattributes(file, 'char', {'nonempty'});
+    validateattributes(outDir, 'char',              {'nonempty'});
+    validateattributes(file,   'char',              {'nonempty'});
     validateattributes(paperSz, {'numeric','char'}, {'nonempty'});
     if ~exist('dpi', 'var') || isempty(dpi)
         dpi = 300;
@@ -33,7 +33,7 @@ function [] = FigurePrint (h, outDir, file, paperSz, dpi, do_close_when_done)
         n_cols = numel(unique(posC));
         paperSz = 5 .* [n_cols,n_rows];
     end
-    validateattributes(paperSz, 'numeric', {'nonempty','numel',2});
+    validateattributes(paperSz, 'numeric', {'nonempty','positive','numel',2});
 
     set(h, 'PaperPosition', [0,0,paperSz(1),paperSz(2)]); % [left, bottom, width, height]
 

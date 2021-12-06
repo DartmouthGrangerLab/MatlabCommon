@@ -21,14 +21,14 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
     end
     t = tic();
 
-    [uniqueLabel,~,trnLabelNum] = unique(trnLabel, 'stable');
+    [uniqueLabel,~,trnLabelIdx] = unique(trnLabel, 'stable');
     
-    tstLabelNum = tstLabel;
+    tstLabelIdx = tstLabel;
     [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
-    tstLabelNum(c) = r;
+    tstLabelIdx(c) = r;
     % above is faster than below, same result
 %     for i = 1 : numel(tstLabel)
-%         tstLabelNum(i) = find(uniqueLabel == tstLabel(i));
+%         tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
 %     end
 
     n_classes = numel(uniqueLabel);
@@ -39,7 +39,16 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
     predLabel = NaN(n_tstpts, n_classes);
     score     = NaN(n_tstpts, 2, n_classes);
     for i = 1 : n_classes
-        [acc(i),predLabel(:,i),score(:,:,i)] = Classify(trnData, (trnLabelNum == i) + 1, tstData, (tstLabelNum == i) + 1, classifierType, classifierParams, false);
+        if nargout() > 2
+            [acc(i),predLabel(:,i),temp] = Classify(trnData, (trnLabelIdx == i) + 1, tstData, (tstLabelIdx == i) + 1, classifierType, classifierParams, false);
+            if ~isempty(temp)
+                score(:,:,i) = temp;
+            end
+        elseif nargout() > 1 % faster
+            [acc(i),predLabel(:,i)]      = Classify(trnData, (trnLabelIdx == i) + 1, tstData, (tstLabelIdx == i) + 1, classifierType, classifierParams, false);
+        else % fasterer
+            acc(i)                       = Classify(trnData, (trnLabelIdx == i) + 1, tstData, (tstLabelIdx == i) + 1, classifierType, classifierParams, false);
+        end
     end
     
     if nargout() > 3
@@ -50,5 +59,5 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
         end
     end
 
-    if verbose; disp(['ClassifyOneVsRest took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_trn = ',num2str(numel(trnLabelIdx)),', n_tst = ',num2str(numel(tstLabelIdx)),') took ',num2str(toc(t)),' s']); end
 end

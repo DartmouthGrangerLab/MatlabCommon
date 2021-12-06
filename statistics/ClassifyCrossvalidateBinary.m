@@ -22,7 +22,7 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateB
     end
     t = tic();
 
-    [uniqueLabel,~,labelNum] = unique(label, 'stable');
+    [uniqueLabel,~,labelIdx] = unique(label, 'stable');
     n_classes = numel(uniqueLabel);
     assert(n_classes > 2); % just call Classify() if 2, if 1 wtf are you doing
 
@@ -32,8 +32,14 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateB
     score     = cell(n_classes, n_classes);
     for i = 1 : n_classes
         for j = i + 1 : n_classes
-            keep = (labelNum == i | labelNum == j);
-            [acc(i,j),accStdErr(i,j),predLabel{i,j},score{i,j}] = ClassifyCrossvalidate(data(keep,:), (labelNum(keep) == i) + 1, n_folds, classifierType, false, classifierParams, false);
+            keep = (labelIdx == i | labelIdx == j);
+            if nargout() > 3
+                [acc(i,j),accStdErr(i,j),predLabel{i,j},score{i,j}] = ClassifyCrossvalidate(data(keep,:), (labelIdx(keep) == i) + 1, n_folds, classifierType, false, classifierParams, false);
+            elseif nargout() > 2 % faster
+                [acc(i,j),accStdErr(i,j),predLabel{i,j}]            = ClassifyCrossvalidate(data(keep,:), (labelIdx(keep) == i) + 1, n_folds, classifierType, false, classifierParams, false);
+            else % fasterer
+                [acc(i,j),accStdErr(i,j)]                           = ClassifyCrossvalidate(data(keep,:), (labelIdx(keep) == i) + 1, n_folds, classifierType, false, classifierParams, false);
+            end
         end
     end
 
@@ -47,5 +53,5 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateB
         end
     end
 
-    if verbose; disp(['ClassifyBinary took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_pts = ',num2str(numel(labelIdx)),') took ',num2str(toc(t)),' s']); end
 end

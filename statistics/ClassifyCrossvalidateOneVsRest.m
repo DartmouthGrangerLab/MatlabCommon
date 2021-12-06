@@ -21,7 +21,7 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateO
     end
     t = tic();
 
-    [uniqueLabel,~,labelNum] = unique(label, 'stable');
+    [uniqueLabel,~,labelIdx] = unique(label, 'stable');
     n_classes = numel(uniqueLabel);
     assert(n_classes > 2); % if 2, just call Classify(); if 1 wtf are you doing
     n_datapts  = numel(label);
@@ -31,9 +31,15 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateO
     predLabel = NaN(n_datapts, n_classes);
     score     = NaN(n_datapts, 2, n_classes);
     for i = 1 : n_classes
-        [acc(i),accStdErr(i),predLabel(:,i),temp4] = ClassifyCrossvalidate(data, (labelNum == i) + 1, n_folds, classifierType, false, classifierParams, false);
-        if ~isempty(temp4)
-            score(:,:,i) = temp4;
+        if nargout() > 3
+            [acc(i),accStdErr(i),predLabel(:,i),temp] = ClassifyCrossvalidate(data, (labelIdx == i) + 1, n_folds, classifierType, false, classifierParams, false);
+            if ~isempty(temp)
+                score(:,:,i) = temp;
+            end
+        elseif nargout() > 2 % faster
+            [acc(i),accStdErr(i),predLabel(:,i)]      = ClassifyCrossvalidate(data, (labelIdx == i) + 1, n_folds, classifierType, false, classifierParams, false);
+        else % fasterer
+            [acc(i),accStdErr(i)]                     = ClassifyCrossvalidate(data, (labelIdx == i) + 1, n_folds, classifierType, false, classifierParams, false);
         end
     end
 
@@ -45,5 +51,5 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateO
         end
     end
 
-    if verbose; disp(['ClassifyOneVsRest took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_pts = ',num2str(numel(labelIdx)),') took ',num2str(toc(t)),' s']); end
 end
