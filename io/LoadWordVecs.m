@@ -1,29 +1,33 @@
 % Eli Bowen
 % 11/19/2021
+% INPUTS:
+%   datasetName
 % RETURNS:
 %   word - 1 x n_words (cell array of chars)
 %   vec  - n_dims x n_words (numeric)
 function [word,vec] = LoadWordVecs (datasetName)
-    arguments
-        datasetName (1,:) char
-    end
+    validateattributes(datasetName, 'char', {'nonempty'});
 
     %% load
     profile = ComputerProfile();
     if strcmp(datasetName, 'wordvec_glove6')
-        text = fileread(fullfile(profile.dataset_dir, 'word_vectors', 'glove', 'glove.6B.300d.txt'));
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.6B.300d.txt'));
     elseif strcmp(datasetName, 'wordvec_glove42')
-        text = fileread(fullfile(profile.dataset_dir, 'word_vectors', 'glove', 'glove.42B.300d.txt'));
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.42B.300d.txt'));
     elseif strcmp(datasetName, 'wordvec_glove840')
-        text = fileread(fullfile(profile.dataset_dir, 'word_vectors', 'glove', 'glove.840B.300d.txt')); %% 11 GB loaded
-    elseif strcmp(datasetName, 'wordvec_small_dense_bin_glove6')
-        text = fileread(fullfile(profile.dataset_dir, 'word_vectors', 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec'));
-        error('TODO: remove header');
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.840B.300d.txt')); %% 11 GB loaded
+    elseif strcmp(datasetName, 'wordvec_smalldensebin_glove6')
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec'));
+        error('parsing code will be wrong for this - need to bring in parsing code from the small_dense_binary folder');
         % vector building code fails (produces all vectors all 1's) on glove.42B and glove.840B
-    elseif strcmp(datasetName, 'wordvec_large_sparse_bin_glove6')
-        text = fileread(fullfile(profile.dataset_dir, 'word_vectors', 'large_sparse_binary', 'glove.6B.300d_sparsified.txt'));
-        error('TODO: remove header?');
-        % vector building code fails (crashes) on glove.840B
+    elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x10')
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.6B.300d_sparsifiedx10.txt')); % 6 GB loaded; 10% nonzero
+    elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x20')
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.6B.300d_sparsifiedx20.txt'));
+        error('untested');
+    elseif strcmp(datasetName, 'wordvec_largesparsebin_glove840x20')
+        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.840B.300d_sparsifiedx20.txt'));
+        error('untested');
     else
         error('unexpected datasetName');
     end
@@ -45,7 +49,18 @@ function [word,vec] = LoadWordVecs (datasetName)
         word{i} = line{1};
         vec(:,i) = str2double(line(2:end));
     end
-    
+    if startsWith(datasetName, 'wordvec_glove')
+        % n/a
+    elseif startsWith(datasetName, 'wordvec_smalldensebin')
+        error('TODO: remove header');
+    elseif startsWith(datasetName, 'wordvec_largesparsebin')
+        vec(end,:) = [];
+%         vec = vec ./ max(vec(:)); % put it in a nice range of 0-->1
+        vec = (vec > 0);
+    else
+        error('unexpected datasetName');
+    end
+
     %% clean up
     word = lower(word);
     [~,idx] = sort(word);
