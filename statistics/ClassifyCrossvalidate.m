@@ -132,11 +132,10 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         for fold = 1 : n_folds
             if islogical(data) || all(data(:) == 0 | data(:) == 1)
                 model = nbBern(data(trnIdx{fold},:)', labelIdx(trnIdx{fold}));
-                predLabel(tstIdx{fold}) = nbBernPred(model, data(tstIdx{fold},:)');
             else % gaussian dist NOT appropriate for count data! use 'nb' with a better distribution instead!
                 model = nbGauss(data(trnIdx{fold},:)', labelIdx(trnIdx{fold}));
-                predLabel(tstIdx{fold}) = nbGaussPred(model, data(tstIdx{fold},:)');
             end
+            predLabel(tstIdx{fold}) = nbPred(model, data(tstIdx{fold},:)');
             accs(fold) = sum(predLabel(tstIdx{fold}) == labelIdx(tstIdx{fold})) / numel(labelIdx(tstIdx{fold}));
         end
     elseif strcmp(classifierType, 'lda') % --- lda via matlab ---

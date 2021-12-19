@@ -53,5 +53,5 @@ function [acc,accStdErr,predLabel,score,uniqueLabelOut] = ClassifyCrossvalidateB
         end
     end
 
-    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_pts = ',num2str(numel(labelIdx)),') took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',classifierType,' (n_pts = ',num2str(numel(labelIdx)),') took ',num2str(toc(t)),' s']); end
 end

@@ -1,6 +1,5 @@
 % Given an image and pooling range, returns an image where each "pixel"
 % represents the sums of the pixel values within the pooling range of the original pixel
-%
 % INPUTS:
 %   imgIn: a 2-dimensional matrix, the image to be filtered
 %   radius: a scalar or vector, the additional radius of the filter pool,

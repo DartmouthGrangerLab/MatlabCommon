@@ -59,5 +59,5 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
         end
     end
 
-    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',classifierType,' (n_trn = ',num2str(numel(trnLabelIdx)),', n_tst = ',num2str(numel(tstLabelIdx)),') took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',classifierType,' (n_trn = ',num2str(numel(trnLabelIdx)),', n_tst = ',num2str(numel(tstLabelIdx)),', acc = ',num2str(mean(acc)),') took ',num2str(toc(t)),' s']); end
 end

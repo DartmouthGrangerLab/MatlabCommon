@@ -58,5 +58,5 @@ function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classi
     acc = gather(acc);
     predLabel = uniqueLabel(predLabel); % convert back from idx into uniqueLabel to labels as they were provided in the input
 
-    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(data, 2)),'-dim ',classifierType,' (n_pts = ',num2str(n_pts),', acc = ',num2str(acc),') took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(data, 2)),'-dim ',classifierType,' (n_pts = ',num2str(n_pts),', acc = ',num2str(acc, 4),') took ',num2str(toc(t)),' s']); end
 end

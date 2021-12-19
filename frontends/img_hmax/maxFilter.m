@@ -1,10 +1,8 @@
 % given an image and pooling range, returns a matrix of the image's maximum
 % values in each neighborhood defined by the pooling range
-%
 % INPUTS:
 %   img: a 2-dimensional matrix, the image to be filtered
 %   poolSize: a scalar, P, such that each maximum will be taken over a P x P area of pixels
-%
 % RETURNS:
 %   maxValues: a matrix whose size depends on poolSize, contains the maximum values found in poolSize x poolSize areas across img
 % modified by eli for readability and performance

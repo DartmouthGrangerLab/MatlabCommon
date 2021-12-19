@@ -92,16 +92,14 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
     elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
         if islogical(trnData) || all(trnData(:) == 0 | trnData(:) == 1)
             if islogical(trnData)
-                trnData = double(trnData);
-                tstData = double(tstData);
+                trnData = double(trnData); % can't be single
+                tstData = double(tstData); % can't be single
             end
             model = nbBern(trnData', trnLabelIdx(:)');
-            predLabel = nbBernPred(model, tstData');
         else % gaussian dist NOT appropriate for count data! use 'nb' with a better distribution instead!
             model = nbGauss(trnData', trnLabelIdx(:)');
-            predLabel = nbGaussPred(model, tstData');
         end
-        predLabel = predLabel';
+        predLabel = nbPred(model, tstData')';
         acc = sum(predLabel == tstLabelIdx) / n_tst;
     elseif strcmp(classifierType, 'lda') % --- lda via matlab ---
         if islogical(trnData)
@@ -165,5 +163,5 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
         score = gather(score);
     end
     
-    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc),') took ',num2str(toc(t)),' s']); end
+    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc, 4),') took ',num2str(toc(t)),' s']); end
 end
