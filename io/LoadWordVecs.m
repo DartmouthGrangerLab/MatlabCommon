@@ -5,28 +5,29 @@
 % RETURNS:
 %   word - 1 x n_words (cell array of chars)
 %   vec  - n_dims x n_words (numeric)
-function [word,vec] = LoadWordVecs (datasetName)
+function [word,vec] = LoadWordVecs(datasetName)
     validateattributes(datasetName, 'char', {'nonempty'});
 
+    directory = fullfile(ComputerProfile.DatasetDir(), 'wordvec');
+
     %% load
-    profile = ComputerProfile();
     if strcmp(datasetName, 'wordvec_glove6')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.6B.300d.txt'));
+        text = fileread(fullfile(directory, 'glove', 'glove.6B.300d.txt'));
     elseif strcmp(datasetName, 'wordvec_glove42')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.42B.300d.txt'));
+        text = fileread(fullfile(directory, 'glove', 'glove.42B.300d.txt'));
     elseif strcmp(datasetName, 'wordvec_glove840')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'glove', 'glove.840B.300d.txt')); %% 11 GB loaded
+        text = fileread(fullfile(directory, 'glove', 'glove.840B.300d.txt')); %% 11 GB loaded
     elseif strcmp(datasetName, 'wordvec_smalldensebin_glove6')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec'));
+        text = fileread(fullfile(directory, 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec'));
         error('parsing code will be wrong for this - need to bring in parsing code from the small_dense_binary folder');
         % vector building code fails (produces all vectors all 1's) on glove.42B and glove.840B
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x10')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.6B.300d_sparsifiedx10.txt')); % 6 GB loaded; 10% nonzero
+        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx10.txt')); % 6 GB loaded; 10% nonzero
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x20')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.6B.300d_sparsifiedx20.txt'));
+        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx20.txt'));
         error('untested');
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove840x20')
-        text = fileread(fullfile(profile.dataset_dir, 'wordvec', 'large_sparse_binary', 'glove.840B.300d_sparsifiedx20.txt'));
+        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.840B.300d_sparsifiedx20.txt'));
         error('untested');
     else
         error('unexpected datasetName');
