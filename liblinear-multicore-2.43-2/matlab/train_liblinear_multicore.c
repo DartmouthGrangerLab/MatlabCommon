@@ -313,7 +313,7 @@ int parse_command_line(int nrhs, const mxArray *prhs[], char *model_file_name)
 			return 1;
 		}
 #ifndef CV_OMP
-		mexPrintf("Total threads used: %d\n", param.nr_thread);
+		//mexPrintf("Total threads used: %d\n", param.nr_thread); // commented out by Eli because it's annoying
 #endif
 	}
 #ifdef CV_OMP
@@ -329,7 +329,7 @@ int parse_command_line(int nrhs, const mxArray *prhs[], char *model_file_name)
 		if(cvthreads > maxthreads)
 			cvthreads = maxthreads;
 		omp_set_num_threads(cvthreads);
-		mexPrintf("Total threads used: %d\n", cvthreads*param.nr_thread);
+		//mexPrintf("Total threads used: %d\n", cvthreads*param.nr_thread); // commented out by Eli because it's annoying
 	}
 #endif
 

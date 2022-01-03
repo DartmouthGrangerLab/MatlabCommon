@@ -49,6 +49,7 @@ try
 %             mex COMPFLAGS="/openmp $COMPFLAGS" CFLAGS="\$CFLAGS -fopenmp -DCV_OMP" CXXFLAGS="\$CXXFLAGS -fopenmp -DCV_OMP" -I.. -largeArrayDims train_liblinear_multicore.c linear_model_matlab.c ../linear.cpp ../newton.cpp ../blas/daxpy.c ../blas/ddot.c ../blas/dnrm2.c ../blas/dscal.c
 %             mex COMPFLAGS="/openmp $COMPFLAGS" CFLAGS="\$CFLAGS -fopenmp -DCV_OMP" CXXFLAGS="\$CXXFLAGS -fopenmp -DCV_OMP" -I.. -largeArrayDims predict_liblinear_multicore.c linear_model_matlab.c ../linear.cpp ../newton.cpp ../blas/daxpy.c ../blas/ddot.c ../blas/dnrm2.c ../blas/dscal.c
         else
+            % works great
             mex CFLAGS="\$CFLAGS -fopenmp" CXXFLAGS='$CXXFLAGS -fopenmp' -I.. -largeArrayDims -lgomp train_liblinear_multicore.c linear_model_matlab.c ../linear.cpp ../newton.cpp ../blas/daxpy.c ../blas/ddot.c ../blas/dnrm2.c ../blas/dscal.c
             mex CFLAGS="\$CFLAGS -fopenmp" CXXFLAGS='$CXXFLAGS -fopenmp' -I.. -largeArrayDims -lgomp predict_liblinear_multicore.c linear_model_matlab.c ../linear.cpp ../newton.cpp ../blas/daxpy.c ../blas/ddot.c ../blas/dnrm2.c ../blas/dscal.c
         end
