@@ -36,7 +36,7 @@
 %       .bias
 %       .norm_min
 %       .norm_max
-function [model] = LiblinearTrain (solverType, label, data, doAdjust4UnequalN, regularizationLvl)
+function [model] = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, regularizationLvl)
     if ischar(solverType)
         if strcmp(solverType, 'logreg')
             solverType = 0;

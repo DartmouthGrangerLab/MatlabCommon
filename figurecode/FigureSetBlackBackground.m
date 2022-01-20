@@ -5,7 +5,7 @@
 % call set(gcf, 'InvertHardCopy', 'off') to make figures saved to image file also have a black background
 % INPUTS:
 %   h - OPTIONAL figure handle (default = gcf())
-function [] = FigureSetBlackBackground (h)
+function [] = FigureSetBlackBackground(h)
     if ~exist('h', 'var') || isempty(h)
         h = gcf();
     end

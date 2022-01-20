@@ -1,5 +1,6 @@
 % Eli Bowen
 % 11/19/2021
+% count data (non-negative integers)
 % INPUTS:
 %   x
 function [] = mustBeCount (x)

@@ -12,7 +12,7 @@
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   predLabel
-function [acc,predLabel] = ClassifyHold1Out (data, label, classifierType, classifierParams, verbose)
+function [acc,predLabel] = ClassifyHold1Out(data, label, classifierType, classifierParams, verbose)
     validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
     validateattributes(label,          'numeric',             {'nonempty','vector'});
     validateattributes(classifierType, 'char',                {'nonempty'});

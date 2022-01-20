@@ -22,7 +22,8 @@ function [y] = nbPred (model, X)
         M = bsxfun(@plus, lambda'*X.^2-2*ml'*X, dot(mu, ml, 1)'); % M distance
         c = d*log(2*pi) + 2*sum(log(var), 1)'; % normalization constant
         R = -0.5 * bsxfun(@plus, M, c);
-        R = bsxfun(@times, exp(R), w);
+%         R = bsxfun(@times, exp(R), w); % original (R is often too large of a negative number to call exp on)
+        R = bsxfun(@plus, R, log(w)); % should equal log(original), the max of which should be the same index
     elseif strcmp(model.dist, 'bern')
         X = sparse(X);
         R = log(mu)'*X + log(1-mu)'*(1-X);

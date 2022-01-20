@@ -17,8 +17,8 @@
 %   n_tn - scalar (int-valued numeric) - number of true negatives
 %   n_fp - scalar (int-valued numeric) - number of false positives
 %   n_fn - scalar (int-valued numeric) - number of false negatives
-function [sensitivity,specificity,precision,acc,accBalanced,n_tp,n_tn,n_fp,n_fn] = SensitivitySpecificity (pred, target)
-    validateattributes(pred, 'logical', {'nonempty','vector','numel',numel(target)});
+function [sensitivity,specificity,precision,acc,accBalanced,n_tp,n_tn,n_fp,n_fn] = SensitivitySpecificity(pred, target)
+    validateattributes(pred,   'logical', {'nonempty','vector','numel',numel(target)});
     validateattributes(target, 'logical', {'nonempty','vector','numel',numel(pred)});
 
     pred = pred(:)'; % make sure they're the same dimensionality

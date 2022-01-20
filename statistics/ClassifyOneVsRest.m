@@ -14,7 +14,7 @@
 %   predLabel
 %   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
 %   uniqueLabelOut - 2 x n_classes (cell of chars)
-function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
+function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
     % params validated in Classify()
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
@@ -24,7 +24,7 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
     [uniqueLabel,~,trnLabelIdx] = unique(trnLabel, 'stable');
     
     tstLabelIdx = tstLabel;
-    [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
+    [r,c] = find(uniqueLabel(:) == tstLabel(:)');
     tstLabelIdx(c) = r;
     % above is faster than below, same result
 %     for i = 1 : numel(tstLabel)
@@ -50,7 +50,7 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyOneVsRest (trnData, trnL
             acc(i)                       = Classify(trnData, (trnLabelIdx == i) + 1, tstData, (tstLabelIdx == i) + 1, classifierType, classifierParams, false);
         end
     end
-    
+
     if nargout() > 3
         uniqueLabelOut = cell(2, n_classes);
         for i = 1 : n_classes

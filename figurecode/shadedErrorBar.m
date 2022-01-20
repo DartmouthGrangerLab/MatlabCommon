@@ -34,16 +34,16 @@
 %
 % Rob Campbell - November 2009  
 % edited by Eli Bowen just to tweak transparency and increase style consistency / readability
-function varargout = shadedErrorBar (x, y, errBar, lineProps, transparent)
+function varargout = shadedErrorBar(x, y, errBar, lineProps, transparent)
     % error checking
-    narginchk(3,5)
+    narginchk(3, 5)
 
     % process y using function handles if needed to make the error bar dynamically
     if iscell(errBar) 
-        fun1=errBar{1};
-        fun2=errBar{2};
-        errBar=fun2(y);
-        y=fun1(y);
+        fun1 = errBar{1};
+        fun2 = errBar{2};
+        errBar = fun2(y);
+        y = fun1(y);
     else
         y = y(:)';
     end
@@ -56,12 +56,14 @@ function varargout = shadedErrorBar (x, y, errBar, lineProps, transparent)
 
     % make upper and lower error bars if only one was specified
     if length(errBar) == length(errBar(:))
-        errBar = repmat(errBar(:)',2,1);
+        errBar = repmat(errBar(:)', 2, 1);
     else
-        s=size(errBar);
-        f=find(s==2);
+        s = size(errBar);
+        f = find(s == 2);
         if isempty(f), error('errbar has the wrong size'), end
-        if f==2, errBar=errBar'; end
+        if f == 2
+            errBar = errBar';
+        end
     end
 
     if length(x) ~= length(errBar)
@@ -70,11 +72,10 @@ function varargout = shadedErrorBar (x, y, errBar, lineProps, transparent)
 
     % set default options
     defaultProps = {'-k'};
-    if nargin<4, lineProps=defaultProps; end
-    if isempty(lineProps), lineProps=defaultProps; end
-    if ~iscell(lineProps), lineProps={lineProps}; end
-
-    if nargin<5, transparent=0; end
+    if nargin<4, lineProps = defaultProps; end
+    if isempty(lineProps), lineProps = defaultProps; end
+    if ~iscell(lineProps), lineProps = {lineProps}; end
+    if nargin<5, transparent = 0; end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % Plot to get the parameters of the line 
@@ -99,8 +100,8 @@ function varargout = shadedErrorBar (x, y, errBar, lineProps, transparent)
     end
 
     % calculate the error bars
-    uE = y+errBar(1,:);
-    lE = y-errBar(2,:);
+    uE = y + errBar(1,:);
+    lE = y - errBar(2,:);
 
     % add the patch error bar
     holdStatus = ishold;
@@ -115,13 +116,15 @@ function varargout = shadedErrorBar (x, y, errBar, lineProps, transparent)
     % remove nans otherwise patch won't work
     xP(isnan(yP)) = [];
     yP(isnan(yP)) = [];
+    
+    assert(~isempty(xP) && ~isempty(yP)); % added by eli - non non-nan error bars
 
-    H.patch = patch(xP,yP,1,'facecolor',patchColor, 'edgecolor','none', 'facealpha',faceAlpha);
+    H.patch = patch(xP, yP, 1, 'facecolor',patchColor, 'edgecolor','none', 'facealpha',faceAlpha);
 
     % make pretty edges around the patch
-    % commented out by eli
-%     H.edge(1)=plot(x,lE,'-','color',edgeColor);
-%     H.edge(2)=plot(x,uE,'-','color',edgeColor);
+    % commented out by eli, who doesn't think they're pretty
+%     H.edge(1) = plot(x, lE, '-', 'color', edgeColor);
+%     H.edge(2) = plot(x, uE, '-', 'color', edgeColor);
 
     % now replace the line (this avoids having to bugger about with z coordinates)
     uistack(H.mainLine, 'top')
