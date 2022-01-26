@@ -1,20 +1,20 @@
-%Eli Bowen
-%12/17/16
-%Silhouette cluster criterion
-%see also matlab's silhouette() for plotting or more detailed breakdowns
-%INPUTS:
-%   X - NxD position of each data point
+% Eli Bowen
+% 12/17/16
+% Silhouette cluster criterion
+% see also matlab's silhouette() for plotting or more detailed breakdowns
+% INPUTS:
+%   X                - N x D position of each data point
 %   clustAssignments - 1D vector (N elements) cluster ID assigned to each datapoint (e.g. a value of 2 indicates a point was assigned to the centroid with mean at the second row of 'centroids')
-%   distMeasure - OPTIONAL (default = 'Euclidean') - any valid input to matlab's silhouette (e.g. 'Euclidean', 'cosine', 'correlation')
-function [s] = ClusterEvalSilhouette (X, clustAssignments, distMeasure)
-    validateattributes(X, {'numeric'}, {}, 'ClusterEvalSilhouette', 'X', 1);
-    validateattributes(clustAssignments, {'numeric'}, {'vector','integer','positive'}, 'ClusterEvalSilhouette', 'clustAssignments', 2);
+%   distMeasure      - OPTIONAL (default = 'Euclidean') - any valid input to matlab's silhouette (e.g. 'Euclidean', 'cosine', 'correlation')
+function [s] = ClusterEvalSilhouette(X, clustAssignments, distMeasure)
+    validateattributes(X,                'numeric', {}, 'ClusterEvalSilhouette', 'X', 1);
+    validateattributes(clustAssignments, 'numeric', {'vector','integer','positive'}, 'ClusterEvalSilhouette', 'clustAssignments', 2);
     assert(size(X, 1) == numel(clustAssignments));
     if ~exist('distMeasure', 'var') || isempty(distMeasure)
         distMeasure = 'Euclidean';
     end
-    
-    %matlab is a fucking tool about measuring these distances between points that aren't whatever it defines as perfect. reproducing their code without the crap:
+
+    % matlab is a tool about measuring these distances between points that aren't whatever it defines as perfect. reproducing their code without the crap:
     if strcmp(distMeasure, 'cosine')
         Xnorm = sqrt(sum(X.^2, 2));
         
@@ -35,7 +35,7 @@ function [s] = ClusterEvalSilhouette (X, clustAssignments, distMeasure)
             disp(['ClusterEvalSilhouette: removing ',num2str(sum(tooSmall)/numel(tooSmall)*100),'% (',num2str(sum(tooSmall)),') of points for being too small for correlation distance']);
         end
     end
-    
+
 %     if ischar(distMeasure)
 %         s = mean(FastSilhouette(X, clustAssignments, distMeasure), 'omitnan');
 %     else
@@ -48,7 +48,7 @@ end
 
 %copied from matlab's silhouette(), but much more efficient
 %ok I haven't yet gotten around to making this faster. def can be many times faster though.
-% function [s] = FastSilhouette (X, clustAssignments, distMeasure)
+% function [s] = FastSilhouette(X, clustAssignments, distMeasure)
 %     % grp2idx sorts a numeric grouping variable in ascending order, and a string grouping variable in order of first occurrence
 %     [idx,cnames] = grp2idx(clustAssignments);
 % 

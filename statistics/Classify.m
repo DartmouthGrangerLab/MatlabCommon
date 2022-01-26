@@ -33,7 +33,7 @@ function [acc,predLabel,score] = Classify (trnData, trnLabel, tstData, tstLabel,
     % some algs require labels to be the integers 1:n_classes
     trnLabel = trnLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
     tstLabel = tstLabel(:); % input label can be either 1 x N or N x 1, below code requires consistency
-    [uniqueLabel,~,trnLabelIdx] = unique(trnLabel, 'stable'); % convert labels into index into uniqueLabels
+    [uniqueLabel,~,trnLabelIdx] = unique(trnLabel); % convert labels into index into uniqueLabels
     n_classes = numel(uniqueLabel);
     
     tstLabelIdx = tstLabel;

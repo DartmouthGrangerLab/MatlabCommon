@@ -28,16 +28,22 @@ function [h] = Plot (x, y, varargin)
     is_x_scalar = (sum(size(x) ~= 1) == 0);
     is_y_scalar = (sum(size(y) ~= 1) == 0);
     if (~is_x_ndvec && ~is_x_scalar) || (~is_y_ndvec && ~is_y_scalar) || (is_x_scalar && is_y_scalar) % if either is an nd matrix, or both are scalars
-        h = plot(squeeze(x), squeeze(y), varargin{:});
+        x = squeeze(x);
+        y = squeeze(y);
     elseif is_x_scalar && is_y_ndvec
-        h = plot(repmat(x, 1, numel(y)), squeeze(y)', varargin{:});
+        x = repmat(x, 1, numel(y));
+        y = squeeze(y)';
     elseif is_x_ndvec && is_y_scalar
-        h = plot(squeeze(x)', repmat(y, 1, numel(x)), varargin{:});
+        x = squeeze(x)';
+        y = repmat(y, 1, numel(x));
     elseif is_x_ndvec && is_y_ndvec
-        h = plot(squeeze(x)', squeeze(y)', varargin{:});
+        x = squeeze(x)';
+        y = squeeze(y)';
     else
         error('bug in code - all conditions should be handled');
     end
+
+    h = plot(x, y, varargin{:});
 
     if alpha ~= 1
         h.Color(4) = alpha; % undocumented matlab

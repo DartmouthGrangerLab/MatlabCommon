@@ -1,32 +1,4 @@
-% Eli Bowen
-% 6/9/2020
-% gets the path of a cache file, given some data to hash and any text you wish to append to the filename
-% just a little helper function for convenience and consistency
-% INPUTS:
-%   data2Hash - any data to hash; beware custom classes
-%   append    - char to append to file name
-%   subDir    - OPTIONAL char, sub-directory within the cache dir to use
-function [cacheFile] = GetCacheFile(data2Hash, append, subDir)
-    validateattributes(append, 'char', {'nonempty','vector'});
-
-    hash = '';
-    if ~isempty(data2Hash)
-        try
-            hash = GetMD5(data2Hash, 'array', 'hex');
-        catch
-            hash = GetMD5(getByteStreamFromArray(data2Hash), 'array', 'hex');
-        end
-        hash = ['_hash',hash];
-    end
-
-    dir = ComputerProfile.CacheDir();
-    if exist('subDir', 'var') && ~isempty(subDir)
-        dir = fullfile(dir, subDir);
-    end
-
-    cacheFile = fullfile(dir, [append,hash,'.mat']);
-
-    if ~isfolder(dir)
-        mkdir(dir);
-    end
+% deprecated - call CacheFile()
+function [file] = GetCacheFile(varargin)
+    file = CacheFile(varargin{:});
 end

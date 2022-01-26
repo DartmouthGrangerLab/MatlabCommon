@@ -12,22 +12,22 @@ function [word,vec] = LoadWordVecs(datasetName)
 
     %% load
     if strcmp(datasetName, 'wordvec_glove6')
-        text = fileread(fullfile(directory, 'glove', 'glove.6B.300d.txt'));
+        text = UnzipText(fullfile(directory, 'glove', 'glove.6B.300d.txt.zip'));
     elseif strcmp(datasetName, 'wordvec_glove42')
-        text = fileread(fullfile(directory, 'glove', 'glove.42B.300d.txt'));
+        text = UnzipText(fullfile(directory, 'glove', 'glove.42B.300d.txt.zip'));
     elseif strcmp(datasetName, 'wordvec_glove840')
-        text = fileread(fullfile(directory, 'glove', 'glove.840B.300d.txt')); %% 11 GB loaded
+        text = UnzipText(fullfile(directory, 'glove', 'glove.840B.300d.txt.zip')); %% 11 GB loaded
     elseif strcmp(datasetName, 'wordvec_smalldensebin_glove6')
-        text = fileread(fullfile(directory, 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec'));
+        text = UnzipText(fullfile(directory, 'small_dense_binary', 'glove.6B.300d_with_header_binarized_trulybinary.vec.zip'));
         error('parsing code will be wrong for this - need to bring in parsing code from the small_dense_binary folder');
         % vector building code fails (produces all vectors all 1's) on glove.42B and glove.840B
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x10')
-        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx10.txt')); % 6 GB loaded; 10% nonzero
+        text = UnzipText(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx10.txt.zip')); % 6 GB loaded; 10% nonzero
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove6x20')
-        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx20.txt'));
+        text = UnzipText(fullfile(directory, 'large_sparse_binary', 'glove.6B.300d_sparsifiedx20.txt.zip'));
         error('untested');
     elseif strcmp(datasetName, 'wordvec_largesparsebin_glove840x20')
-        text = fileread(fullfile(directory, 'large_sparse_binary', 'glove.840B.300d_sparsifiedx20.txt'));
+        text = UnzipText(fullfile(directory, 'large_sparse_binary', 'glove.840B.300d_sparsifiedx20.txt.zip'));
         error('untested');
     else
         error('unexpected datasetName');

@@ -7,7 +7,7 @@
 % Written by Mo Chen (sth4nth@gmail.com)
 % downloaded by Eli Bowen 12/5/2021 from https://www.mathworks.com/matlabcentral/fileexchange/55864-naive-bayes-classifier
 % edited only for argument validation, clarity, and style consistency, then I merged nbGaussPred and nbBernPred.
-function [y] = nbPred (model, X)
+function [y] = nbPred(model, X)
     validateattributes(model, 'struct', {'nonempty'});
     validateattributes(X,     {'numeric','logical'}, {'nonempty'});
     w = model.w;

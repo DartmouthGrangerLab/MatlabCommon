@@ -1,5 +1,3 @@
-% function h=shadedErrorBar(x,y,errBar,lineProps,transparent)
-% Purpose 
 % Makes a 2-d line plot with a pretty shaded error bar made using patch
 % Error bar color is chosen automatically
 % INPUTS:
@@ -34,16 +32,24 @@
 %
 % Rob Campbell - November 2009  
 % edited by Eli Bowen just to tweak transparency and increase style consistency / readability
-function varargout = shadedErrorBar(x, y, errBar, lineProps, transparent)
+function varargout = shadedErrorBar(x, y, err, lineProps, transparent)
     % error checking
     narginchk(3, 5)
+    
+    % this section added by Eli Bowen (for validation and input flexibility)
+    validateattributes(x,   {'numeric','logical'}, {'nonempty'});
+    validateattributes(y,   {'numeric','logical'}, {'nonempty'});
+    validateattributes(err, {'numeric','logical'}, {'nonempty'});
+    x   = double(x);
+    y   = double(y);
+    err = double(err);
 
     % process y using function handles if needed to make the error bar dynamically
-    if iscell(errBar) 
-        fun1 = errBar{1};
-        fun2 = errBar{2};
-        errBar = fun2(y);
-        y = fun1(y);
+    if iscell(err) 
+        fun1 = err{1};
+        fun2 = err{2};
+        err  = fun2(y);
+        y    = fun1(y);
     else
         y = y(:)';
     end
@@ -55,19 +61,19 @@ function varargout = shadedErrorBar(x, y, errBar, lineProps, transparent)
     end
 
     % make upper and lower error bars if only one was specified
-    if length(errBar) == length(errBar(:))
-        errBar = repmat(errBar(:)', 2, 1);
+    if length(err) == length(err(:))
+        err = repmat(err(:)', 2, 1);
     else
-        s = size(errBar);
+        s = size(err);
         f = find(s == 2);
-        if isempty(f), error('errbar has the wrong size'), end
+        if isempty(f), error('err has the wrong size'), end
         if f == 2
-            errBar = errBar';
+            err = err';
         end
     end
 
-    if length(x) ~= length(errBar)
-        error('length(x) must equal length(errBar)');
+    if length(x) ~= length(err)
+        error('length(x) must equal length(err)');
     end
 
     % set default options
@@ -100,8 +106,8 @@ function varargout = shadedErrorBar(x, y, errBar, lineProps, transparent)
     end
 
     % calculate the error bars
-    uE = y + errBar(1,:);
-    lE = y - errBar(2,:);
+    uE = y + err(1,:);
+    lE = y - err(2,:);
 
     % add the patch error bar
     holdStatus = ishold;

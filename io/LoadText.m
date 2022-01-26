@@ -13,13 +13,15 @@ function [text] = LoadText(datasetName)
     %% load
     text = newline();
     for i = 1 : numel(datasetName)
-        if strcmp(datasetName{i}, 'text_wikipedia')
-            text = [text,newline(),fileread(fullfile(directory, 'wikipedia', 'enwiki-latest-pages-articles_preprocessed.txt'))];
+        if strcmp(datasetName{i}, 'text_text8')
+            text = [text,newline(),UnzipText(fullfile(directory, 'text8.txt.zip'))];
+        elseif strcmp(datasetName{i}, 'text_wikipedia')
+            text = [text,newline(),UnzipText(fullfile(directory, 'wikipedia', 'enwiki-latest-pages-articles_preprocessed.txt.zip'))];
         elseif strcmp(datasetName{i}, 'text_bookcorpus')
-            text = [text,newline(),fileread(fullfile(directory, 'bookcorpus_homemade', 'bookcorpus_from_igor_brigadir', 'books_large_p1.txt'))];
-            text = [text,newline(),fileread(fullfile(directory, 'bookcorpus_homemade', 'bookcorpus_from_igor_brigadir', 'books_large_p2.txt'))];
+            text = [text,newline(),UnzipText(fullfile(directory, 'bookcorpus_homemade', 'bookcorpus_from_igor_brigadir', 'books_large_p1.txt.zip'))];
+            text = [text,newline(),UnzipText(fullfile(directory, 'bookcorpus_homemade', 'bookcorpus_from_igor_brigadir', 'books_large_p2.txt.zip'))];
         elseif strcmp(datasetName{i}, 'text_openwebtext')
-            text = [text,newline(),fileread(fullfile(directory, 'openwebtext', '???.txt'))];
+            text = [text,newline(),UnzipText(fullfile(directory, 'openwebtext', '???.txt.zip'))];
             error('TODO: requires more extensive cleanup');
         else
             error('unexpected datasetName');
