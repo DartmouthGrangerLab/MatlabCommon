@@ -45,6 +45,20 @@ function [predLabel] = ClassifyKNNHold1Out (k, data, label, distance)
                 [~,idx(i)] = max(similarity);
             end
         end
+    elseif k == 1 && strcmpi(distance, 'dot') % dot product
+        if isnumeric(data)
+            for i = 1 : n_pts
+                similarity = sum(data .* data(:,i), 1); % implicit expansion
+                similarity(i) = -Inf; % can't choose self
+                [~,idx(i)] = max(similarity);
+            end
+        else % binary values
+            for i = 1 : n_pts
+                similarity = sum(data & data(:,i), 1); % implicit expansion
+                similarity(i) = -Inf; % can't choose self
+                [~,idx(i)] = max(similarity);
+            end
+        end
     else
         error('TODO');
     end
