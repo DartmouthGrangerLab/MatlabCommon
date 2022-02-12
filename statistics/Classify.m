@@ -5,11 +5,12 @@
 %   trnLabel         - 1 x n_trnpts (int-valued numeric or cell array of chars)
 %   tstData          - n_tstpts x n_dims (numeric or logical)
 %   tstLabel         - 1 x n_tstpts (int-valued numeric or cell array of chars)
-%   classifierType   - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
+%   classifierType   - (char) 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn', 'nb', 'nbfast'
 %   classifierParams - OPTIONAL struct
 %       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k           - for KNN
 %       .distance    - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
+%       .distribution - for nbfast; 'bern', 'gauss', 'multinomial'
 %   verbose - OPTIONAL scalar (logical) - should we print text? (default=false)
 % RETURNS:
 %   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
@@ -22,7 +23,11 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     validateattributes(tstLabel,       'numeric',             {'nonempty','vector'});
     validateattributes(classifierType, 'char',                {'nonempty'});
     if ~exist('classifierParams', 'var') || isempty(classifierParams)
-        classifierParams = struct('regularization_lvl', 'optimize', 'k', 1, 'distance', 'euclidean');
+        distribution = 'gauss';
+        if islogical(trnData) || all(trnData(:) == 0 | trnData(:) == 1)
+            distribution = 'bern';
+        end
+        classifierParams = struct('regularization_lvl', 'optimize', 'k', 1, 'distance', 'euclidean', 'distribution', distribution);
     end
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
@@ -76,28 +81,27 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     score = [];
     if strcmp(classifierType, 'nb') % --- naive bayes via matlab ---
         if islogical(trnData)
-            trnData = double(trnData);
-            tstData = double(tstData);
+            error('ues classifierType=nbfast with logical data; classifierType=nb doesnt support bernoulli distributions');
         end
-        if n_classes == 2 % 2-class lda
-            model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost);
-        else % multiclass lda
-            model = fitcecoc(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost, 'Learners', templateNaiveBayes(), 'Options', statset('UseParallel', do_parallel));
-        end
+        model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost);
         acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
             [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
         end
         warning('nb untested');
     elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
-        if islogical(trnData) || all(trnData(:) == 0 | trnData(:) == 1)
-            if islogical(trnData)
-                trnData = double(trnData); % can't be single
-                tstData = double(tstData); % can't be single
-            end
+        if islogical(trnData)
+            trnData = double(trnData); % can't be single
+            tstData = double(tstData); % can't be single
+        end
+        if strcmp(classifierParams.distribution, 'bern') % for boolean/binary data
             model = nbBern(trnData', trnLabelIdx(:)');
-        else % gaussian dist NOT appropriate for count data! use 'nb' with a better distribution instead!
+        elseif strcmp(classifierParams.distribution, 'gauss')
             model = nbGauss(trnData', trnLabelIdx(:)');
+        elseif strcmp(classifierParams.distribution, 'multinomial') % for count data
+            model = nbMulti(trnData', trnLabelIdx(:)');
+        else
+            error('unexpected distribution');
         end
         predLabel = nbPred(model, tstData')';
         acc = sum(predLabel == tstLabelIdx) / n_tst;

@@ -16,12 +16,11 @@ function [model] = nbBern(X, labelIdx)
     n = size(X, 2);
     k = max(labelIdx); % n_classes
 
-    E = full(sparse(labelIdx, 1:n, 1, k, n, n)); % create a 1-hot label code
+    E = full(sparse(labelIdx, 1:n, 1, k, n, n)); % create a 1-hot label code (n x k)
     nk = sum(E, 2);         % k x 1 (int-valued numeric) num datapoints per class
     w = nk ./ n;            % k x 1 (numeric)
-    dia = diag(1 ./ nk, 0); % k x k (int-valued numeric) diagonal matrix (with values of 1./nk along the diagonal)
-    R = E' * dia;           % n x k
-    mu = X * R;
+    dia = diag(1 ./ nk, 0); % k x k (numeric) diagonal matrix (with values of 1./nk along the diagonal)
+    mu = X * (E' * dia);
     % above seems 10x faster than below
 %     E = sparse(labelIdx, 1:n, 1, k, n, n); % create a 1-hot label code
 %     nk = full(sum(E, 2));          % k x 1 (int-valued numeric)

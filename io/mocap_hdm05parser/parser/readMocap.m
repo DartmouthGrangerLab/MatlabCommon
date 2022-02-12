@@ -19,8 +19,8 @@
 % THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
 % KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
 % IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-%modified by Eli Bowen 12/2020 for readability, to remove caching option, which takes tons of file space to save a second or two at most (if you load tons of mocap files, save them all together yourself)
-function [skel,mot] = readMocap (skelfile, varargin)
+% modified by Eli Bowen 12/2020 for readability, to remove caching option, which takes tons of file space to save a second or two at most (if you load tons of mocap files, save them all together yourself)
+function [skel,mot] = readMocap(skelfile, varargin)
     %% set defaults
     motfile = skelfile;
     range = [];
