@@ -12,20 +12,28 @@ function [img] = RenderHex2Img(img, gridSz, pos, color)
         validateattributes(img, 'uint8', {});
     end
     validateattributes(gridSz, 'numeric',          {'nonempty','vector','positive'});
-    validateattributes(pos,    'numeric',          {'nonempty','ncols',2,'nonnegative'});
+    validateattributes(pos,    'numeric',          {'nonnegative'});
     validateattributes(color,  {'uint8','double'}, {'nonempty'});
     if numel(gridSz) == 1
         gridSz = [gridSz,gridSz];
     end
     assert(numel(gridSz) == 2);
-    assert(size(color, 1) == size(pos, 1) || size(color, 1) == 1);
     if isa(color, 'double')
         color = uint8(255 .* color);
     end
-    n_items = size(pos, 1);
-    n_chan = size(color, 2);
-
     scale = 3;
+    n_chan = size(color, 2);
+    n_items = size(pos, 1);
+    
+    if isempty(pos)
+        if isempty(img)
+            imgRes = (gridSz + 1) .* scale; % +1 because we usually have pixels at both position 0 and position gridSize
+            img = zeros(imgRes(1), imgRes(2), n_chan, 'uint8');
+        end
+        return;
+    end
+    assert(size(pos, 2) == 2);
+    assert(size(color, 1) == size(pos, 1) || size(color, 1) == 1);
     assert(n_chan == 1 || n_chan == 3);
 
     if isempty(img)

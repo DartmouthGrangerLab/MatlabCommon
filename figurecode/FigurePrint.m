@@ -1,13 +1,13 @@
 % Eli bowen
 % 10/7/2021
 % INPUTS:
-%   h - figure handle
-%   outDir - (char) - file path
-%   file - (char) - file name
-%   paperSz - 1 x 2 (numeric) or char - size of the paper (in inches?) or 'auto'
-%   dpi OPTIONAL - scalar (int-valued numeric) - resolution (default = 300)
-%   do_close_when_done OPTIONAL - scalar (logical) - if true, close figure when done printing (default = true)
-function [] = FigurePrint (h, outDir, file, paperSz, dpi, do_close_when_done)
+%   h       - figure handle
+%   outDir  - (char) file path
+%   file    - (char) file name
+%   paperSz - 1 x 2 (numeric) or (char) size of the paper (in inches?) or 'auto'
+%   dpi     - OPTIONAL scalar (int-valued numeric) resolution (default = 300)
+%   do_close_when_done - OPTIONAL scalar (logical) if true, close figure when done printing (default = true)
+function [] = FigurePrint(h, outDir, file, paperSz, dpi, do_close_when_done)
     validateattributes(outDir, 'char',              {'nonempty'});
     validateattributes(file,   'char',              {'nonempty'});
     validateattributes(paperSz, {'numeric','char'}, {'nonempty'});
@@ -19,7 +19,7 @@ function [] = FigurePrint (h, outDir, file, paperSz, dpi, do_close_when_done)
         do_close_when_done = true;
     end
     validateattributes(do_close_when_done, 'logical', {'nonempty','scalar'});
-    
+
     if strcmp(paperSz, 'auto')
         % determine num subplots
         axes = findall(h, 'type', 'axes');
@@ -48,7 +48,7 @@ function [] = FigurePrint (h, outDir, file, paperSz, dpi, do_close_when_done)
     else % default to png, which is nice and lossless
         print(h, fullfile(outDir, [file,'.png']), '-dpng', ['-r',num2str(dpi)]);
     end
-    
+
     if do_close_when_done
         close(h);
     end

@@ -3,12 +3,12 @@
 % this class represents a grid of items
 classdef Grid < handle
     properties (SetAccess=immutable)
-        sz                         % if scalar, sz is the diameter of a circle; if 1 x 2, sz is [n_rows,n_cols] of a rectangle
-        mode        (1,:) char     % (char) 'hex', 'sqr'
-        is_wrapped  (1,1) logical  % if true, wrap points around the edges of the grid; if false, will throw an error when points are out of the bounds specified by obj.sz
-        scaleFactor (1,1) double   % amount that unit grid is scaled to fit into sz
-        pos                        % n_items x 2 (numeric) 2D euclidean position of each item
-        gridPos                    % n_items x 3 (numeric) hex cube position of each item
+        sz                        % if scalar, sz is the diameter of a circle; if 1 x 2, sz is [n_rows,n_cols] of a rectangle
+        mode        (1,:) char    % (char) 'hex', 'sqr'
+        is_wrapped  (1,1) logical % if true, wrap points around the edges of the grid; if false, will throw an error when points are out of the bounds specified by obj.sz
+        scaleFactor (1,1) double  % amount that unit grid is scaled to fit into sz
+        pos                       % n_items x 2 (numeric) 2D euclidean position of each item
+        gridPos                   % n_items x 3 (numeric) hex cube position of each item
     end
     properties (SetAccess=private, Transient=true) % cache for precomputed values
         cache struct = struct()
@@ -49,10 +49,11 @@ classdef Grid < handle
         % RETURNS:
         %   idx - index of the matching grid item for each query (indexes into 1:n_items)
         function [idx] = Match2GridItem(obj, pt)
-            if strcmp(obj.mode, 'hex') && size(pt, 2) == 3
+            if strcmp(obj.mode, 'hex') && size(pt, 2) > 2
+                validateattributes(pt, 'numeric', {'integer','ncols',3});
                 pt = Hex2Pixel(pt, obj.scaleFactor);
             end
-            validateattributes(pt, 'numeric', {'integer','ncols',2});
+            validateattributes(pt, 'numeric', {'ncols',2});
 
             if obj.is_wrapped
                 pt = WrapGridPoints(pt, obj.sz, obj.scaleFactor);
@@ -78,10 +79,17 @@ classdef Grid < handle
             validateattributes(radius, 'double', {'nonempty','scalar'});
             assert(radius >= 1, 'radius < 1 yields no neighbors');
             
-            if ~isfield(obj.cache, 'neighbor_idx') % must (re)build cache
-                obj.cache.neighbor_idx = obj.GetNeighborIdxAll(radius);
+            if radius == 1 || radius == 2 || radius == 3 % cache
+                if ~isfield(obj.cache, 'neighbor_idx') % must (re)build cache
+                    obj.cache.neighbor_idx = cell(1, 3);
+                    obj.cache.neighbor_idx{1} = obj.GetNeighborIdxAll(1);
+                    obj.cache.neighbor_idx{2} = obj.GetNeighborIdxAll(2);
+                    obj.cache.neighbor_idx{3} = obj.GetNeighborIdxAll(3);
+                end
+                x = obj.cache.neighbor_idx{radius};
+            else
+                x = obj.GetNeighborIdxAll(radius);
             end
-            x = obj.cache.neighbor_idx;
             
             if islogical(select) || isnumeric(select)
                 x = x(:,select);
