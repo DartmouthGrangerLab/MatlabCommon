@@ -1,5 +1,4 @@
-% Eli Bowen
-% 2/27/2020
+% Eli Bowen 2/27/2020
 % wrapper around the hmax library
 % https://maxlab.neuro.georgetown.edu/hmax.html
 % the data types produced by extractC2forCell make zero sense, and had no type safety - so here's my own version
@@ -7,8 +6,8 @@
 % [s1,c1] = HMAX(img, patchCache)
 % [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img, patchCache);
 % INPUTS:
-%   img - one image (in a valid matlab image format), or a cell array of said images (not sure what the outputs look like in that case)
-%   patchCache - OPTIONAL struct returned from a call to HMAXPatchCache() - reuse for efficiency
+%   img                 - one image (in a valid matlab image format), or a cell array of said images (not sure what the outputs look like in that case)
+%   patchCache          - OPTIONAL struct returned from a call to HMAXPatchCache() - reuse for efficiency
 %   do_normalize_gabors - OPTIONAL scalar (logical)
 % RETURNS:
 %   s1 - s1{nBands,nScalesPerBand,nOrientations}(nImgRows,nImgCols) contains a gabor's responses at each location on the image
@@ -17,7 +16,8 @@
 %   c2 - c2(nPatchesPerSz,nPatchSizes) contains ___
 %   bestBands
 %   bestLocations
-function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache, do_normalize_gabors)
+% see also: HMAXTransform
+function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img, patchCache, do_normalize_gabors)
     validateattributes(img, {'numeric','logical'}, {'nonempty','2d'}); % img must be grayscale - if handling color, call HMAX on each channel separately
     if ~exist('do_normalize_gabors', 'var') || isempty(do_normalize_gabors)
         do_normalize_gabors = false; % do not normalize as default
@@ -62,7 +62,7 @@ function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX (img, patchCache, do_norma
         isIgnorePartials     = false; % dunno what this does - false was default
         allS2C1Prune         = 0;     % dunno what this does - 0 was default
         orientations2C1Prune = 0;     % dunno what this does - 0 was default
-        for i = 1:nPatchSizes
+        for i = 1 : nPatchSizes
             [s2(:,:,i),c2(:,i),bestBands(:,i),bestLocations(:,:,i)] = C2(c1, size(img), patchCache.c1_space, patchCache.c1_scale, patchCache.filter_sz, patchCache.patches{i}, patchCache.patch_sz(:,i)', isIgnorePartials, allS2C1Prune, orientations2C1Prune);
         end
     end

@@ -1,4 +1,4 @@
-% Given an image, returns C1 & S1 unit responses
+% given an image, returns C1 & S1 unit responses
 % INPUTS:
 %   img: a 2-dimensional matrix, the input image must be grayscale and of type 'double'
 %   c1Space: a vector, defines the spatial pooling range of each scale band
@@ -15,7 +15,7 @@
 %   for speed / memory fragmentation (preallocate variables etc.)
 %   changed s1 return structure slightly (it's never used by hmax outside this function)
 %   switched return value order for efficiency
-function [s1,c1] = C1 (img, c1Space, sqfilter, do_include_border, do_normalize_gabors)
+function [s1,c1] = C1(img, c1Space, sqfilter, do_include_border, do_normalize_gabors)
 %     c1OL = 2; % c1OL: (for C1 units) a scalar, defines the overlap between C1 units
 %     % ^ In scale band i, C1 unit responses are computed every c1Space(i)/c1OL
     nBands = numel(c1Space); % numel(c1Space) == numel(c1Scale) - 1
