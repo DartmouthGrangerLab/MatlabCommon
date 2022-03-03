@@ -10,8 +10,11 @@ various ways to connect members of a set to one another
 ## figurecode
 figure code to make rendering simpler
 
+## frontend
+code to preprocess specific datatypes (images, video, audio, ...)
+
 ## geometry
-2D and 3D geometry and trigonometry functions
+geometry and trigonometry functions (mostly for 2D and 3D spaces, but not exclusively)
 
 ## grid
 grid of points (rectangular, hex, ...)
