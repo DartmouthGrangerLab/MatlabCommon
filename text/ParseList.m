@@ -5,6 +5,11 @@
 % RETURNS:
 %   str - cell array of chars
 function [str] = ParseList(str)
+    validateattributes(str, {'cell','char','string'}, {});
+    if isstring(str)
+        str = char(str);
+    end
+
     if ischar(str)
         str = strsplit(str, ',');
     elseif iscell(str)

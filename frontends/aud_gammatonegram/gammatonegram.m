@@ -16,7 +16,7 @@
 % 2009-02-18 DAn Ellis dpwe@ee.columbia.edu
 % Last updated: $Date: 2009/02/23 21:07:09 $
 % downloaded by Eli Bowen 2/3/2018 and tweaked only for readability
-function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX, USEFFT, WIDTH)
+function [X,cf] = gammatonegram(X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX, USEFFT, WIDTH)
     if nargin < 2;  SR = 16000; end
     if nargin < 3;  TIMEWINDOW = 0.025; end
     if nargin < 4;  STRIDE = 0.010; end
@@ -26,11 +26,11 @@ function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX
     if nargin < 8;  USEFFT = 1; end
     if nargin < 9;  WIDTH = 1.0; end
     
-    windowType = 'hann'; %'hann' or 'rectangle'
+    windowType = 'hann'; % 'hann' or 'rectangle'
     
     if USEFFT == 0
         % Use malcolm's function to filter into subbands (IGNORES FMAX)
-        assert(FMAX==SR/2);
+        assert(FMAX == SR/2);
         
         if numel(numFreqs) == 1
             [fcoefs,cf] = MakeERBFilters(SR, numFreqs, FMIN);
@@ -76,8 +76,8 @@ function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX
         twinmod = winext * TIMEWINDOW;
         % first spectrogram
         nfft = 2^(ceil(log(2*twinmod*SR)/log(2)));
-        nhop = round(STRIDE*SR);
-        nwin = round(twinmod*SR);
+        nhop = round(STRIDE * SR);
+        nwin = round(twinmod * SR);
         [gtm,cf] = fft2gammatonemx(nfft, SR, numFreqs, WIDTH, FMIN, FMAX, nfft/2+1);
         % perform FFT and weighting in amplitude domain
         X = 1/nfft*gtm*abs(specgram(X, nfft, SR, nwin, nwin-nhop));
@@ -85,5 +85,3 @@ function [X,cf] = gammatonegram (X, SR, TIMEWINDOW, STRIDE, numFreqs, FMIN, FMAX
         %X = 1/nfft*sqrt(gtm*abs(specgram(X, nfft, SR, nwin, nwin-nhop).^2));
     end
 end
-
-    

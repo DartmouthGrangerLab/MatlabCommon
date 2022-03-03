@@ -1,5 +1,5 @@
 % INPUTS:
-%   data          - N x D numeric matrix
+%   data          - N x D (numeric)
 %   kList         - (OPTIONAL) list of K's to consider. Default is 1:6.
 %   clusterMethod - (OPTIONAL) string specifying cluster method, one of 'kmeans', 'linkage', 'gmdistribution'. Default = 'linkage'.
 %   verbose       - (OPTIONAL) if 1 then print results to screen. Default = 0.

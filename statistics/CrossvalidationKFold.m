@@ -1,33 +1,35 @@
-%implements k-fold cross-validation
-%INPUTS:
-%   labels - 1D numeric array of label IDs for each datapoint
-%   numFolds - number of folds (e.g. 10)
-%   beRandom - OPTIONAL - iff true, datapoints will be randomly shuffled before selection (used to always be false)
-%RETURNS:
-%   trainIndices - indices into labels array (aka positions of datapoints) for training points, one cell per fold
-%   testIndices - indices into labels array (aka positions of datapoints) for testing points, one cell per fold
-function [trainIndices, testIndices] = CrossvalidationKFold (labels, numFolds, beRandom)
+% implements k-fold cross-validation
+% INPUTS:
+%   labels   - 1D (numeric) array of label IDs for each datapoint
+%   n_folds  - scalar (numeric) number of folds (e.g. 10)
+%   beRandom - OPTIONAL (default = false) iff true, datapoints will be randomly shuffled before selection (used to always be false)
+% RETURNS:
+%   trnIdx - 1 x n_folds (cell array of numeric arrays) indices into labels array (aka positions of datapoints) for training points
+%   tstIdx - 1 x n_folds (cell array of numeric arrays)indices into labels array (aka positions of datapoints) for testing points
+function [trnIdx,tstIdx] = CrossvalidationKFold(labels, n_folds, beRandom)
     assert(isnumeric(labels) && isvector(labels));
-    assert(isnumeric(numFolds) && isscalar(numFolds));
+    assert(isnumeric(n_folds) && isscalar(n_folds));
+    if ~exist('beRandom', 'var') || isempty(beRandom)
+        beRandom = false;
+    end
 
     uniqueLabels = unique(labels);
-    trainIndices = cell(numFolds, 1);
-    testIndices = cell(numFolds, 1);
-    for fold = 1:numFolds
-        trainIndices{fold} = [];
-        testIndices{fold} = [];
+    trnIdx = cell(n_folds, 1);
+    tstIdx = cell(n_folds, 1);
+    for fold = 1 : n_folds
+        trnIdx{fold} = [];
+        tstIdx{fold} = [];
     end
-    for k = 1:numel(uniqueLabels)
-        catIndices = find(labels == uniqueLabels(k));
-        N = numel(catIndices);
+    for k = 1 : numel(uniqueLabels)
+        catIdx = find(labels == uniqueLabels(k));
+        N = numel(catIdx);
         if beRandom
-            catIndices = catIndices(randperm(numel(catIndices)));
+            catIdx = catIdx(randperm(numel(catIdx)));
         end
-        for fold = 1:numFolds
-            trainIndices{fold} = [trainIndices{fold};catIndices(1:ceil((fold-1)*N/numFolds))];
-            trainIndices{fold} = [trainIndices{fold};catIndices(ceil(fold*N/numFolds)+1:N)];
-            testIndices{fold} = [testIndices{fold};catIndices(ceil((fold-1)*N/numFolds+1):ceil(fold*N/numFolds))];
+        for fold = 1 : n_folds
+            trnIdx{fold} = [trnIdx{fold};catIdx(1:ceil((fold-1)*N/n_folds))];
+            trnIdx{fold} = [trnIdx{fold};catIdx(ceil(fold*N/n_folds)+1:N)];
+            tstIdx{fold} = [tstIdx{fold};catIdx(ceil((fold-1)*N/n_folds+1):ceil(fold*N/n_folds))];
         end
     end
 end
-
