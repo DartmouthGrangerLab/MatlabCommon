@@ -1,12 +1,12 @@
-%Eli Bowen
-%12/19/2020
-% returns a rotation matrix (if 3D, performs rotations in order x, y, z)
-%INPUTS:
-%   rVec - a 2D or 3D rotation formatted as [r] or [rX,rY,rZ]
-%   angleFormat - 'deg' or 'rad' (is rVec in units of degrees or radians?)
-function [rotationMat] = RotationMat (rVec, angleFormat)
-    validateattributes(rVec, {'numeric'}, {'nonempty','vector'});
-    validateattributes(angleFormat, {'char'}, {'nonempty'});
+% Eli Bowen 12/19/2020
+% INPUTS:
+%   rVec - (numeric) a 2D or 3D rotation formatted as [r] or [rX,rY,rZ]
+%   angleFormat - (char) 'deg' or 'rad' (is rVec in units of degrees or radians?)
+% RETURNS:
+%   rotationMat - a rotation matrix (if 3D, performs rotations in order x, y, z)
+function [rotationMat] = RotationMat(rVec, angleFormat)
+    validateattributes(rVec, 'numeric', {'nonempty','vector'});
+    validateattributes(angleFormat, 'char', {'nonempty'});
 
     if numel(rVec) == 1
         if strcmp(angleFormat, 'deg')
@@ -42,7 +42,7 @@ function [rotationMat] = RotationMat (rVec, angleFormat)
         else
             error('unknown input angleFormat');
         end
-        
+
         rotationMat = rxMat * ryMat * rzMat;
     else
         error('rVec must be 2D (1 angle) or 3D (3 angles)');

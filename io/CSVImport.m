@@ -40,6 +40,7 @@
 % Revisions:
 %   04/28/2009: Corrected typo in an error message, Added igonoreWSpace option
 %   08/16/2010: Replaced calls to str2num with str2double, the former uses eval leading to unwanted side effects if cells contain text with function names
+% see also: readmatrix, readcell
 function varargout = CSVImport (fileName, varargin)
     if (nargin == 0) || isempty(fileName)
         [fileName, filePath] = uigetfile('*.csv', 'Select CSV file');
