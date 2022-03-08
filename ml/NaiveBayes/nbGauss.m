@@ -28,6 +28,7 @@ function [model] = nbGauss(X, labelIdx)
     var = X.^2 * R - mu.^2;
 
     model = struct();
+    model.name = 'nb';
     model.dist = 'gauss';
     model.w = w;     % k x 1
     model.mu = mu;   % d x k means 

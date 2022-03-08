@@ -30,6 +30,7 @@ function [model] = nbBern(X, labelIdx)
 %     mu = full(sparse(X) * R);
 
     model = struct();
+    model.name = 'nb';
     model.dist = 'bern';
     model.w = w;   % k x 1
     model.mu = mu; % d x k means

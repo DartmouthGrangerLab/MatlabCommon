@@ -2,8 +2,8 @@
 % INPUTS:
 %   hist - n_classes x n_discriminators (numeric)
 % RETURNS:
-%   discriminability - 1 x n_discriminators (numeric)
-%   sharedness       - 1 x n_discriminators (numeric) the fraction of classes that a discriminator is selective for
+%   discriminability - 1 x n_discriminators (numeric, can be nan)
+%   sharedness       - 1 x n_discriminators (numeric, can be nan) the fraction of classes that a discriminator is selective for
 function [discriminability,sharedness] = SparseClassResponderDiscriminability(hist)
     validateattributes(hist, 'numeric', {'nonnegative'});
     [n_classes,n_discriminators] = size(hist);
@@ -22,13 +22,15 @@ function [discriminability,sharedness] = SparseClassResponderDiscriminability(hi
 %     end
 
     % a simpler way
-    mask = (hist > 0.5);
+    mask = (hist > 0.5); % nans will be false
     discriminability = zeros(1, n_discriminators);
     for i = 1 : n_discriminators
         discriminability(i) = mean(hist(mask(:,i),i)) - mean(hist(~mask(:,i),i));
     end
+    discriminability = (discriminability - 0.5) .* 2; % was ranged 0.5 --> 1, now 0 --> 1
     sharedness = sum(mask, 1) ./ n_classes; % 1 x n_discriminators
-
+    sharedness(isnan(discriminability)) = NaN; % if one is nan, both should be
+    
     %TODO: deal with negative histograms
     %PROBLEM: what does it mean to be <0?
     %   also, if we leave things 0-->1, we can simply use the dilated image as a feature, because we'll be able to use ORs (an unused synapse won't count against us)

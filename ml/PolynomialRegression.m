@@ -2,7 +2,7 @@
 % based on: http://www.mathworks.com/help/matlab/data_analysis/linear-regression.html#bswinlz
 % USAGE:
 %   [model,yfit,resid,rSquared,adjRSquared] = PolynomialRegression(x, y, n)
-%   newYFit = polyval(model, newX);
+%   newYFit = polyval(model.coeffs, newX);
 %   [resid,rSquared,adjRSquared] = RegressionStats(newY, newYFit);
 % INPUTS:
 %   x - 1 x n_pts (numeric) yes, must be a single predictor variable
@@ -22,12 +22,14 @@ function [model,yfit,resid,rSquared,adjRSquared] = PolynomialRegression(x, y, n)
     x = x(:); % matlab doesn't like transposed vector orientation
     y = y(:); % matlab doesn't like transposed vector orientation
 
-    model = polyfit(x, y, n); % coeffs(end) is the intercept
+    model = struct();
+    model.name = 'polynomial';
+    model.coeffs = polyfit(x, y, n); % coeffs(end) is the intercept
 
     % make predictions on training set
     if nargout() > 1
-        yfit = polyval(model, x);
+        yfit = polyval(model.coeffs, x);
 
-        [resid,rSquared,adjRSquared] = RegressionStats(y, yfit);
+        [resid,rSquared,adjRSquared] = RegressionStats(y, yfit, numel(model.coeffs));
     end
 end

@@ -1,5 +1,4 @@
-% Eli Bowen
-% 2/15/2022
+% Eli Bowen 2/15/2022
 % INPUTS:
 %   str - list, either as a cell array of chars or as comma delimited text
 % RETURNS:
