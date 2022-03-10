@@ -1,18 +1,17 @@
 % naive bayes classifier with indepenet Bernoulli
 % INPUTS:
 %   X:        d x n (numeric or logical) data matrix
-%   labelIdx: 1 x n (int-valued numeric) label (1~k)
+%   labelIdx: 1 x n (int-valued numeric) label (1~n_classes)
 % RETURNS:
 %   model: trained model structure
 % Written by Mo Chen (sth4nth@gmail.com)
 % downloaded by Eli Bowen 12/5/2021 from https://www.mathworks.com/matlabcentral/fileexchange/55864-naive-bayes-classifier
 % edited only for argument validation, clarity, and style consistency
 function [model] = nbBern(X, labelIdx)
-    validateattributes(X,        {'numeric','logical'}, {'nonempty'});
-    validateattributes(labelIdx, 'numeric',             {'nonempty','vector'});
+    validateattributes(X, {'numeric','logical'}, {'nonempty'});
+    validateattributes(labelIdx, 'numeric', {'nonempty','vector'});
     assert(size(X, 2) == numel(labelIdx));
     labelIdx = labelIdx(:)';
-
     n = size(X, 2);
     k = max(labelIdx); % n_classes
 
