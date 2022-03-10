@@ -1,5 +1,4 @@
-% Eli Bowen
-% 11/19/2021
+% Eli Bowen 11/19/2021
 % INPUTS:
 %   datasetName
 % RETURNS:

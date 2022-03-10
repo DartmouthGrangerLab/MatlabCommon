@@ -1,5 +1,4 @@
-% Eli Bowen
-% 12/20/2021
+% Eli Bowen 12/20/2021
 % INPUTS:
 %   datasetStr - (char) '<datasetName>.<subset>', options:
 %       'mnist'
