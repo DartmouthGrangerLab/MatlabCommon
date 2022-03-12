@@ -23,13 +23,16 @@ function [discriminability,sharedness] = SparseClassResponderDiscriminability(hi
 
     % a simpler way
     mask = (hist > 0.5); % nans will be false
-    discriminability = zeros(1, n_discriminators);
+    discriminability = zeros(1, n_discriminators, 'like', hist);
     for i = 1 : n_discriminators
         discriminability(i) = mean(hist(mask(:,i),i)) - mean(hist(~mask(:,i),i));
     end
     discriminability = (discriminability - 0.5) .* 2; % was ranged 0.5 --> 1, now 0 --> 1
-    sharedness = sum(mask, 1) ./ n_classes; % 1 x n_discriminators
-    sharedness(isnan(discriminability)) = NaN; % if one is nan, both should be
+    
+    if nargout() > 1
+        sharedness = sum(mask, 1) ./ n_classes; % 1 x n_discriminators
+        sharedness(isnan(discriminability)) = NaN; % if one is nan, both should be
+    end
     
     %TODO: deal with negative histograms
     %PROBLEM: what does it mean to be <0?

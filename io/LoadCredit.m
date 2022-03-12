@@ -14,11 +14,11 @@ function [dataset] = LoadCredit(datasetName)
     dataset = struct();
     if strcmp(datasetName, 'uci_credit_screening')
         dataset.t = readtable(fullfile(directory, 'crx.csv'));
-        dataset.t.Properties.VariableNames = {'a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12','a13','a14','a15','a16_dv'};
+        dataset.t.Properties.VariableNames = {'a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12','a13','a14','a15','dv'};
         dataset.t.a9  = strcmp(dataset.t.a9, 't');
         dataset.t.a10 = strcmp(dataset.t.a10, 't');
         dataset.t.a12 = strcmp(dataset.t.a12, 't');
-        dataset.t.a16_dv = strcmp(dataset.t.a16_dv, '+'); % make logical for simplicity
+        dataset.t.dv = strcmp(dataset.t.dv, '+'); % make logical for simplicity
         dataset.uniq_a1  = {'a','b'};
         dataset.uniq_a4  = {'u','y','l','t'};
         dataset.uniq_a5  = {'g','p','gg'};
@@ -52,12 +52,12 @@ function [dataset] = LoadCredit(datasetName)
         dataset.t_bin = removevars(dataset.t_bin, 'a13');
     elseif strcmp(datasetName, 'uci_statlog_australian_credit')
         dataset.t = readtable(fullfile(directory, 'australian.csv'));
-        dataset.t.Properties.VariableNames = {'a1_idx','a2','a3','a4_idx','a5_idx','a6_idx','a7','a8','a9','a10','a11','a12_idx','a13','a14','a15_dv'};
+        dataset.t.Properties.VariableNames = {'a1_idx','a2','a3','a4_idx','a5_idx','a6_idx','a7','a8','a9','a10','a11','a12_idx','a13','a14','dv'};
         dataset.t.a1_idx = dataset.t.a1_idx + 1;
         dataset.t.a8  = logical(dataset.t.a8);
         dataset.t.a9  = logical(dataset.t.a9);
         dataset.t.a11 = logical(dataset.t.a11);
-        dataset.t.a15_dv = logical(dataset.t.a15_dv); % despite the description (says values should be 1,2), seems to be logical
+        dataset.t.dv = logical(dataset.t.dv); % despite the description (says values should be 1,2), seems to be logical
         dataset.uniq_a1 = {'a','b'};
         dataset.uniq_a4 = {'p','g','gg'};
         dataset.uniq_a5 = {'ff','d','i','k','j','aa','m','c','w','e','q','r','cc','x'};
@@ -84,10 +84,10 @@ function [dataset] = LoadCredit(datasetName)
         dataset.t_bin = removevars(dataset.t_bin, 'a12_idx');
     elseif strcmp(datasetName, 'uci_statlog_german_credit')
         dataset.t = readtable(fullfile(directory, 'german.txt'));
-        dataset.t.Properties.VariableNames = {'a1','a2_duration','a3','a4','a5_creditscore','a6','a7','a8_percent','a9','a10','a11','a12','a13_age','a14','a15','a16_ncredits','a17','a18_ndependents','a19_hasphone','a20_isforeign','a21_dv'};
+        dataset.t.Properties.VariableNames = {'a1','a2_duration','a3','a4','a5_creditscore','a6','a7','a8_percent','a9','a10','a11','a12','a13_age','a14','a15','a16_ncredits','a17','a18_ndependents','a19_hasphone','a20_isforeign','dv'};
         dataset.t.a19_hasphone = strcmp(dataset.t.a19_hasphone, 'A192');
         dataset.t.a20_isforeign = strcmp(dataset.t.a20_isforeign, 'A201');
-        dataset.t.a21_dv = logical(dataset.t.a21_dv - 1); % make logical for simplicity
+        dataset.t.dv = logical(dataset.t.dv - 1); % make logical for simplicity
         dataset.t_bin = dataset.t;
         %TODO: t_bin
     elseif strcmp(datasetName, 'kaggle_icl_loan_default_prediction')

@@ -7,6 +7,9 @@ clustering algorithms
 ## connec
 various ways to connect members of a set to one another
 
+## encoding
+functions for changing the encoding of a dataset (whiten, one-hot code, ...)
+
 ## figurecode
 figure code to make rendering simpler
 

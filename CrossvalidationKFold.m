@@ -1,3 +1,4 @@
+% Eli Bowen
 % implements k-fold cross-validation
 % INPUTS:
 %   labels   - 1D (numeric) array of label IDs for each datapoint
@@ -5,7 +6,7 @@
 %   beRandom - OPTIONAL (default = false) iff true, datapoints will be randomly shuffled before selection (used to always be false)
 % RETURNS:
 %   trnIdx - 1 x n_folds (cell array of numeric arrays) indices into labels array (aka positions of datapoints) for training points
-%   tstIdx - 1 x n_folds (cell array of numeric arrays)indices into labels array (aka positions of datapoints) for testing points
+%   tstIdx - 1 x n_folds (cell array of numeric arrays) indices into labels array (aka positions of datapoints) for testing points
 function [trnIdx,tstIdx] = CrossvalidationKFold(labels, n_folds, beRandom)
     assert(isnumeric(labels) && isvector(labels));
     assert(isnumeric(n_folds) && isscalar(n_folds));

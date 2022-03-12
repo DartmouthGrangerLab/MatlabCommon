@@ -1,5 +1,4 @@
-% Eli Bowen
-% 10/1/2021
+% Eli Bowen 10/1/2021
 % sets the figure to be black background (safer and more extensible than the old matlab built-in way)
 % call it AFTER rendering your data
 % INPUTS:
@@ -13,10 +12,12 @@ function [] = FigureSetBlackBackground(h)
 
     axes = findall(h, 'type', 'axes');
     for i = 1 : numel(axes)
-        axes(i).Color     = [0,0,0];
-        axes(i).XColor    = [1,1,1]; % x axis ticks and labels
-        axes(i).YColor    = [1,1,1]; % y axis ticks and labels
-        axes(i).GridColor = [1,1,1]; % has transparency by default, so won't look white (has no effect if your grid is off)
+        axes(i).Color       = [0,0,0];
+        axes(i).XColor      = [1,1,1]; % x axis ticks and labels
+        axes(i).YColor      = [1,1,1]; % y axis ticks and labels
+        axes(i).ZColor      = [1,1,1]; % z axis ticks and labels
+        axes(i).GridColor   = [1,1,1]; % has transparency by default, so won't look white (has no effect if your grid is off)
+        axes(i).Title.Color = [1,1,1]; % title text
     end
 
     legends = findobj(h, 'Type', 'Legend');

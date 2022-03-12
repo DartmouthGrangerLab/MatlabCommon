@@ -37,7 +37,7 @@
 %   distortionIdx  - 1 x n_images (int-valued numeric)
 %   amount         - 1 x n_images (int-valued numeric)
 function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr)
-    validateattributes(datasetStr, 'char', {'nonempty'});
+    validateattributes(datasetStr, 'char', {'nonempty'}, 1);
     
     % parse datasetStr
     x = strsplit(datasetStr, '.');
@@ -78,13 +78,13 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
         imgSz = [28,28,1];
         assert(strcmp(subset, 'trn') || strcmp(subset, 'tst') || isempty(subset));
         if strcmp(subset, 'trn') || isempty(subset)
-            x = importdata(fullfile(directory, 'fashion-mnist_train.csv'));
+            x = UnzipText(fullfile(directory, 'fashion-mnist_train.csv.zip'), @importdata);
             assert(strcmp(x.colheaders{1}, 'label'));
             img = x.data(:,2:end)' ./ 255;
             labelIdx = x.data(:,1)' + 1; % these numbers index into uniqueLabel
         end
         if strcmp(subset, 'tst') || isempty(subset)
-            x = importdata(fullfile(directory, 'fashion-mnist_test.csv'));
+            x = UnzipText(fullfile(directory, 'fashion-mnist_test.csv.zip'), @importdata);
             assert(strcmp(x.colheaders{1}, 'label'));
             img = cat(2, img, x.data(:,2:end)' ./ 255);
             labelIdx = cat(2, labelIdx, x.data(:,1)' + 1); % these numbers index into uniqueLabel
