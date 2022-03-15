@@ -1,5 +1,4 @@
-% Eli Bowen
-% 5/1/2021
+% Eli Bowen 5/1/2021
 % code draws a line using the Bresenham line algorithm: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 % very fast, no anti-aliasing
 % based on 2 functions:
@@ -20,8 +19,8 @@ function [pix] = DrawSkinnyLineSqr(pt1, pt2, scaleFactor)
     validateattributes(scaleFactor, 'numeric', {'nonempty','scalar'});
 
     %% first, set start and end points to be real pixels
-    pt1 = 1 + floor(pt1 ./ scaleFactor);
-    pt2 = 1 + floor(pt2 ./ scaleFactor);
+    pt1 = floor(pt1 ./ scaleFactor);
+    pt2 = floor(pt2 ./ scaleFactor);
 
     is_steep = (abs(pt2(2) - pt1(2)) > abs(pt2(1) - pt1(1)));
 
@@ -49,7 +48,7 @@ function [pix] = DrawSkinnyLineSqr(pt1, pt2, scaleFactor)
         % v1
         y = pt1(2); % init y
         param = 2*d(2) - d(1); % init error parameter
-        for i = 1:size(pix, 1) % loop to travel along X
+        for i = 1 : size(pix, 1) % loop to travel along X
             pix(i,2) = y;
             param = param + 2*d(2);
             if param > 0 % if parameter value is exceeded

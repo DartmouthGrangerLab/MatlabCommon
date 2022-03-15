@@ -1,5 +1,4 @@
-% Eli bowen
-% 12/17/2021
+% Eli bowen 12/17/2021
 % less error-prone version of matlab's plot()
 % matlab's plot is annoying about x and y looking just right - this function pleases it
 % also supports the additional name-value argument "alpha", for color transparency
@@ -9,7 +8,7 @@
 %   other arguments to matlab's plot()
 % RETURNS:
 %   h - plot handle
-function [h] = Plot (x, y, varargin)
+function [h] = Plot(x, y, varargin)
     validateattributes(x, {'numeric','logical'}, {'nonempty'});
     validateattributes(y, {'numeric','logical'}, {'nonempty'});
     x = double(x);
@@ -20,6 +19,7 @@ function [h] = Plot (x, y, varargin)
         idx = find(strcmpi(varargin, 'alpha'));
         alpha = varargin{idx+1};
         validateattributes(alpha, 'numeric', {'nonempty','scalar','nonnegative'});
+        assert(alpha <= 1);
         varargin([idx,idx+1]) = [];
     end
 

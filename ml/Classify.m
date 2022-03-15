@@ -1,5 +1,4 @@
-% Eli Bowen
-% 10/1/2021
+% Eli Bowen 10/1/2021
 % INPUTS:
 %   trnData          - n_trnpts x n_dims (numeric or logical)
 %   trnLabel         - 1 x n_trnpts (int-valued numeric or cell array of chars)
@@ -94,9 +93,9 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
             trnData = double(trnData); % can't be single
             tstData = double(tstData); % can't be single
         end
-        if strcmp(classifierParams.distribution, 'bern') % for boolean/binary data
+        if strcmp(classifierParams.distribution, 'bern') % bernoulli, for boolean/binary data
             model = nbBern(trnData', trnLabelIdx(:)');
-        elseif strcmp(classifierParams.distribution, 'gauss')
+        elseif strcmp(classifierParams.distribution, 'gauss') % gaussian-distributed data
             model = nbGauss(trnData', trnLabelIdx(:)');
         elseif strcmp(classifierParams.distribution, 'multinomial') % for count data
             model = nbMulti(trnData', trnLabelIdx(:)');

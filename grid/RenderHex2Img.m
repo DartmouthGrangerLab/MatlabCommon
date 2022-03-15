@@ -1,5 +1,4 @@
-% Eli Bowen
-% 5/3/2021
+% Eli Bowen 5/3/2021
 % INPUTS:
 %   img    - OPTIONAL - if empty, we'll create one of size 3.*gridSize; if populated, we'll render onto it
 %   gridSz - if scalar, grid has a circular boundary of diameter gridSz. if 1 x 2, grid has a rectangular boundary of [rowSz,colSz]
@@ -30,7 +29,7 @@ function [img] = RenderHex2Img(img, gridSz, pos, color)
             imgRes = (gridSz + 1) .* scale; % +1 because we usually have pixels at both position 0 and position gridSize
             img = zeros(imgRes(1), imgRes(2), n_chan, 'uint8');
         end
-        return;
+        return
     end
     assert(size(pos, 2) == 2);
     assert(size(color, 1) == size(pos, 1) || size(color, 1) == 1);

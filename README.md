@@ -33,3 +33,8 @@ various standalone scripts
 
 ## stats
 various statistics (e.g. correlation)
+
+## validation
+code for validating that various conditions hold
+must* functions throw errors when the conditions are not met
+is* functions return logicals and never error

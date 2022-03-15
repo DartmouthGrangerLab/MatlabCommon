@@ -1,5 +1,4 @@
-% Eli bowen
-% 10/7/2021
+% Eli bowen 10/7/2021
 % INPUTS:
 %   h       - figure handle
 %   outDir  - (char) file path
