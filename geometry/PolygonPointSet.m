@@ -6,7 +6,7 @@
 % RETURNS:
 %   pointSet - cell array of sets of points, generally 2 x n_points numerics
 function [pointSet] = PolygonPointSet(polyRadius, puckerFactor)
-    validateattributes(polyRadius, 'numeric', {'nonempty','scalar','positive'});
+    validateattributes(polyRadius, 'numeric', {'nonempty','scalar','positive'}, 1);
     if ~exist('puckerFactor', 'var') || isempty(puckerFactor)
         puckerFactor = 1; % squeeze radius this much in one direction
     end

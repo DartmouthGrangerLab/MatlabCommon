@@ -5,6 +5,11 @@
 %   str - cell array of chars
 function [str] = ParseList(str)
     validateattributes(str, {'cell','char','string'}, {});
+    if isempty(str)
+        str = {};
+        return
+    end
+
     if isstring(str)
         str = char(str);
     end
