@@ -1,16 +1,15 @@
-% Eli Bowen
-% 1/7/2021
+% Eli Bowen 1/7/2021
 % writes a video to file (just a wrapper around matlab code to save us time)
 % INPUTS:
 %   filePath - full path to file (including file name) - recommend .mj2 for lossless
 %   video - nCols x nRows x nChannels x nFrames uint8 (range 0-->255) or double (range 0-->1)
 %   frameRate
-%   isLossless - scalar logical (should video be lossless or lossy)
-function [] = WriteVideo (filePath, video, frameRate, isLossless)
-    validateattributes(filePath, {'char'}, {'nonempty','vector'});
-    validateattributes(video, {'uint8','double'}, {'nonempty','ndims',4});
-    validateattributes(frameRate, {'numeric'}, {'nonempty','scalar','positive'});
-    validateattributes(isLossless, {'logical'}, {'nonempty','scalar'});
+%   is_lossless - scalar logical (should video be lossless or lossy)
+function [] = WriteVideo(filePath, video, frameRate, is_lossless)
+    validateattributes(filePath, {'char'}, {'nonempty','vector'}, 1);
+    validateattributes(video, {'uint8','double'}, {'nonempty','ndims',4}, 2);
+    validateattributes(frameRate, {'numeric'}, {'nonempty','scalar','positive'}, 3);
+    validateattributes(is_lossless, {'logical'}, {'nonempty','scalar'}, 4);
     if isa(video, 'double')
         assert(max(video(:)) <= 1 && min(video(:)) >= 0); % range of double inputs must be 0-->1 (a matlab image convention)
         video = uint8(video .* 255);
@@ -18,7 +17,7 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
     
     % pad for video player compatability
     aspectRatio = size(video, 2) / size(video, 1);
-    if ~isLossless
+    if ~is_lossless
         rows2Add = 0;
         cols2Add = 0;
         if aspectRatio > 16 / 9
@@ -53,12 +52,12 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
     
     isUseFFMPEG = false;
     if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
-        if isLossless
+        if is_lossless
             warning('WriteVideo() will try to make .mp4/.m4v lossless, but we recommend .mj2 file extensions for true lossless video');
         end
         if ispc() || ismac() % definitely can write mpeg-4, so let's use that
             v = VideoWriter(filePath, 'MPEG-4');
-            if isLossless
+            if is_lossless
                 v.Quality = 100; % range [0,100], 100 is best
             else
                 v.Quality = 75; % range [0,100], 100 is best
@@ -70,7 +69,7 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
 %             v = VideoWriter(filePath, 'Archival'); % write as mj2, then convert via ffmpeg
         end
     elseif strcmpi(requestedExt, '.mj2')
-        if isLossless
+        if is_lossless
             % we no longer save lossless as mat files, because turns out matlab loads .mj2 files 2x-10x faster than compressed mat files (and they're the same size at high quality mj2s)
             % using below (lossless mjpeg2000) because video files are tiny and lossy artifacts pop out in retina code
             v = VideoWriter(filePath, 'Archival');
@@ -79,7 +78,7 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
             v.CompressionRatio = 5; % only for motion jpeg 2000, default = 10
         end
     elseif strcmpi(requestedExt, '.avi')
-        if isLossless
+        if is_lossless
             error('.avi not supported with lossless - use .mj2');
         else
            % matlab only writes .avi files with mj2 compression - consider .mp4, which has superior compression
@@ -114,7 +113,7 @@ function [] = WriteVideo (filePath, video, frameRate, isLossless)
 %             if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
 %                 % crf 0 is lossless, 23 is default, 51 is worst (for both libx264 and libx265)
 %                 crf = '5';
-%                 if isLossless
+%                 if is_lossless
 %                     crf = '0';
 %                 end
 %                 status = system(['ffmpeg -i "',ffmpegTempFile,'" -c:v libx264 ',aspectStr,' -crf ',crf,' -pix_fmt yuv420p "',filePath,'"']);

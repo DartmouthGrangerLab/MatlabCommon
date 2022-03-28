@@ -16,9 +16,9 @@
 % borrowed from: Ingo Buerk 2011/2012, bachelor thesis
 % modified by Eli Bowen just for clarity
 function [idx,centroids,L,U] = SpectralClustering(W, k, type)
-    validateattributes(W,    'numeric', {});
-    validateattributes(k,    'numeric', {'nonempty','scalar','positive','integer'});
-    validateattributes(type, 'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(W,    {'numeric'}, {}, 1);
+    validateattributes(k,    {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);
+    validateattributes(type, {'numeric'}, {'nonempty','scalar','positive','integer'}, 3);
 
     %% calculate degree matrix
     degs = sum(W, 2);

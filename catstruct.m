@@ -51,7 +51,7 @@
 %                  ML. Unique(...,'last') is no longer the deafult.
 %                  (thanks to Isabel P)
 %   4.1 (feb 2015) fixed warning with narginchk
-%Downloaded by Eli 11/2016 from: http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct
+% downloaded by Eli 11/2016 from: http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct
 function [A] = catstruct(varargin)
     narginchk(1,Inf);
     N = nargin;

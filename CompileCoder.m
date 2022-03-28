@@ -1,18 +1,17 @@
-% Eli Bowen
-% 11/2021
+% Eli Bowen 11/2021
 % compiles a matlab function to mex / mex+cuda
 % INPUTS:
 %   funcName - (char)
-%   vars      - 1 x n_func_args (cell)
-%   is_gpu  - scalar (logical) - if true, we're compiling a gpu cuda kernel, if false, we're compiling mex
+%   vars     - 1 x n_func_args (cell)
+%   is_gpu   - scalar (logical) - if true, we're compiling a gpu cuda kernel, if false, we're compiling mex
 %   append   - (char)
 % RETURNS:
 %   funcHandle - function handle for the compiled gpu kernel
-function [funcHandle] = CompileCoder (funcName, vars, is_gpu, append)
-    validateattributes(funcName, 'char',    {'nonempty'});
-    validateattributes(vars,     'cell',    {});
-    validateattributes(is_gpu,   'logical', {'nonempty','scalar'});
-    validateattributes(append,   'char',    {'nonempty'});
+function funcHandle = CompileCoder(funcName, vars, is_gpu, append)
+    validateattributes(funcName, {'char'},    {'nonempty'}, 1);
+    validateattributes(vars,     {'cell'},    {}, 2);
+    validateattributes(is_gpu,   {'logical'}, {'nonempty','scalar'}, 3);
+    validateattributes(append,   {'char'},    {'nonempty'}, 4);
 
     t = tic();
 

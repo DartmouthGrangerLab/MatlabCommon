@@ -7,8 +7,8 @@
 %   func     - OPTIONAL (char or function_handle) function to call to read the data (default = fileread)
 % RETURNS
 %   text
-function [text] = UnzipText(fileName, func)
-    validateattributes(fileName, 'char', {'nonempty'});
+function text = UnzipText(fileName, func)
+    validateattributes(fileName, {'char'}, {'nonempty'}, 1);
     assert(endsWith(fileName, '.zip'));
     if ~exist('func', 'var') || isempty(func)
         func = @fileread;
@@ -19,14 +19,14 @@ function [text] = UnzipText(fileName, func)
 
     [~,rawFileName,~] = fileparts(fileName);
     rawFileName = strrep(rawFileName, '.', '_');
-    directory = fullfile(ComputerProfile.CacheDir(), ['unziptext_',rawFileName]);
-    assert(~isfolder(directory));
+    unzipDir = fullfile(ComputerProfile.CacheDir(), ['unziptext_',GetMD5(now, 'array', 'hex'),'_',rawFileName]);
+    assert(~isfolder(unzipDir));
 
-    fileNames = unzip(fileName, directory);
+    fileNames = unzip(fileName, unzipDir);
     assert(numel(fileNames) == 1);
 
     text = func(fileNames{1});
 
-    delete(fullfile(directory, '*'));
-    rmdir(directory);
+    delete(fullfile(unzipDir, '*'));
+    rmdir(unzipDir);
 end

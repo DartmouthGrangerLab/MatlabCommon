@@ -1,5 +1,4 @@
-% Eli Bowen
-% 1/12/2020
+% Eli Bowen 1/12/2020
 % given some set or population (e.g. of neurons), forms connections amonst them
 % INPUTS:
 %   srcMsk  - 1 x n (logical) mask on nrnlst (neurons which will project)
@@ -10,10 +9,10 @@
 %   src2HitIdx
 %   dst2HitIdx
 function [src2HitIdx,dst2HitIdx] = ConnectRand(srcMsk, dstMsk, percent, method)
-    validateattributes(srcMsk,  'logical', {'vector'});
-    validateattributes(dstMsk,  'logical', {'vector'});
-    validateattributes(percent, 'double',  {'nonempty','scalar','positive'});
-    validateattributes(method,  'char',    {'nonempty','vector'});
+    validateattributes(srcMsk,  {'logical'}, {'vector'}, 1);
+    validateattributes(dstMsk,  {'logical'}, {'vector'}, 2);
+    validateattributes(percent, {'double'},  {'nonempty','scalar','positive'}, 3);
+    validateattributes(method,  {'char'},    {'nonempty','vector'}, 4);
     assert(numel(srcMsk) == numel(dstMsk));
     assert(any(srcMsk) && any(dstMsk));
     srcMsk = srcMsk(:)'; % so we can assume it's 1 x n not n x 1

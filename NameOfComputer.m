@@ -5,8 +5,8 @@
 % m j m a r i n j (AT) y a h o o (DOT) e s
 % (c) MJMJ/2007
 % MOD: MJMJ/2013
-% Pulled by Eli Bowen 1/2017 from https://www.mathworks.com/matlabcentral/fileexchange/16450-get-computer-name-hostname
-function [name] = NameOfComputer ()
+% pulled by Eli Bowen 1/2017 from https://www.mathworks.com/matlabcentral/fileexchange/16450-get-computer-name-hostname
+function name = NameOfComputer()
     [ret,name] = system('hostname');
 
     if ret ~= 0

@@ -2,8 +2,8 @@
 % INPUTS:
 %   n_threads - scalar (int-valued numeric) - number of threads requested. ignored exclusively when you're on bigbrain
 %   is_spmd_enabled - OPTIONAL scalar (logical) - (default = true, same as matlab's default) - can safely set to false iff you never use the spmd keyword. ignored exclusively when hardware = 'bigbrain'
-function [] = StartThreadPool (n_threads, is_spmd_enabled)
-    validateattributes(n_threads, 'numeric', {'nonempty','scalar','positive','integer'});
+function [] = StartThreadPool(n_threads, is_spmd_enabled)
+    validateattributes(n_threads, {'numeric'}, {'nonempty','scalar','positive','integer'}, 1);
     if ~exist('is_spmd_enabled', 'var') || isempty(is_spmd_enabled)
         is_spmd_enabled = true;
     end

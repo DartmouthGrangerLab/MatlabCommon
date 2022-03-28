@@ -3,8 +3,8 @@
 % if your spectrogram is complex, call Convert2PowerPhase() first
 % method used by the "ams" library, produces cleaner spectrograms than version 1
 % INPUTS:
-%   spec - 2D (numeric) - non-complex (real) spectrogram
-function [spec] = AudioMagnitude2Decibels (spec)
+%   spec - 2D (numeric) non-complex (real) spectrogram
+function [spec] = AudioMagnitude2Decibels(spec)
     Smin = -59; % lower normalized dynamic range limit 
     Smax = -1;  % upper normalized dynamic range limit
 

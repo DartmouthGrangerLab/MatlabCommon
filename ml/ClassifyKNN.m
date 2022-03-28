@@ -1,20 +1,20 @@
 % performs KNN classification
 % if interested in cross-validation, just call ClassifyCrossvalidate(data, label, n_folds, 'knn', ...)
 % INPUTS:
-%   K - scalar (int-valued numeric) - number of neighbors to use
-%   trnData - n_dims x n_trnpts (numeric or logical)
-%   tstData - n_dims x n_tstpts (numeric or logical)
-%   trnLabel - 1 x n_trnpts (cell, numeric, or logical) - "ground truth" label for each training point
+%   K        - scalar (int-valued numeric) number of neighbors to use
+%   trnData  - n_dims x n_trnpts (numeric or logical)
+%   tstData  - n_dims x n_tstpts (numeric or logical)
+%   trnLabel - 1 x n_trnpts (cell, numeric, or logical) "ground truth" label for each training point
 %   distance - char or function_handle - @(X,Y) function handle or one of 'cityblock', 'chebychev', 'correlation', 'cosine', 'euclidean', 'hamming', 'jaccard', 'mahalanobis', 'minkowski', 'seuclidean' (not sqeuclidean), 'spearman'
 % RETURNS:
-%   predLabel - 1 x n_tstpts (same format as trnLabel)
-%   predStrength - 1 x n_tstpts (double ranged 0-->1) - a measure of how strongly KNN believes in the prediction in predLabel (SLOW TO COMPUTE) (ONLY returned for euclidean or cosine distance)
+%   predLabel    - 1 x n_tstpts (same format as trnLabel)
+%   predStrength - 1 x n_tstpts (double ranged 0-->1) a measure of how strongly KNN believes in the prediction in predLabel (SLOW TO COMPUTE) (ONLY returned for euclidean or cosine distance)
 function [predLabel,predStrength] = ClassifyKNN(K, trnData, tstData, trnLabel, distance)
-    validateattributes(K,        'numeric',                    {'nonempty','scalar','positive','integer'});
-    validateattributes(trnData,  {'numeric','logical'},        {'nonempty','2d','nonnan','nrows',size(tstData, 1),'ncols',numel(trnLabel)});
-    validateattributes(tstData,  {'numeric','logical'},        {'nonempty','2d','nonnan','nrows',size(trnData, 1)});
-    validateattributes(trnLabel, {'cell','numeric','logical'}, {'nonempty','vector'});
-    validateattributes(distance, {'char','function_handle'},   {'nonempty'});
+    validateattributes(K,        {'numeric'},                  {'nonempty','scalar','positive','integer'}, 1);
+    validateattributes(trnData,  {'numeric','logical'},        {'nonempty','2d','nonnan','nrows',size(tstData, 1),'ncols',numel(trnLabel)}, 2);
+    validateattributes(tstData,  {'numeric','logical'},        {'nonempty','2d','nonnan','nrows',size(trnData, 1)}, 3);
+    validateattributes(trnLabel, {'cell','numeric','logical'}, {'nonempty','vector'}, 4);
+    validateattributes(distance, {'char','function_handle'},   {'nonempty'}, 5);
     assert((isnumeric(trnData) && isnumeric(tstData)) || (islogical(trnData) && islogical(tstData))); % inputs must be same datatype
 
     n_tst_pts = size(tstData, 2);

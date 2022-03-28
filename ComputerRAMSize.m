@@ -1,7 +1,7 @@
 % Eli Bowen 6/3/2020
 % RETURNS:
 %   totalMemory - scalar (numeric) total memory in gigabytes (may not be a round number, or exactly what the ram packaging said)
-function [totalMemory] = ComputerRAMSize()
+function totalMemory = ComputerRAMSize()
     if ispc()
         [~,sys] = memory();
         totalMemory = sys.PhysicalMemory.Total / 1024 / 1024 / 1024;

@@ -1,5 +1,4 @@
-% Eli Bowen
-% 11/18/2017
+% Eli Bowen 11/18/2017
 % reimplementation of pseudocode "OME" from:
 % INPUTS:
 %   data    - N x D

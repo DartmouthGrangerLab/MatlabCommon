@@ -5,7 +5,7 @@
 %   dirPath - relative or absolute path of the directory
 % RETURNS:
 %   tf - scalar (logical)
-function [tf] = IsDirInPath(dirPath)
+function tf = IsDirInPath(dirPath)
     path_list_cell = regexp(path(), pathsep(), 'Split');
     tf = any(endsWith(path_list_cell, dirPath));
 end

@@ -1,14 +1,13 @@
-% Eli Bowen
-% 12/17/16
+% Eli Bowen 12/17/16
 % Silhouette cluster criterion
 % see also matlab's silhouette() for plotting or more detailed breakdowns
 % INPUTS:
 %   X                - N x D position of each data point
 %   clustAssignments - 1D vector (N elements) cluster ID assigned to each datapoint (e.g. a value of 2 indicates a point was assigned to the centroid with mean at the second row of 'centroids')
 %   distMeasure      - OPTIONAL (default = 'Euclidean') - any valid input to matlab's silhouette (e.g. 'Euclidean', 'cosine', 'correlation')
-function [s] = ClusterEvalSilhouette(X, clustAssignments, distMeasure)
-    validateattributes(X,                'numeric', {}, 'ClusterEvalSilhouette', 'X', 1);
-    validateattributes(clustAssignments, 'numeric', {'vector','integer','positive'}, 'ClusterEvalSilhouette', 'clustAssignments', 2);
+function s = ClusterEvalSilhouette(X, clustAssignments, distMeasure)
+    validateattributes(X,                {'numeric'}, {}, 'ClusterEvalSilhouette', 'X', 1);
+    validateattributes(clustAssignments, {'numeric'}, {'vector','integer','positive'}, 'ClusterEvalSilhouette', 'clustAssignments', 2);
     assert(size(X, 1) == numel(clustAssignments));
     if ~exist('distMeasure', 'var') || isempty(distMeasure)
         distMeasure = 'Euclidean';

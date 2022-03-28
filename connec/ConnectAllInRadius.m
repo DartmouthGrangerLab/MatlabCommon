@@ -1,5 +1,4 @@
-% Eli Bowen
-% 5/20/2021
+% Eli Bowen 5/20/2021
 % given some set or population (e.g. of neurons), forms connections amonst them
 % connect all neurons in srcMask to all neurons in dstMask
 % INPUTS:
@@ -13,12 +12,12 @@
 %   src2HitIdx
 %   dst2HitIdx
 function [src2HitIdx,dst2HitIdx] = ConnectAllInRadius(srcMsk, dstMsk, posR, posC, radius, is_dst_fractured)
-    validateattributes(srcMsk,           'logical', {'vector'});
-    validateattributes(dstMsk,           'logical', {'vector'});
-    validateattributes(posR,             'numeric', {'vector'});
-    validateattributes(posC,             'numeric', {'vector'});
-    validateattributes(radius,           'double',  {'nonempty','scalar','positive'});
-    validateattributes(is_dst_fractured, 'logical', {'nonempty','scalar'});
+    validateattributes(srcMsk,           {'logical'}, {'vector'}, 1);
+    validateattributes(dstMsk,           {'logical'}, {'vector'}, 2);
+    validateattributes(posR,             {'numeric'}, {'vector'}, 3);
+    validateattributes(posC,             {'numeric'}, {'vector'}, 4);
+    validateattributes(radius,           {'double'},  {'nonempty','scalar','positive'}, 5);
+    validateattributes(is_dst_fractured, {'logical'}, {'nonempty','scalar'}, 6);
     assert(numel(srcMsk) == numel(dstMsk) && numel(srcMsk) == numel(posR) && numel(srcMsk) == numel(posC));
     assert(any(srcMsk) && any(dstMsk));
     srcMsk = srcMsk(:)'; % so we can assume it's 1 x n not n x 1

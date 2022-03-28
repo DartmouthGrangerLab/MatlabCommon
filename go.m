@@ -1,14 +1,16 @@
-function [] = go (nThreads)
-    dir = fileparts(fileparts(which('go'))); % dir is the folder that MatlabCommon resides in (up 2 from go.m)
-    cd(dir);
-    pause(3);
+function [] = go(n_threads)
+%     dir = fileparts(fileparts(which('go'))); % dir is the folder that MatlabCommon resides in (up 2 from go.m)
+%     cd(dir);
+%     pause(3);
 
-    if exist('nThreads', 'var') && ~isempty(nThreads) && nThreads > 1
-        parpool(nThreads, 'SpmdEnabled', false);
+    if exist('n_threads', 'var') && ~isempty(n_threads) && n_threads > 1
+        parpool(n_threads, 'SpmdEnabled', false);
     end
 
     warning('off', 'MATLAB:MKDIR:DirectoryExists');
-    format compact;
+    warning('off', 'MATLAB:structOnObject'); % I like to call struct() on an object when I call struct on an object...
+    warning('off', 'MATLAB:table:PreallocateCharWarning'); % shh
+    format compact % for terminal printing
 
     %------------ FreeSurfer -----------------------------%
     % fshome = getenv('FREESURFER_HOME');

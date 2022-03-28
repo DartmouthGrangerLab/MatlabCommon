@@ -4,6 +4,6 @@
 %   x
 % RETURNS:
 %   tf - same dimensionality as x (logical)
-function tf = IsIdx(x)
-    tf = isnumeric(x) & x > 0 & mod(x, 1) == 0 & ~isnan(x);
+function tf = IsFraction(x)
+    tf = isnumeric(x) & x >= 0 & x <= 1 & ~isnan(x);
 end

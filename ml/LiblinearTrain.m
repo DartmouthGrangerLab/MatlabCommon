@@ -1,5 +1,4 @@
-% Eli Bowen
-% 9/12/2018
+% Eli Bowen 9/12/2018
 % wrapper designed to simplify and remove the chance of errors when calling liblinear's train() function
 % designed to work with liblinear-multicore version 2.43-2
 % switched from version 2.20 (still available as a zip) on 9/29/2021
@@ -46,11 +45,11 @@ function [model] = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, re
             error('unexpected solverType');
         end
     end
-    validateattributes(solverType, 'numeric', {'nonempty','scalar','nonnegative','integer'});
-    validateattributes(label, 'numeric', {'nonempty','vector','positive','integer'});
-    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
-    validateattributes(doAdjust4UnequalN, 'logical', {'nonempty','scalar'});
-    validateattributes(regularizationLvl, {'numeric','char'}, {'nonempty'});
+    validateattributes(solverType,        {'numeric'},           {'nonempty','scalar','nonnegative','integer'}, 1);
+    validateattributes(label,             {'numeric'},           {'nonempty','vector','positive','integer'}, 2);
+    validateattributes(data,              {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)}, 3);
+    validateattributes(doAdjust4UnequalN, {'logical'},           {'nonempty','scalar'}, 4);
+    validateattributes(regularizationLvl, {'numeric','char'},    {'nonempty'}, 5);
     if any(solverType == 4:10)
         warning('liblinear-multicore options 4 through 10 were never tested');
     end

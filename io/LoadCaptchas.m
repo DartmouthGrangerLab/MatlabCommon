@@ -29,15 +29,15 @@
 %       'noisymnisttests.line_deletion'
 % RETURNS:
 %   img            - n_rows x n_cols x n_chan x n_images (double ranged 0 --> 1)
-%   labelIdx       - 1 x n_images (int-valued numeric)
+%   labelIdx       - 1 x n_images (numeric index)
 %   uniqLabel      - 1 x n_classes (cell array of chars)
 %   imgSz          - 1 x 3 (int-valued numeric)
 %   writer         - 1 x n_images (int-valued numeric)
-%   distortionType - 1 x n_images (int-valued numeric)
-%   distortionIdx  - 1 x n_images (int-valued numeric)
+%   distortionType - 1 x n_images (cell)
+%   distortionIdx  - 1 x n_images (numeric index)
 %   amount         - 1 x n_images (int-valued numeric)
 function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr)
-    validateattributes(datasetStr, 'char', {'nonempty'}, 1);
+    validateattributes(datasetStr, {'char'}, {'nonempty'}, 1);
     
     % parse datasetStr
     x = strsplit(datasetStr, '.');
@@ -154,7 +154,7 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
         distortionType = {'bg_noise','boundary_box','box_occlusion','grid_lines','line_clutter','line_deletion'};
         for i = 1 : numel(distortionType)
             if ~isempty(subset) && ~strcmp(subset, distortionType{i})
-                continue;
+                continue
             end
             if isfile(fullfile(directory, [distortionType{i},'.mat']))
                 load(fullfile(directory, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt');
@@ -162,30 +162,31 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
                 distortionImg      = [];
                 distortionLabelIdx = [];
                 distortionAmt      = [];
-                unzip(fullfile(directory, [distortionType{i},'.zip']), fullfile(ComputerProfile.CacheDir(), 'noisymnisttests'));
+                unzipDir = fullfile(ComputerProfile.CacheDir(), ['loadcaptchas_',GetMD5(now, 'array', 'hex')]);
+                unzip(fullfile(directory, [distortionType{i},'.zip']), unzipDir);
                 for c = 1 : 10
-                    listing1 = dir(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '0', num2str(c-1), '*.png'));
-                    listing2 = dir(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '1', num2str(c-1), '*.png'));
-                    listing3 = dir(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '2', num2str(c-1), '*.png'));
+                    listing1 = dir(fullfile(unzipDir, distortionType{i}, '0', num2str(c-1), '*.png'));
+                    listing2 = dir(fullfile(unzipDir, distortionType{i}, '1', num2str(c-1), '*.png'));
+                    listing3 = dir(fullfile(unzipDir, distortionType{i}, '2', num2str(c-1), '*.png'));
                     classImg = zeros(imgSz(1), imgSz(2), imgSz(3), numel(listing1) + numel(listing2) + numel(listing3));
                     classAmt = NaN(1, numel(listing1) + numel(listing2) + numel(listing3));
                     for j = 1 : numel(listing1) % for each image in this dir
-                        classImg(:,:,:,j) = im2double(rgb2gray(imread(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '0', num2str(c-1), listing1(j).name))));
+                        classImg(:,:,:,j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '0', num2str(c-1), listing1(j).name))));
                         classAmt(j) = 0;
                     end
                     for j = 1 : numel(listing2) % for each image in this dir
-                        classImg(:,:,:,numel(listing1) + j) = im2double(rgb2gray(imread(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '1', num2str(c-1), listing2(j).name))));
+                        classImg(:,:,:,numel(listing1) + j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '1', num2str(c-1), listing2(j).name))));
                         classAmt(numel(listing1) + j) = 1;
                     end
                     for j = 1 : numel(listing3) % for each image in this dir
-                        classImg(:,:,:,numel(listing1) + numel(listing2) + j) = im2double(rgb2gray(imread(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests', distortionType{i}, '2', num2str(c-1), listing3(j).name))));
+                        classImg(:,:,:,numel(listing1) + numel(listing2) + j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '2', num2str(c-1), listing3(j).name))));
                         classAmt(numel(listing1) + numel(listing2) + j) = 2;
                     end
                     distortionImg      = cat(4, distortionImg, classImg);
                     distortionLabelIdx = cat(2, distortionLabelIdx, c .* ones(1, size(classImg, 4)));
                     distortionAmt      = cat(2, distortionAmt, classAmt);
                 end
-                rmdir(fullfile(ComputerProfile.CacheDir(), 'noisymnisttests'), 's');
+                rmdir(unzipDir, 's');
                 save(fullfile(directory, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt', '-v7.3');
             end
             

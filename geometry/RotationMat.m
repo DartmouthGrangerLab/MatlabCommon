@@ -4,9 +4,9 @@
 %   angleFormat - (char) 'deg' or 'rad' (is rVec in units of degrees or radians?)
 % RETURNS:
 %   rotationMat - a rotation matrix (if 3D, performs rotations in order x, y, z)
-function [rotationMat] = RotationMat(rVec, angleFormat)
-    validateattributes(rVec, 'numeric', {'nonempty','vector'});
-    validateattributes(angleFormat, 'char', {'nonempty'});
+function rotationMat = RotationMat(rVec, angleFormat)
+    validateattributes(rVec, {'numeric'}, {'nonempty','vector'});
+    validateattributes(angleFormat, {'char'}, {'nonempty'});
 
     if numel(rVec) == 1
         if strcmp(angleFormat, 'deg')

@@ -1,5 +1,4 @@
-% Eli Bowen
-% 12/6/16
+% Eli Bowen 12/6/16
 % performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
 % INPUTS:
 %   model

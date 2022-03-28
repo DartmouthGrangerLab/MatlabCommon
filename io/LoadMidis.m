@@ -1,5 +1,4 @@
-% Eli Bowen
-% 5/20/2020
+% Eli Bowen 5/20/2020
 % wrapper around a matlab file exchange project for loading midi files (https://www.mathworks.com/matlabcentral/fileexchange/27470-midi-tools)
 % INPUT:
 %	path - folder or valid midi file
@@ -13,7 +12,7 @@
 %       noteList(:,6) is track/file number (index into descriptors)
 %   descriptors - 1 x numTracks cell array of file descriptors
 %   trackDuration - 1 x numTracks double array of durations in seconds
-function [noteList,descriptors,trackDuration] = LoadMidis (path)
+function [noteList,descriptors,trackDuration] = LoadMidis(path)
     rootPath = '/pdata/ebowen/MatlabCommon';
     if isempty(StringFind(javaclasspath(), fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'), true)) % for performance
         javaaddpath(fullfile(rootPath, 'frontends', 'aud_midi', 'KaraokeMidiJava.jar'));
@@ -30,7 +29,7 @@ function [noteList,descriptors,trackDuration] = LoadMidis (path)
     N = sum(cellfun(@numel, noteMat)) / 7;
     noteList = zeros(N, 6);
     count = 1;
-    for i = 1:numel(noteMat)
+    for i = 1 : numel(noteMat)
         noteList(count:count+size(noteMat{i}, 1)-1,1) = noteMat{i}(:,4);
         noteList(count:count+size(noteMat{i}, 1)-1,2) = noteMat{i}(:,5);
         noteList(count:count+size(noteMat{i}, 1)-1,3) = noteMat{i}(:,6);
@@ -40,21 +39,21 @@ function [noteList,descriptors,trackDuration] = LoadMidis (path)
         count = count + size(noteMat{i}, 1);
     end
     trackDuration = zeros(1, numel(descriptors));
-    for i = 1:numel(descriptors)
+    for i = 1 : numel(descriptors)
         idx = find(noteList(:,6)==i, 1, 'last');
         trackDuration(i) = noteList(idx,3) + noteList(idx,4);
     end
 end
 
 
-function [count,descriptors,noteMat] = Helper (path, noteMat, count, descriptors, append)
+function [count,descriptors,noteMat] = Helper(path, noteMat, count, descriptors, append)
     listing = dir(path);
-    for i = 1:numel(listing)
+    for i = 1 : numel(listing)
         if listing(i).isdir && ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             [count,descriptors,noteMat] = Helper(fullfile(path, listing(i).name), noteMat, count, descriptors, [append,'_',strrep(listing(i).name, '_', '-')]);
         end
     end
-    for i = 1:numel(listing)
+    for i = 1 : numel(listing)
         if ~listing(i).isdir
             [~,fileNameNoExt,ext] = fileparts(listing(i).name);
             if strcmpi(ext, '.mid') || strcmpi(ext, '.kar')

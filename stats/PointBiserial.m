@@ -1,5 +1,4 @@
-% Eli Bowen
-% 10/16/17
+% Eli Bowen 10/16/17
 % copied from InfoTheory.java, adapted from the Java Mutual Information Toolbox (JavaMI)
 % INPUTS:
 %   d      - 1 x N (logical)
@@ -8,7 +7,7 @@
 % RETURNS:
 %   ret - 1 x n_predictors (numeric) - correlation between each predictor (separately) and d
 function [ret] = PointBiserial(d, x, stdOfX)
-    validateattributes(d, 'logical', {'vector'});
+    validateattributes(d, {'logical'}, {'vector'}, 1);
     N = numel(d, 1);
 
     if ~exist('stdOfX', 'var') || isempty(stdOfX)

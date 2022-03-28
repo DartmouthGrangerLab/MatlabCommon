@@ -1,16 +1,15 @@
-% Eli Bowen
-% 12/3/2021
+% Eli Bowen 12/3/2021
 % this will take a long while
 % INPUTS:
-%   text - (char)
-%   dictionary - 1 x n_unique_words (cell array of chars)
+%   text            - (char)
+%   dictionary      - 1 x n_unique_words (cell array of chars)
 %   tokenDefinition - (char) - regex defining a token e.g. '\w+' = [a-zA-Z_0-9] or '\S+' (word = nonwhitespace) (newlines always included as id = -1)
 % RETURNS:
 %   tokenIdx - 1 x n_words_in_text (int-valued numeric)
-function [tokenIdx] = TxtTokenize (text, dictionary, tokenDefinition)
-    validateattributes(text,            'char', {'nonempty'});
-    validateattributes(dictionary,      'cell', {'nonempty'});
-    validateattributes(tokenDefinition, 'char', {'nonempty'});
+function tokenIdx = TxtTokenize(text, dictionary, tokenDefinition)
+    validateattributes(text,            {'char'}, {'nonempty'}, 1);
+    validateattributes(dictionary,      {'cell'}, {'nonempty'}, 2);
+    validateattributes(tokenDefinition, {'char'}, {'nonempty'}, 3);
     n_threads = min(16, DetermineNumJavaComputeCores()); % too many and we run out of memory
 %     n_threads = 1;
 
@@ -44,7 +43,7 @@ function [tokenIdx] = TxtTokenize (text, dictionary, tokenDefinition)
 end
 
 
-function [tokenIdx] = Helper (dictionary, tokenDefinition, text, verbose)
+function [tokenIdx] = Helper(dictionary, tokenDefinition, text, verbose)
     nlIdx = find(text == newline()); % must split things up to save memory
     n_lines = numel(nlIdx) - 1; % should be a new line at the start and the end
     

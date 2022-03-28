@@ -1,7 +1,7 @@
 % Eli Bowen 1/2017
 % RETURNS:
 %   n_cores - scalar (int-valued numeric)
-function [n_cores] = DetermineNumJavaComputeCores()
+function n_cores = DetermineNumJavaComputeCores()
     n_cores = feature('numCores');
     if n_cores == 24
 %         if contains(NameOfComputer(), 'boskop')

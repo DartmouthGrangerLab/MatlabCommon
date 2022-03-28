@@ -4,8 +4,8 @@
 %   X        - d x n (numeric) data matrix
 %   labelIdx - 1 x n (int-valued numeric) label (1~k)
 function [model] = nbMulti(X, labelIdx)
-    validateattributes(X,        'numeric', {'nonempty'});
-    validateattributes(labelIdx, 'numeric', {'nonempty','vector'});
+    validateattributes(X,        {'numeric'}, {'nonempty'}, 1);
+    validateattributes(labelIdx, {'numeric'}, {'nonempty','vector'}, 2);
     assert(size(X, 2) == numel(labelIdx));
     assert(~any(X(:) < 0));
     labelIdx = labelIdx(:)';

@@ -1,5 +1,4 @@
-% Eli Bowen
-% 1/23/18
+% Eli Bowen 1/23/18
 % provided a 1x1 struct where each field is a scalar or a 1D numeric/cell array, subsets each nonscalar field the same way
 % requires that every field in this struct is either the same length or numel(myStruct.field)==1 (considered metadata)
 % works on data generated e.g. by FindGoodWords.m
@@ -8,11 +7,11 @@
 %   keep - 1 x n_items (logical mask or integer index) entries to KEEP
 %   fields2Exclude - OPTIONAL (comma-separated char or cell array of chars) list of fieldnames to NOT subset (e.g. fields that aren't the same length as the rest)
 % see also StructFilter
-function [s] = StructSubset(s, keep, fields2Exclude)
-    validateattributes(s, 'struct', {'nonempty','scalar'});
-    validateattributes(keep, {'numeric','logical'}, {});
+function s = StructSubset(s, keep, fields2Exclude)
+    validateattributes(s, {'struct'}, {'nonempty','scalar'}, 1);
+    validateattributes(keep, {'numeric','logical'}, {}, 2);
     if islogical(keep) && all(keep)
-        return;
+        return % nothing to do
     end
 
     fn = fieldnames(s);
@@ -28,7 +27,7 @@ function [s] = StructSubset(s, keep, fields2Exclude)
         end
         fn(idx) = [];
         if isempty(fn)
-            return; % you're asking us to do nothing
+            return % nothing to do
         end
     end
 
@@ -38,7 +37,7 @@ function [s] = StructSubset(s, keep, fields2Exclude)
             isEmpty(i) = (ischar(s.(fn{i})) || isempty(s.(fn{i})));
         end
         if all(isEmpty)
-            return; % you're asking us to do nothing
+            return % nothing to do
         end
     end
 

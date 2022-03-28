@@ -5,8 +5,8 @@
 %   n_folds  - scalar (numeric) number of folds (e.g. 10)
 %   beRandom - OPTIONAL (default = false) iff true, datapoints will be randomly shuffled before selection (used to always be false)
 % RETURNS:
-%   trnIdx - 1 x n_folds (cell array of numeric arrays) indices into labels array (aka positions of datapoints) for training points
-%   tstIdx - 1 x n_folds (cell array of numeric arrays) indices into labels array (aka positions of datapoints) for testing points
+%   trnIdx - n_folds x 1 (cell array of numeric indexes) indices into labels array (aka positions of datapoints) for training points
+%   tstIdx - n_folds x 1 (cell array of numeric indexes) indices into labels array (aka positions of datapoints) for testing points
 function [trnIdx,tstIdx] = CrossvalidationKFold(labels, n_folds, beRandom)
     assert(isnumeric(labels) && isvector(labels));
     assert(isnumeric(n_folds) && isscalar(n_folds));

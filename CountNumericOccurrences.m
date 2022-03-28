@@ -1,5 +1,4 @@
-% Eli Bowen
-% 1/16/17
+% Eli Bowen 1/16/17
 % NOTE: counts has the same number of elements (and same order), as unique(arr).
 % omits nans
 % INPUTS:
@@ -7,15 +6,15 @@
 %   uniqueArr - OPTIONAL, default = unique(arr)
 % RETURNS:
 %   counts - number of entries for each unique number, same dimensionality as uniqueArr
-function [counts] = CountNumericOccurrences (arr, uniqueArr)
-    validateattributes(arr, {'numeric'}, {});
+function counts = CountNumericOccurrences(arr, uniqueArr)
+    validateattributes(arr, {'numeric'}, {}, 1);
     if isempty(arr)
         if ~exist('uniqueArr', 'var') || isempty(uniqueArr)
             counts = [];
         else
             counts = zeros(size(uniqueArr), 'like', uniqueArr);
         end
-        return;
+        return
     end
     if any(isnan(arr))
         arr(isnan(arr)) = []; % omit nans (for efficiency, don't change arr if not needed)

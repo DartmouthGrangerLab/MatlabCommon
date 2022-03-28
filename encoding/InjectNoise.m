@@ -5,9 +5,9 @@
 %   n_desired_ones - scalar (int-valued numeric)
 % RETURNS:
 %   data - d x n (logical)
-function [data] = InjectNoise(data, n_desired_ones)
-    validateattributes(data, 'logical', {});
-    validateattributes(n_desired_ones, 'numeric', {'nonempty','scalar'});
+function data = InjectNoise(data, n_desired_ones)
+    validateattributes(data, {'logical'}, {}, 1);
+    validateattributes(n_desired_ones, {'numeric'}, {'nonempty','scalar'}, 2);
 
     is_sparse = issparse(data);
     data = full(data); % for speed

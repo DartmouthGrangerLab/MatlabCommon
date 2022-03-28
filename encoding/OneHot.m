@@ -5,8 +5,8 @@
 %   is_sparse - OPTIONAL scalar (logical) DEFAULT = false
 % RETURNS:
 %   code - n x n_classes (logical)
-function [code] = OneHot(idx, n_classes, is_sparse)
-    validateattributes(idx, 'numeric', {'positive','integer'});
+function code = OneHot(idx, n_classes, is_sparse)
+    validateattributes(idx, {'numeric'}, {'positive','integer'}, 1);
     if ~exist('n_classes', 'var') || isempty(n_classes)
         n_classes = max(idx);
     end

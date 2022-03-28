@@ -1,5 +1,4 @@
-% Eli Bowen
-% 1/14/2020
+% Eli Bowen 1/14/2020
 % given some set or population (e.g. of neurons), forms connections amonst them
 % INPUTS:
 %   srcMsk  - 1 x n (logical) mask on nrnlst (neurons which will project)
@@ -14,14 +13,14 @@
 %   src2HitIdx - index into the population (numbers 1 --> n)
 %   dst2HitIdx - index into the population (numbers 1 --> n)
 function [src2HitIdx,dst2HitIdx] = ConnectRand2DSurf(srcMsk, dstMsk, posR, posC, percent, sigma, method, pdfMode)
-    validateattributes(srcMsk,  'logical', {'vector'});
-    validateattributes(dstMsk,  'logical', {'vector'});
-    validateattributes(posR,    'numeric', {'vector'});
-    validateattributes(posC,    'numeric', {'vector'});
-    validateattributes(percent, 'double',  {'nonempty','scalar','positive'});
-    validateattributes(sigma,   'double',  {'nonempty','scalar','positive'});
-    validateattributes(method,  'char',    {'nonempty','vector'});
-    validateattributes(pdfMode, 'char',    {'nonempty','vector'});
+    validateattributes(srcMsk,  {'logical'}, {'vector'});
+    validateattributes(dstMsk,  {'logical'}, {'vector'});
+    validateattributes(posR,    {'numeric'}, {'vector'});
+    validateattributes(posC,    {'numeric'}, {'vector'});
+    validateattributes(percent, {'double'},  {'nonempty','scalar','positive'});
+    validateattributes(sigma,   {'double'},  {'nonempty','scalar','positive'});
+    validateattributes(method,  {'char'},    {'nonempty','vector'});
+    validateattributes(pdfMode, {'char'},    {'nonempty','vector'});
     assert(numel(srcMsk) == numel(dstMsk) && numel(srcMsk) == numel(posR) && numel(srcMsk) == numel(posC));
     assert(any(srcMsk) && any(dstMsk));
     srcMsk = srcMsk(:)'; % so we can assume it's 1 x n not n x 1

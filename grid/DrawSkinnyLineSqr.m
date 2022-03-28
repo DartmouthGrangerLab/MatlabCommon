@@ -7,16 +7,16 @@
 % pix = DrawSkinnyLineSqr([1,1], [8,3]);
 % figure; [c,r] = meshgrid(0:10, 0:10); scatter(c(:), r(:), 'r.'); hold on; scatter(pix(:,2), pix(:,1), 50, 'k*'); axis([0,10,0,10]); xlabel('row'); ylabel('col');
 % INPUTS:
-%   pt1 - 2D position of point 1 (x,y or r,c - whatever - pix coordinates returned with same dimensionality)
-%   pt2 - 2D position of point 2
+%   pt1         - 1 x 2 (numeric) 2D position of point 1 (x,y or r,c - whatever - pix coordinates returned with same dimensionality)
+%   pt2         - 1 x 2 (numeric) 2D position of point 2
 %   scaleFactor - scalar (numeric)
 % RETURNS:
 %   pix - n_pixels x 2 (numeric) 2D coordinates of pixels that should be illuminated by the line
 % see also DrawSkinnyLineHex
-function [pix] = DrawSkinnyLineSqr(pt1, pt2, scaleFactor)
-    validateattributes(pt1,         'numeric', {'nonempty'});
-    validateattributes(pt2,         'numeric', {'nonempty'});
-    validateattributes(scaleFactor, 'numeric', {'nonempty','scalar'});
+function pix = DrawSkinnyLineSqr(pt1, pt2, scaleFactor)
+    validateattributes(pt1,         {'numeric'}, {'nonempty'}, 1);
+    validateattributes(pt2,         {'numeric'}, {'nonempty'}, 2);
+    validateattributes(scaleFactor, {'numeric'}, {'nonempty','scalar'}, 3);
 
     %% first, set start and end points to be real pixels
     pt1 = floor(pt1 ./ scaleFactor);

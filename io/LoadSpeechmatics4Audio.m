@@ -1,8 +1,8 @@
 % ASSUMES that the speechmatics data is in a .json (preferred) or .csv in the same folder as the audio, with a file name that's identical except for file extension
 % INPUTS:
 %   filePath - path to a .wav file
-function [wordInfo] = LoadSpeechmatics4Audio (filePath)
-    validateattributes(filePath, {'char'}, {'nonempty'});
+function wordInfo = LoadSpeechmatics4Audio(filePath)
+    validateattributes(filePath, {'char'}, {'nonempty'}, 1);
     assert(endsWith(lower(filePath), '.wav'));
 
     jsonFilePath = regexprep(filePath, '\.wav', '.json');

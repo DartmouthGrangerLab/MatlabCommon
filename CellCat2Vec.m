@@ -1,12 +1,11 @@
-%Eli Bowen
-%5/22/2020
-%the cells will be concatenated into a single vector
-%this works even if they are of unequal dimensionality
-%INPUTS:
-%   cellData
+% Eli Bowen 5/22/2020
+% the cells will be concatenated into a single vector
+% this works even if they are of unequal dimensionality
+% INPUTS:
+%   cellData - (cell)
 %   sizeOfVal - OPTIONAL (for performance)
-function [val] = CellCat2Vec (cellData, sizeOfVal)
-    validateattributes(cellData, {'cell'}, {'nonempty'});
+function val = CellCat2Vec (cellData, sizeOfVal)
+    validateattributes(cellData, {'cell'}, {'nonempty'}, 1);
     
 %     if vectorize
     if ~exist('sizeOfVal', 'var') || isempty(sizeOfVal)

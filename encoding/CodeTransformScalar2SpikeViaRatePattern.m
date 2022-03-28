@@ -8,7 +8,7 @@
 %   data - size(squeeze(data)) x patternDuration logical
 %   meta - scalar (struct)
 function [data,meta] = CodeTransformScalar2SpikeViaRatePattern(data, meta)
-    validateattributes(data, 'numeric', {'nonempty'});
+    validateattributes(data, {'numeric'}, {'nonempty'}, 1);
     assert(min(data(:)) >= 0 && max(data(:)) <= 1, 'input scalar code must be in range 0-->1');
 
     data = squeeze(data);

@@ -18,7 +18,7 @@
 %   bestLocations
 % see also: HMAXTransform
 function [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img, patchCache, do_normalize_gabors)
-    validateattributes(img, {'numeric','logical'}, {'nonempty','2d'}); % img must be grayscale - if handling color, call HMAX on each channel separately
+    validateattributes(img, {'numeric','logical'}, {'nonempty','2d'}, 1); % img must be grayscale - if handling color, call HMAX on each channel separately
     if ~exist('do_normalize_gabors', 'var') || isempty(do_normalize_gabors)
         do_normalize_gabors = false; % do not normalize as default
     end

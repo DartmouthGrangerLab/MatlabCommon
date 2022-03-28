@@ -1,5 +1,4 @@
-% Eli Bowen
-% 5/1/2021
+% Eli Bowen 5/1/2021
 % code draws a line using the Bresenham line algorithm: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 % this hex grid has every other row shifted +0.5 to the right (i.e. rows are intact, cols are diagonalized; i.e. this is the "pointy" / "hesagon corners point up/down" configuration)
 % see:
@@ -58,16 +57,16 @@
 %     text(temp2(2)+0.5, temp2(1), num2str(i), 'color', [0,0,0.5]);
 % end
 % INPUTS:
-%   pt1 - 2D position of point 1 (in euclidean / pixel / square coordinates)
-%   pt2 - 2D position of point 2 (in euclidean / pixel / square coordinates)
+%   pt1         - 1 x 2 (numeric) 2D position of point 1 (in euclidean / pixel / square coordinates)
+%   pt2         - 1 x 2 (numeric) 2D position of point 2 (in euclidean / pixel / square coordinates)
 %   scaleFactor - scalar (numeric)
 % RETURNS:
 %   pix - n_pts x 2 (numeric) coordinates of pixels that should be illuminated by the line
 % see also DrawSkinnyLineSqr
-function [pix] = DrawSkinnyLineHex(pt1, pt2, scaleFactor)
-    validateattributes(pt1,         'numeric', {'nonempty'});
-    validateattributes(pt2,         'numeric', {'nonempty'});
-    validateattributes(scaleFactor, 'numeric', {'nonempty','scalar'});
+function pix = DrawSkinnyLineHex(pt1, pt2, scaleFactor)
+    validateattributes(pt1,         {'numeric'}, {'nonempty','numel',2}, 1);
+    validateattributes(pt2,         {'numeric'}, {'nonempty','numel',2}, 2);
+    validateattributes(scaleFactor, {'numeric'}, {'nonempty','scalar'}, 3);
 
     pt1 = pt1 ./ scaleFactor;
     pt2 = pt2 ./ scaleFactor;

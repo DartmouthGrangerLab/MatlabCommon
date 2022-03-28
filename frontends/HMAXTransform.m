@@ -7,8 +7,8 @@
 %   hmax
 % see also: HMAX
 function [hmax] = HMAXTransform(img, type)
-    validateattributes(img, {'logical','numeric'}, {});
-    validateattributes(type, 'char', {'nonempty'});
+    validateattributes(img, {'logical','numeric'}, {}, 1);
+    validateattributes(type, {'char'}, {'nonempty'}, 2);
     n = size(img, 4);
     imgSz = [size(img, 1),size(img, 2),size(img, 3)]; % [n_rows,n_cols,n_chan]
 

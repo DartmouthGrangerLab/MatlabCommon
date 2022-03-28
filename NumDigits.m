@@ -7,8 +7,8 @@
 %   data - (int-valued numeric)
 % RETURNS:
 %   data
-function [data] = NumDigits(data)
-    validateattributes(data, 'numeric', {'integer'});
+function data = NumDigits(data)
+    validateattributes(data, {'numeric'}, {'integer'}, 1);
 
     is_int = false;
     if isinteger(data)

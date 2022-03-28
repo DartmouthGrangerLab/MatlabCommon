@@ -29,7 +29,7 @@
 %        (9) This function uses the public domain ZLIB Deflater algorithm.
 %       (10) Carefully tested, but no warranty; use at your own risk.
 %       (11) Michael Kleder, Nov 2005
-%Downloaded by Eli Bowen 2/27/2018 from: https://www.mathworks.com/matlabcentral/fileexchange/8899-rapid-lossless-data-compression-of-numerical-or-string-variables
+% downloaded by Eli Bowen 2/27/2018 from: https://www.mathworks.com/matlabcentral/fileexchange/8899-rapid-lossless-data-compression-of-numerical-or-string-variables
 function Z = dzip (M)
     s = size(M);
     c = class(M);

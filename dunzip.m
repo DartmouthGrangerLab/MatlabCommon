@@ -14,7 +14,7 @@
 %        (3) See DZIP for other notes.
 %        (4) Carefully tested, but no warranty; use at your own risk.
 %        (5) Michael Kleder, Nov 2005
-%Downloaded by Eli Bowen 2/27/2018 from: https://www.mathworks.com/matlabcentral/fileexchange/8899-rapid-lossless-data-compression-of-numerical-or-string-variables
+% downloaded by Eli Bowen 2/27/2018 from: https://www.mathworks.com/matlabcentral/fileexchange/8899-rapid-lossless-data-compression-of-numerical-or-string-variables
 function M = dunzip(Z)
     import com.mathworks.mlwidgets.io.InterruptibleStreamCopier
     a = java.io.ByteArrayInputStream(Z);

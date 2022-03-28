@@ -1,13 +1,12 @@
-% Eli Bowen
-% 11/18/16
+% Eli Bowen 11/18/16
 % if multiclass, it parallelizes itself, otherwise you should call this in a parfor
 % NOTE: svm is too slow, so we're using LDA (lots of datapoints, which is when LDA shines anyways)
 % INPUTS:
 %   data             - n_datapts x n_dims (numeric)
 %   label            - 1 x n_datapts (int-valued numeric or cell array of chars)
-%   n_folds          - scalar (int-valued numeric) - how many crossvalidation folds (e.g. 10)
+%   n_folds          - scalar (int-valued numeric) how many crossvalidation folds (e.g. 10)
 %   classifierType   - (char) 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   doEvenN          - scalar (logical) - if true, will equalize the number of exemplars of each category. Else, will not
+%   doEvenN          - scalar (logical) if true, will equalize the number of exemplars of each category. Else, will not
 %   classifierParams - OPTIONAL struct
 %       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k           - for KNN
@@ -22,11 +21,11 @@
 %   rocTPR      - OPTIONAL
 %   rocFPR      - OPTIONAL
 function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = ClassifyCrossvalidate(data, label, n_folds, classifierType, doEvenN, classifierParams, verbose)
-    validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)});
-    validateattributes(label,          {'numeric','cell'},    {'nonempty','vector'});
-    validateattributes(n_folds,        'double',              {'nonempty','scalar','positive','integer','>=',2});
-    validateattributes(classifierType, 'char',                {'nonempty'});
-    validateattributes(doEvenN,        {'double','logical'},  {'nonempty','scalar'});
+    validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)}, 1);
+    validateattributes(label,          {'numeric','cell'},    {'nonempty','vector'}, 2);
+    validateattributes(n_folds,        {'double'},            {'nonempty','scalar','positive','integer','>=',2}, 3);
+    validateattributes(classifierType, {'char'},              {'nonempty'}, 4);
+    validateattributes(doEvenN,        {'double','logical'},  {'nonempty','scalar'}, 5);
     if ~exist('classifierParams', 'var') || isempty(classifierParams)
         classifierParams = struct('regularization_lvl', 'optimize', 'k', 1, 'distance', 'euclidean');
     end

@@ -10,9 +10,9 @@
 % RETURNS:
 %   data - logical same size as input data
 function [data] = CodeTransformScalar2SpikeViaKWTA(data, n_winners, dim, min2Win)
-    validateattributes(data,      'numeric', {'nonempty'});
-    validateattributes(n_winners, 'numeric', {'nonempty','scalar','positive','integer'});
-    validateattributes(dim,       'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(data,      {'numeric'}, {'nonempty'}, 1);
+    validateattributes(n_winners, {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);
+    validateattributes(dim,       {'numeric'}, {'nonempty','scalar','positive','integer'}, 3);
     assert(min(data(:)) >= 0 && max(data(:)) <= 1, 'input scalar code must be in range 0-->1');
     if ~exist('min2Win', 'var') || isempty(min2Win)
         min2Win = 0;

@@ -5,7 +5,7 @@
 %   b - 1 x 2 (numeric) [x,y] coordinates
 % RETURNS:
 %   dir
-function [dir] = PointATowardB(a, b)
+function dir = PointATowardB(a, b)
     assert(numel(a) == 2 && numel(b) == 2);
 
     x = b(1) - a(1);

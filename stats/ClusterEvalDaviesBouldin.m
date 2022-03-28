@@ -1,10 +1,9 @@
-% Eli Bowen (copied directly from matlab's clustering.evaluation.DaviesBouldinEvaluation code to make a standalone function)
-% 12/17/16
+% Eli Bowen 12/17/16 (copied directly from matlab's clustering.evaluation.DaviesBouldinEvaluation code to make a standalone function)
 % DaviesBouldin cluster criterion
 % INPUTS:
 %   X - N x D position of each data point
 %   clustAssignments - 1D vector (N elements) cluster ID assigned to each datapoint (e.g. a value of 2 indicates a point was assigned to the centroid with mean at the second row of 'centroids')
-function [db] = ClusterEvalDaviesBouldin(X, clustAssignments)
+function db = ClusterEvalDaviesBouldin(X, clustAssignments)
     assert(~any(any(isnan(X))), 'X contains NaN values. TODO: code a way to handle this');
     assert(numel(unique(clustAssignments)) > 1, 'Only one cluster has assignments!');
 

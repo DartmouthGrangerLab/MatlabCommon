@@ -12,13 +12,13 @@
 %   Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % made more efficient by Eli Bowen 9.19.2017, made capitalized so as not to conflict with matlab's stft()
-function [x] = STFT (x, flength, fshift, w)
+function x = STFT(x, flength, fshift, w)
     assert(mod(flength, 2) ~= 1, 'odd ffts not implemented');
     if size(x, 2) > size(x, 1)
         x = x'; % ensure this is a row vector
     end
     if nargin < 3
-       fshift = flength / 2; 
+        fshift = flength / 2; 
     end
 
     Q = flength / fshift;

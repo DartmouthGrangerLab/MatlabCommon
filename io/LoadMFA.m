@@ -1,8 +1,8 @@
 % loads a montreal forced aligner output csv
 % INPUTS:
 %   filepath
-function [alignment] = LoadMFA (filePath)
-    validateattributes(filePath, {'char'}, {'nonempty'});
+function alignment = LoadMFA(filePath)
+    validateattributes(filePath, {'char'}, {'nonempty'}, 1);
     assert(endsWith(lower(filePath), '.csv'));
 
     fileID = fopen(filePath, 'r');

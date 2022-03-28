@@ -10,8 +10,8 @@
 %   spatialStop - size(squeeze(data)) x n_spatial_stops (numeric)
 %   meta        - scalar (struct)
 function [data,spatialStop,meta] = CodeTransformScalar2SpatialScalar(data, n_spatial_stops, meta)
-    validateattributes(data, 'numeric', {'nonempty'});
-    validateattributes(n_spatial_stops, 'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(data, {'numeric'}, {'nonempty'}, 1);
+    validateattributes(n_spatial_stops, {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);
     assert(min(data(:)) >= 0 && max(data(:)) <= 1, 'input scalar code must be in range 0-->1');
     data = squeeze(data);
     n_used_dims = sum(size(data) > 1);

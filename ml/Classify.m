@@ -16,11 +16,11 @@
 %   predLabel
 %   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
 function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
-    validateattributes(trnData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)});
-    validateattributes(trnLabel,       'numeric',             {'nonempty','vector'});
-    validateattributes(tstData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)});
-    validateattributes(tstLabel,       'numeric',             {'nonempty','vector'});
-    validateattributes(classifierType, 'char',                {'nonempty'});
+    validateattributes(trnData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)}, 1);
+    validateattributes(trnLabel,       {'numeric'},           {'nonempty','vector'}, 2);
+    validateattributes(tstData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)}, 3);
+    validateattributes(tstLabel,       {'numeric'},           {'nonempty','vector'}, 4);
+    validateattributes(classifierType, {'char'},              {'nonempty'}, 5);
     if ~exist('classifierParams', 'var') || isempty(classifierParams)
         distribution = 'gauss';
         if islogical(trnData) || all(trnData(:) == 0 | trnData(:) == 1)

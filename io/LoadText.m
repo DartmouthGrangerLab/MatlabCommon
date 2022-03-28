@@ -3,8 +3,8 @@
 %   datasetName
 % RETURNS:
 %   text - (char) - comma separated list of datasets to load (must all be text)
-function [text] = LoadText(datasetName)
-    validateattributes(datasetName, 'char', {'nonempty','vector'});
+function text = LoadText(datasetName)
+    validateattributes(datasetName, {'char'}, {'nonempty','vector'});
     
     directory = fullfile(ComputerProfile.DatasetDir(), 'text');
     datasetName = strsplit(datasetName, ',');

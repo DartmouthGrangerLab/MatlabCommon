@@ -2,8 +2,8 @@
 % loads the text file produced by running FAVE
 % INPUTS:
 %   filePath
-function [fave] = LoadFAVE (filePath)
-    validateattributes(filePath, {'char'}, {'nonempty'});
+function fave = LoadFAVE(filePath)
+    validateattributes(filePath, {'char'}, {'nonempty'}, 1);
 
     fileID = fopen(filePath, 'r');
 

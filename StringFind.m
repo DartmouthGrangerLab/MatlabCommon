@@ -4,10 +4,10 @@
 % INPUTS:
 %   str      - variable to search within. If a char, returns the result of strfind(). If a cell array of char (e.g. {'hi','there'}), returns indices into the cell array.
 %   pattern  - search term (char)
-%   is_exact - scalar (logical) - if true, will only accept exact string matches. Note search is always case sensitive. Default = 0
+%   is_exact - scalar (logical) if true, will only accept exact string matches. Note search is always case sensitive. Default = 0
 % RETURNS:
 %   idx - empty array [] if nothing found, otherwise an array of integers
-function [idx] = StringFind(str, pattern, is_exact)
+function idx = StringFind(str, pattern, is_exact)
     if iscellstr(str)
         if is_exact
             idx = find(strcmp(str, pattern)); % 20x faster than below

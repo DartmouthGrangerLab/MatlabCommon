@@ -4,6 +4,6 @@
 % RETURNS:
 %   tf
 % see also: iseven
-function [tf] = isodd(x)
+function tf = isodd(x)
     tf = (mod(x, 2) == 1);
 end

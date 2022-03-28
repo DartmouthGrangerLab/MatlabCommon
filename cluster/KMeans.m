@@ -1,10 +1,10 @@
 % Eli Bowen
 % INPUTS:
 %   model
-%   data - N x D
+%   data     - N x D
 %   maxIter
 %   do_fuzzy - if true, use fuzzy clustering. If you don't know what this means, set to false.
-%   verbose - OPTIONAL (default = true)
+%   verbose  - OPTIONAL (default = true)
 % RETURNS:
 %   clustMemberships - Nx1 integer array with values in the range 1:size(centroids, 1)
 %   centroids

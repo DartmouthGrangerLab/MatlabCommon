@@ -3,9 +3,9 @@
 %   frac - fraction of data to keep (0 to 1)
 % RETURNS:
 %   idx - indices into a random percent of the datapoints for each class
-function [idx] = RandSubsetDataset(labels, frac)
-    validateattributes(labels, 'numeric', {});
-    validateattributes(frac, 'numeric', {'nonempty','scalar','nonnegative'});
+function idx = RandSubsetDataset(labels, frac)
+    validateattributes(labels, {'numeric'}, {}, 1);
+    validateattributes(frac, {'numeric'}, {'nonempty','scalar','nonnegative'}, 2);
 
     idx = [];
     uniqLabels = unique(labels);

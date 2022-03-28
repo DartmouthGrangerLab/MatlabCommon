@@ -9,7 +9,7 @@
 %   other arguments to matlab's fitdist()
 % RETURNS:
 %   params - scalar (struct) - each field is a 1 x n set of distribution parameters
-function [params] = FitDistByCol(data, distName, varargin)
+function params = FitDistByCol(data, distName, varargin)
     n = size(data, 2);
 
     params = struct();

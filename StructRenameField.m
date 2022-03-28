@@ -6,10 +6,10 @@
 %   newName - (char) new field name
 % RETURNs:
 %   s
-function [s] = StructRenameField(s, oldName, newName)
-    validateattributes(s, {'struct','cell'}, {'nonempty'});
-    validateattributes(oldName, 'char', {'nonempty'});
-    validateattributes(newName, 'char', {'nonempty'});
+function s = StructRenameField(s, oldName, newName)
+    validateattributes(s, {'struct','cell'}, {'nonempty'}, 1);
+    validateattributes(oldName, {'char'}, {'nonempty'}, 2);
+    validateattributes(newName, {'char'}, {'nonempty'}, 3);
 
     if isstruct(s)
         if numel(s) == 1 % special case for efficiency
@@ -35,7 +35,7 @@ function [s] = StructRenameField(s, oldName, newName)
 end
 
 
-function [s] = Helper(s, oldName, newName)
+function s = Helper(s, oldName, newName)
     assert(isfield(s, oldName));
     assert(~isfield(s, newName));
 

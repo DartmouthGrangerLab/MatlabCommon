@@ -1,5 +1,4 @@
-% Eli Bowen
-% 10/1/2021
+% Eli Bowen 10/1/2021
 % wrapper designed to simplify and remove the chance of errors when calling liblinear's predict() function
 % designed to work with liblinear-multicore version 2.43-2
 % INPUTS:
@@ -13,14 +12,14 @@
 %   data - n_datapts x ? (numeric or logical)
 % RETURNS:
 %   predLabel - 1 x n_datapts
-%   acc - scalar (numeric) - accuracy ranged 0 --> 1
-%   score - n_datapts x n_classes
-%   mse - scalar (numeric) - mean squared error
-%   sqcorr - scalar (numeric) - squared correlation coefficient
+%   acc       - scalar (numeric) accuracy ranged 0 --> 1
+%   score     - n_datapts x n_classes
+%   mse       - scalar (numeric) mean squared error
+%   sqcorr    - scalar (numeric) squared correlation coefficient
 function [predLabel,acc,score,mse,sqcorr] = LiblinearPredict (model, label, data)
-    validateattributes(model, 'struct',  {'nonempty','scalar'});
-    validateattributes(label, 'numeric', {'nonempty','vector','positive','integer'});
-    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)});
+    validateattributes(model, {'struct'},  {'nonempty','scalar'}, 1);
+    validateattributes(label, {'numeric'}, {'nonempty','vector','positive','integer'}, 2);
+    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)}, 3);
     assert(~isa(data, 'gpuArray')); % liblinear doesn't have gpu support
     
     label = label(:); % required orientation...

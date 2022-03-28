@@ -1,5 +1,4 @@
-% Eli Bowen
-% 10/14/2021
+% Eli Bowen 10/14/2021
 % https://en.wikipedia.org/wiki/Sensitivity_and_specificity
 % INPUTS:
 %   pred - 1 x n_datapts (logical)
@@ -18,8 +17,8 @@
 %   n_fp - scalar (int-valued numeric) - number of false positives
 %   n_fn - scalar (int-valued numeric) - number of false negatives
 function [sensitivity,specificity,precision,acc,accBalanced,n_tp,n_tn,n_fp,n_fn] = SensitivitySpecificity(pred, target)
-    validateattributes(pred,   'logical', {'nonempty','vector','numel',numel(target)});
-    validateattributes(target, 'logical', {'nonempty','vector','numel',numel(pred)});
+    validateattributes(pred,   {'logical'}, {'nonempty','vector','numel',numel(target)}, 1);
+    validateattributes(target, {'logical'}, {'nonempty','vector','numel',numel(pred)}, 2);
 
     pred = pred(:)'; % make sure they're the same dimensionality
     target = target(:)';

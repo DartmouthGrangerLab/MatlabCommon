@@ -1,45 +1,44 @@
-% Eli Bowen
-% 8/3/2020
+% Eli Bowen 8/3/2020
 % simple function for loading a video all at once in bulk
 % supports:
 %   any file type supported by matlab's VideoReader (hopefully mjpeg in an avi or motion jpeg 2000 in an mj2, or VideoReader compatability will be iffy)
-%   .mat files (must contain a variable called video (uint8 nRows x nCols x nChannels x nFrames) and one called frameRate (scalar numeric)
+%   .mat files (must contain a variable called video (uint8 nRows x nCols x n_channels x n_frames) and one called frameRate (scalar numeric)
 % INPUTS:
 %   path
 %   fileName
-%   sz - OPTIONAL - [nRows,nCols] aka [height,width] - size of video; if provided, and video is a different size, we'll resize it automagically
-function [video,frameRate] = LoadVideo (path, fileName, sz)
-    validateattributes(path, {'char'}, {'nonempty','vector'});
-    validateattributes(fileName, {'char'}, {'nonempty','vector'});
+%   sz - OPTIONAL [nRows,nCols] aka [height,width] - size of video; if provided, and video is a different size, we'll resize it automagically
+function [video,frameRate] = LoadVideo(path, fileName, sz)
+    validateattributes(path, {'char'}, {'nonempty','vector'}, 1);
+    validateattributes(fileName, {'char'}, {'nonempty','vector'}, 2);
     if exist('sz', 'var') && ~isempty(sz)
         validateattributes(sz, {'numeric'}, {'nonempty','vector','positive','integer'});
     end
-    
+
     if endsWith(fileName, '.mat')
         load(fullfile(path, fileName), 'video', 'frameRate');
         validateattributes(video, {'uint8'}, {'nonempty'});
         validateattributes(frameRate, {'numeric'}, {'nonempty','scalar','positive','integer'});
         return;
     end
-    
+
     vidH = VideoReader(fullfile(path, fileName));
     frameRate = vidH.FrameRate;
-    
-    nChan = 1;
+
+    n_chan = 1;
     if vidH.BitsPerPixel > 8
-        nChan = 3;
+        n_chan = 3;
     end
-    
+
     if ~exist('sz', 'var') || isempty(sz)
         sz = [vidH.Height,vidH.Width];
     end
     resize = (sz(1) ~= vidH.Height || sz(2) ~= vidH.Width);
-    
-    nFrames = vidH.Duration * frameRate;
-%     nFrames = vidH.NumFrames; % "not always available"
-    video = zeros(sz(1), sz(2), nChan, nFrames, 'uint8');
+
+    n_frames = vidH.Duration * frameRate;
+%     n_frames = vidH.NumFrames; % "not always available"
+    video = zeros(sz(1), sz(2), n_chan, n_frames, 'uint8');
     count = 1;
-    while hasFrame(vidH) && count <= nFrames
+    while hasFrame(vidH) && count <= n_frames
         if resize
             video(:,:,:,count) = imresize(vidH.readFrame(), sz);
         else

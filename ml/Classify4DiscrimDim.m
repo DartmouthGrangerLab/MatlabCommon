@@ -1,16 +1,15 @@
-% Eli Bowen
-% 1/6/2017
+% Eli Bowen 1/6/2017
 % INPUTS:
-%   data - n_datapts x n_dims (double)
-%   label - 
+%   data           - n_datapts x n_dims (double)
+%   label
 %   classifierType - one of 'lda', 'svm' (BROKEN), 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear'
-%   verbose - OPTIONAL (default = true)
+%   verbose        - OPTIONAL (default = true)
 % RETURNS:
 %   primaryAxis - 1 x n_dims (numeric)
-function [primaryAxis] = Classify4DiscrimDim (data, label, classifierType, verbose)
-    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)});
-    validateattributes(label, {'numeric','cell'}, {'nonempty','vector'});
-    validateattributes(classifierType, {'char'}, {'nonempty'});
+function [primaryAxis] = Classify4DiscrimDim(data, label, classifierType, verbose)
+    validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)}, 1);
+    validateattributes(label, {'numeric','cell'}, {'nonempty','vector'}, 2);
+    validateattributes(classifierType, {'char'}, {'nonempty'}, 3);
     assert(numel(unique(label)) == 2);
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = true;

@@ -1,5 +1,4 @@
-% Eli Bowen
-% 9/1/2020
+% Eli Bowen 9/1/2020
 % [pos,scaleFactor] = SpreadItemsOn2DGrid(10*10, [10,10], 'hex');
 % figure; scatter(pos(:,2), pos(:,1)); xlabel('c'); ylabel('r');
 % [pos,scaleFactor] = SpreadItemsOn2DGrid(10*10, 10, 'hex');
@@ -7,16 +6,16 @@
 % [pos,scaleFactor] = SpreadItemsOn2DGrid(10*10, [10,10], 'sqr');
 % figure; scatter(pos(:,2), pos(:,1)); xlabel('c'); ylabel('r');
 % INPUTS:
-%   n_items  - scalar (numeric)
+%   n_items  - scalar (int-valued numeric)
 %   sz       - 1 x 2 (numeric) size of the rectangle along [row,col] dimensions (not to be confused with nRows / nCols)
 %   gridMode - (char) 'sqr' or 'hex'
 % RETURNS:
 %   pos         - n_items x 2 (numeric) row,col position of each item in euclidean / square coordinates
 %   scaleFactor - scalar (numeric) a unit hex grid has been multiplied by this scale factor
 function [pos,scaleFactor] = SpreadItemsOn2DGrid(n_items, sz, gridMode)
-    validateattributes(n_items,  'numeric', {'nonempty','scalar','positive','integer'});
-    validateattributes(sz,       'numeric', {'nonempty','vector','positive'});
-    validateattributes(gridMode, 'char',    {'nonempty','vector'});
+    validateattributes(n_items,  {'numeric'}, {'nonempty','scalar','positive','integer'}, 1);
+    validateattributes(sz,       {'numeric'}, {'nonempty','vector','positive'}, 2);
+    validateattributes(gridMode, {'char'},    {'nonempty','vector'}, 3);
 
     %% compute starting square grid
     if numel(sz) == 1 % circular boundary

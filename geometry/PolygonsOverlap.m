@@ -6,12 +6,12 @@
 %   poly2      - scalar (int-valued numeric)
 %   polyRadius - scalar (numeric)
 %   puckerFactor - OPTIONAL (default = 1 aka none) scalar (numeric) squeeze radius this much in one direction
-function [result] = PolygonsOverlap(pos1, pos2, poly1, poly2, polyRadius, puckerFactor)
-    validateattributes(pos1,       'numeric', {'nonempty','vector'}, 1);
-    validateattributes(pos2,       'numeric', {'nonempty','vector'}, 2);
-    validateattributes(poly1,      'numeric', {'nonempty','scalar','positive','integer'}, 3);
-    validateattributes(poly2,      'numeric', {'nonempty','scalar','positive','integer'}, 4);
-    validateattributes(polyRadius, 'numeric', {'nonempty','scalar','positive'}, 5);
+function result = PolygonsOverlap(pos1, pos2, poly1, poly2, polyRadius, puckerFactor)
+    validateattributes(pos1,       {'numeric'}, {'nonempty','vector'}, 1);
+    validateattributes(pos2,       {'numeric'}, {'nonempty','vector'}, 2);
+    validateattributes(poly1,      {'numeric'}, {'nonempty','scalar','positive','integer'}, 3);
+    validateattributes(poly2,      {'numeric'}, {'nonempty','scalar','positive','integer'}, 4);
+    validateattributes(polyRadius, {'numeric'}, {'nonempty','scalar','positive'}, 5);
     if ~exist('puckerFactor', 'var') || isempty(puckerFactor)
         puckerFactor = 1; % squeeze radius this much in one direction
     end

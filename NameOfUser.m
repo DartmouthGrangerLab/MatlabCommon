@@ -1,8 +1,7 @@
-% Eli Bowen
-% 5/21/2021
+% Eli Bowen 5/21/2021
 % RETURNS
 %   name - the username of whoever's running matlab
-function [name] = NameOfUser ()
+function name = NameOfUser()
     if ispc()
         userProfile = getenv('USERPROFILE');
         [p,name,ext] = fileparts(userProfile); % get last folder in the above path
