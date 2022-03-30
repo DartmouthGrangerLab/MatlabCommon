@@ -5,7 +5,7 @@
 %   varargin - arguments to the function
 % RETURNS:
 %   whatever func would return
-function varargout = CachedCompute(func, varargin)
+function [varargout] = CachedCompute(func, varargin)
     validateattributes(func, {'char','function_handle'}, {'nonempty'}, 1);
     if ischar(func)
         func = str2func(func);
