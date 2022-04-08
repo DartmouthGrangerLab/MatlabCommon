@@ -8,9 +8,9 @@
 %   other arguments to matlab's plot()
 % RETURNS:
 %   h - plot handle
-function [h] = Plot(x, y, varargin)
-    validateattributes(x, {'numeric','logical'}, {'nonempty'});
-    validateattributes(y, {'numeric','logical'}, {'nonempty'});
+function h = Plot(x, y, varargin)
+    validateattributes(x, {'numeric','logical'}, {'nonempty'}, 1);
+    validateattributes(y, {'numeric','logical'}, {'nonempty'}, 2);
     x = double(x);
     y = double(y);
 
@@ -18,7 +18,7 @@ function [h] = Plot(x, y, varargin)
     if any(strcmpi(varargin, 'alpha'))
         idx = find(strcmpi(varargin, 'alpha'));
         alpha = varargin{idx+1};
-        validateattributes(alpha, 'numeric', {'nonempty','scalar','nonnegative'});
+        validateattributes(alpha, {'numeric'}, {'nonempty','scalar','nonnegative'});
         assert(alpha <= 1);
         varargin([idx,idx+1]) = [];
     end
@@ -46,6 +46,8 @@ function [h] = Plot(x, y, varargin)
     h = plot(x, y, varargin{:});
 
     if alpha ~= 1
-        h.Color(4) = alpha; % undocumented matlab
+        for i = 1 : numel(h) % for each line we've plotted
+            h(i).Color(4) = alpha; % undocumented matlab
+        end
     end
 end
