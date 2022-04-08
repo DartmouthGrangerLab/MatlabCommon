@@ -17,6 +17,11 @@ function [x,y] = PDF(data, mode, n_bins)
     if ~exist('n_bins', 'var') || isempty(n_bins)
         n_bins = 100;
     end
+    if isempty(data)
+        x = [];
+        y = [];
+        return
+    end
 
     binLim = [min(data(:)),max(data(:))];
 
