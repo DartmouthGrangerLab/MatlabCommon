@@ -1,14 +1,15 @@
-% Eli Bowen
-% 12/6/16
+% Eli Bowen 12/6/16
 % performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
 % INPUTS:
-%   model
+%   model - struct
 %   data
-function [data] = ClustResponse(model, data)
+% RETURNS:
+%   data
+function data = ClustResponse(model, data)
     if strcmp(model.clusterer, 'kmeans')
         if iscell(model.mu) % bagging was used
             projecteddata = [];
-            for i = 1:numel(model.mu)
+            for i = 1 : numel(model.mu)
                 bagModel = model;
                 bagFeats = model.mu{i}.bagFeats;
                 bagModel.mu = model.mu{i}.bagComponents;
@@ -32,6 +33,10 @@ function [data] = ClustResponse(model, data)
         data = DistFromClustGMM(model, data);
         
         data = 1 - data;
+    elseif startsWith(model.clusterer, 'hierarchical')
+        error('n/a');
+    elseif startsWith(model.clusterer, 'spectralkmeans')
+        error('TODO');
     else
         error('unknown clusterer');
     end

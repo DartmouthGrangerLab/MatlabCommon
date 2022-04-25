@@ -10,7 +10,7 @@ function selectedIdx = EqualizeN(labelIdx, n)
 
     [uniqLabel,~,labelIdx] = unique(labelIdx);
 
-    if ~exist('n', 'var') || isempty(n)
+    if ~exist('n', 'var') || isempty(n) || isnan(n)
         n = min(CountNumericOccurrences(labelIdx, 1:numel(uniqLabel)));
     else
         validateattributes(n, 'numeric', {'scalar','nonnegative','integer'});

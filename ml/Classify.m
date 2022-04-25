@@ -166,5 +166,5 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         score = gather(score);
     end
 
-    if verbose; disp([mfilename(),': ',num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,' (n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc, 4),') took ',num2str(toc(t)),' s']); end
+    Toc(t, verbose, [num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,', n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc, 4)]);
 end

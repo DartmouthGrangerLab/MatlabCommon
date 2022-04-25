@@ -24,6 +24,7 @@ function [x,y] = PDF(data, mode, n_bins)
     end
 
     binLim = [min(data(:)),max(data(:))];
+    assert(binLim(1) ~= binLim(2)); % data must take >1 value
 
     if strcmp(mode, 'density')
         x = binLim(1):(binLim(2)-binLim(1))/n_bins:binLim(2);

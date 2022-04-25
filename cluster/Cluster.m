@@ -1,19 +1,25 @@
-% Eli Bowen
-% 11/30/2019
+% Eli Bowen 11/30/2019
 % copied and enhanced from LSRExperiments() (Eli Bowen, 7/2/2019)
 % USAGE:
-%   model = ClusterInit(trnData, K, 'clusterer', 'distance', init);
-%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, maxIter);
+%   model = ClustInit('clusterer', K, 'distance', init, trnData);
+%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, n_iter);
 %   responsesToTstData = ClustResponse(model, tstData);
 % INPUTS:
-%   model - struct, result of ClustInit()
-%   data
-%   do_fuzzy - scalar (logical)
-%   maxIter - scalar (numeric)
-function [model,data] = Cluster(model, data, do_fuzzy, maxIter)
-    K = size(model.mu, 1);
-    distance = model.distance;
-    if strcmp(distance, 'cosine')
+%   model    - (struct) result of ClustInit()
+%   data     - N x D (numeric)
+%   do_fuzzy - OPTIONAL scalar (logical)
+%   n_iter   - OPTIONAL scalar (numeric)
+% RETURNS:
+%   model - (struct) model with modified clusters
+%   data  - N x K (numeric) similarity between each cluster and each datapoint
+%   idx   - N x 1 (numeric index) index of the cluster closest to each datapoint
+function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
+    validateattributes(model, {'struct'}, {'nonempty'}, 1);
+    if ~isfloat(data)
+        data = double(data);
+    end
+
+    if strcmp(model.distance, 'cosine')
         % fix zeroish-length vectors
         Xnorm = realsqrt(sum(data.^2, 2));
         tIdxs = find(Xnorm <= eps(max(Xnorm)));
@@ -22,18 +28,26 @@ function [model,data] = Cluster(model, data, do_fuzzy, maxIter)
     end
 
     if strcmp(model.clusterer, 'kmeans')
-        [idx,model.mu,~] = KMeans(model, data, distance, maxIter, do_fuzzy, false);
+        [idx,model.mu,~] = KMeans(model, data, n_iter, do_fuzzy, false);
     elseif strcmp(model.clusterer, 'gmm')
         assert(~do_fuzzy);
-        [idx,model] = GMM(data, K, maxIter, model);
+        [idx,model] = GMM(data, model.k, n_iter, model);
+    elseif startsWith(model.clusterer, 'hierarchical')
+        linkage = strrep(model.clusterer, 'hierarchical', ''); % linkage - (char) 'average' | 'centroid' | 'complete' | 'median' | 'single' | 'ward' | 'weighted'
+        idx = clusterdata(data, 'MaxClust', model.k, 'Distance', model.distance, 'Linkage', linkage);
+    elseif startsWith(model.clusterer, 'spectralkmeans')
+        assert(size(data, 1) == size(data, 2)); % data must be a square adjacency matrix
+        assert(strcmp(model.distance, 'euclidean') || strcmp(model.distance, 'sqeuclidean'));
+        type = str2double(model.clusterer(end));
+        [idx,model.mu,model.L,model.U] = SpectralClustering(data, model.k, type, model.init, n_iter); % mu is K x N, L is the same dimensionality as data (N x N), U is ___
     else
         error('unknown clusterer');
     end
 
-    counts = CountNumericOccurrences(idx, 1:K);
+    counts = CountNumericOccurrences(idx, 1:model.k);
 
     if any(counts == 0)
-        warning(['removing ',num2str(sum(counts==0)),' (of ',num2str(K),') clusters for having 0 members']);
+        warning(['removing ',num2str(sum(counts==0)),' (of ',num2str(model.k),') clusters for having 0 members']);
 
         if strcmp(model.clusterer, 'kmeans')
             model.mu(counts==0,:) = [];
@@ -47,11 +61,25 @@ function [model,data] = Cluster(model, data, do_fuzzy, maxIter)
             else
                 error('invalid model.modelType');
             end
+        elseif startsWith(model.clusterer, 'hierarchical')
+            % nothing to do
+        elseif startsWith(model.clusterer, 'spectralkmeans')
+            model.mu(counts==0,:) = [];
         else
             error('unknown clusterer');
         end
     end
 
     %% calculate responses
-    data = ClustResponse(model, data);
+    if nargout() > 1
+        if startsWith(model.clusterer, 'hierarchical')
+            [~,idx] = min(data, [], 2); % idx must be re-computed
+            data = double(OneHot(idx, model.k));
+        else
+            data = ClustResponse(model, data);
+            if nargout() > 2
+                [~,idx] = min(data, [], 2); % idx must be re-computed
+            end
+        end
+    end
 end

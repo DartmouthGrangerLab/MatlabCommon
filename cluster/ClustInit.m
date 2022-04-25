@@ -1,29 +1,38 @@
-% Eli Bowen
-% 11/30/2019
+% Eli Bowen 11/30/2019
 % USAGE:
-%   model = ClusterInit(trnData, K, 'clusterer', 'distance', init);
+%   model = ClustInit(trnData, k, 'clusterer', 'distance', init);
 %   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, maxIter);
 %   responsesToTstData = ClustResponse(model, tstData);
 % INPUTS:
-%   data
-%   K - scalar (int-valued numeric)
-%   clusterer - char
-%   distance - char
-%   init
+%   clusterer - (char) 'kmeans' | 'gmm' | 'hierarchical<linkage>' | 'spectralkmeans<1|2|3>'
+%   K         - scalar (int-valued numeric)
+%   distance  - (char) any valid distance measure e.g. 'euclidean'
+%   init      - OPTIONAL (numeric, struct, char) if numeric, a cluster idx for each datapoint. if struct, a pre-existing model. if char, one of 'random', 'furthestfirst', 'kmeans++'
+%   data      - OPTIONAL N x D (numeric)
 % RETURNS:
 %   model - struct
 %       .clusterer
 %       .distance
 %       .mu
 %       [other fields]
-function [model] = ClustInit(data, K, clusterer, distance, init)
+function model = ClustInit(clusterer, K, distance, init, data)
+    validateattributes(clusterer, {'char'}, {'nonempty'}, 1);
+    validateattributes(K, {'numeric'}, {'nonempty','scalar','integer'}, 2);
+    validateattributes(distance, {'char'}, {'nonempty'}, 3);
     if strcmp(distance, 'sqeuclidean') % compatability for matlab's built in kmeans
         distance = 'euclidean';
     end
-    
+    if exist('data', 'var') && ~isempty(data)
+        if ~isfloat(data)
+            data = double(data);
+        end
+    end
+
     model = struct();
     model.clusterer = clusterer;
+    model.k = K;
     model.distance = distance;
+
     if strcmp(clusterer, 'kmeans')
         if isstruct(init) % init with a model
             model = init;
@@ -76,6 +85,12 @@ function [model] = ClustInit(data, K, clusterer, distance, init)
         assert(K == size(init.mu, 2));
         assert(~any(isnan(init.mu(:))) && ~any(isnan(init.sigma(:))) && ~any(isnan(init.w(:))), 'model better not contain NaN!');
         assert(~strcmp(distance, 'cosine'));
+    elseif startsWith(clusterer, 'hierarchical')
+        % nothing to do
+    elseif startsWith(clusterer, 'spectralkmeans')
+        model.init = init; % we'll do this later
+    else
+        error('unexpected clusterer');
     end
 end
 
@@ -84,7 +99,7 @@ end
 %   data - dimensionality of [#datapts][#dims]
 %   K - scalar (numeric) num clusters
 %   labels
-function [centroids] = InitKMeansSupervised(data, K, labels)
+function centroids = InitKMeansSupervised(data, K, labels)
     [N,D] = size(data);
     lSet = unique(labels);
     n_labels = numel(lSet);
@@ -132,9 +147,10 @@ end
 % INPUTS:
 %   data - dimensionality of [#datapts][#dims]
 %   K - number of clusters
-function [centroids] = InitKMeansRandomly(data, K)
+function centroids = InitKMeansRandomly(data, K)
     usablePts = find(sum(data, 2) ~= 0);
     N = numel(usablePts);
+    assert(N >= K); % must have enough points to actually pick K of them
 
     randPointIdx = randperm(N, K); % random sample without replacement
 %     m_centroids = zeros(K, size(data, 2));
@@ -152,7 +168,7 @@ end
 % This is basically an approximation of the "Metric k-center" problem", which is NP-complete, but desiring longer distance not shorter.
 % INPUTS:
 %   data - dimensionality of [#datapts][#dims]
-function [centroids] = InitKMeansFurthestFirst(data, K, distance)
+function centroids = InitKMeansFurthestFirst(data, K, distance)
     N = size(data, 1);
     if strcmp(distance, 'euclidean')
         distance = 'squaredeuclidean'; % identical result, faster
@@ -182,7 +198,7 @@ end
 % Plex Metric Data Toolbox version 2.5 by Vin de Silva, Patrick Perry and contributors. See PX_PLEXINFO for credits and licensing information.
 % Released with Plex version 2.5. [2006-Jul-14]
 % Modified by Eli Bowen from http://math.stanford.edu/~yuany/pku/matlab/kcenter.m
-function [choices] = FurthestFirst1(data, K, firstCenter, distance)
+function choices = FurthestFirst1(data, K, firstCenter, distance)
     N = size(data, 1);
 
     choices = zeros(K, 1);
@@ -208,11 +224,12 @@ end
 
 % copied from apache commons math and translated by Eli Bowen
 % INPUTS:
-%   data   - dimensionality of [#datapts][#dims]
-%   K      - scalar (numeric) num clusters
+%   data     - dimensionality of [#datapts][#dims]
+%   K        - scalar (numeric) num clusters
 %   distance - char
-function [centroids] = InitKMeansPlusPlus(data, K, distance)
+function centroids = InitKMeansPlusPlus(data, K, distance)
     N = size(data, 1);
+    assert(N >= K); % must have enough points to actually pick K of them
 
     taken = false(N, 1); % for each element of pointList, is it no longer available?
 
@@ -247,7 +264,7 @@ function [centroids] = InitKMeansPlusPlus(data, K, distance)
                 tempSum = tempSum + minDistSquared(i);
                 if tempSum >= r
                     nextPointIndex = i;
-                    break;
+                    break
                 end
             end
         end
@@ -257,7 +274,7 @@ function [centroids] = InitKMeansPlusPlus(data, K, distance)
             for i = N:-1:1
                 if ~taken(i)
                     nextPointIndex = i;
-                    break;
+                    break
                 end
             end
         end
@@ -284,7 +301,7 @@ function [centroids] = InitKMeansPlusPlus(data, K, distance)
                 minDistSquared(ptNums) = min(minDistSquared(ptNums), d); % pairwise minimums
             end
         else
-            break; % none found - break to prevent an infinite loop
+            break % none found - break to prevent an infinite loop
         end
     end
 end

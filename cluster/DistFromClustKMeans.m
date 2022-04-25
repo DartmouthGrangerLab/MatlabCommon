@@ -4,8 +4,8 @@
 %   model
 %   data - n_pts x n_dim
 % RETURNS:
-%   distances - n_pts x n_prototypes distance matrix
-function [data] = DistFromClustKMeans(model, data)
+%   data - n_pts x n_prototypes (numeric) distance between each point and each cluster
+function data = DistFromClustKMeans(model, data)
     prototypes = model.mu;
     assert(size(data, 2) == size(prototypes, 2));
 %     import matlabclusternetworkjavahelper.*;

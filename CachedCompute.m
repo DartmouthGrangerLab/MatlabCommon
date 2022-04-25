@@ -12,7 +12,7 @@ function [varargout] = CachedCompute(func, varargin)
     end
     funcName = lower(func2str(func));
 
-    rng_state = rng();
+    rngState = rng();
 
     t = tic();
     file = CacheFile(varargin, funcName, 'cachedcompute');
@@ -29,5 +29,5 @@ function [varargout] = CachedCompute(func, varargin)
         end
     end
 
-    rng(rng_state); % return to original random number generator state
+    rng(rngState); % return to original random number generator state
 end
