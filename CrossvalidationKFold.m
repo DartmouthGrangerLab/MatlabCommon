@@ -9,10 +9,11 @@
 %   tstIdx - n_folds x 1 (cell array of numeric indexes) indices into labels array (aka positions of datapoints) for testing points
 function [trnIdx,tstIdx] = CrossvalidationKFold(labels, n_folds, beRandom)
     assert(isnumeric(labels) && isvector(labels));
-    assert(isnumeric(n_folds) && isscalar(n_folds));
+    assert(isnumeric(n_folds) && isscalar(n_folds) && n_folds > 1);
     if ~exist('beRandom', 'var') || isempty(beRandom)
         beRandom = false;
     end
+    labels = labels(:);
 
     uniqueLabels = unique(labels);
     trnIdx = cell(n_folds, 1);
