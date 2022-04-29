@@ -18,7 +18,9 @@ classdef ComputerProfile
             'ebowen',    'bigbrain.dartmouth.edu',   '?',                     '?';...                       % Eli on bigbrain
             'eli',       'eb-inspiron',              'Z:\datasets',           'D:\tempcache';...            % Eli's laptop
             'eli',       'eb-desktop',               'D:\Projects\datasets',  'D:\tempcache';...            % Eli's desktop
-            'grangerlab','grangerlab-aspire-m3985',  '/home/grangerlab/Desktop/Projects/Logicnet/datasets','/home/grangerlab/Desktop/Projects/Logicnet/tempcache';... % Anand's desktop
+            'grangerlab','grangerlab-aspire-m3985',  '/home/grangerlab/Desktop/Projects/Logicnet/datasets','/home/grangerlab/Desktop/Projects/Logicnet/tempcache'; % Anand's desktop
+            'cfoye',      'clays-macbook-pro.local', '/Users/cfoye/Granger/', '/Users/cfoye/Granger/cache';... %Clay's macbook
+       
             }
     end
 
