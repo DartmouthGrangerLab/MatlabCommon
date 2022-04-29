@@ -7,7 +7,11 @@
 % INPUTS:
 %   path
 %   fileName
-function [vidSize,frameRate] = LoadVideoMetadata(path, fileName)
+% RETURNS:
+%   vidSz     - (numeric) [n_rows,n_cols,n_chan,n_frames]
+%   frameRate - scalar (int-valued numeric) in hz
+% see also LoadVideo
+function [vidSz,frameRate] = LoadVideoMetadata(path, fileName)
     validateattributes(path, {'char'}, {'nonempty','vector'}, 1);
     validateattributes(fileName, {'char'}, {'nonempty','vector'}, 2);
 
@@ -20,7 +24,7 @@ function [vidSize,frameRate] = LoadVideoMetadata(path, fileName)
 
     vidH = VideoReader(fullfile(path, fileName));
     frameRate = vidH.FrameRate;
-    
+
     n_chan = 1;
     if vidH.BitsPerPixel > 8
         n_chan = 3;
@@ -28,5 +32,5 @@ function [vidSize,frameRate] = LoadVideoMetadata(path, fileName)
 
     n_frames = vidH.Duration * frameRate;
 %     n_frames = vidH.NumFrames; % "not always available"
-    vidSize = [vidH.Height,vidH.Width,n_chan,n_frames];
+    vidSz = [vidH.Height,vidH.Width,n_chan,n_frames];
 end

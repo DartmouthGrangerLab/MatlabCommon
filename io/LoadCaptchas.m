@@ -27,6 +27,7 @@
 %       'noisymnisttests.grid_lines'
 %       'noisymnisttests.line_clutter'
 %       'noisymnisttests.line_deletion'
+%   path - OPTIONAL (char) directory in which to find the dataset file(s)
 % RETURNS:
 %   img            - n_rows x n_cols x n_chan x n_images (double ranged 0 --> 1)
 %   labelIdx       - 1 x n_images (numeric index)
@@ -36,9 +37,9 @@
 %   distortionType - 1 x n_images (cell)
 %   distortionIdx  - 1 x n_images (numeric index)
 %   amount         - 1 x n_images (int-valued numeric)
-function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr)
+function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr, path)
     validateattributes(datasetStr, {'char'}, {'nonempty'}, 1);
-    
+
     % parse datasetStr
     x = strsplit(datasetStr, '.');
     datasetName = x{1};
@@ -47,7 +48,9 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
         subset = x{2};
     end
 
-    directory = fullfile(ComputerProfile.DatasetDir(), 'img_captchas', datasetName);
+    if ~exist('path', 'var') || isempty(path)
+        path = fullfile(ComputerProfile.DatasetDir(), 'img_captchas', datasetName);
+    end
 
     img            = [];
     labelIdx       = [];
@@ -59,15 +62,15 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
     if strcmp(datasetName, 'mnist')
         imgSz = [28,28,1];
         if strcmp(subset, 'trn')
-            load(fullfile(directory, 'mnist.mat'), 'trnImg', 'trnLabel');
+            load(fullfile(path, 'mnist.mat'), 'trnImg', 'trnLabel');
             img = trnImg;
             labelIdx = trnLabel(:)' + 1; % numbers 0 through 9, plus 1
         elseif strcmp(subset, 'tst')
-            load(fullfile(directory, 'mnist.mat'), 'tstImg', 'tstLabel');
+            load(fullfile(path, 'mnist.mat'), 'tstImg', 'tstLabel');
             img = tstImg;
             labelIdx = tstLabel(:)' + 1; % numbers 0 through 9, plus 1
         elseif isempty(subset)
-            load(fullfile(directory, 'mnist.mat'), 'trnImg', 'trnLabel', 'tstImg', 'tstLabel'); % 150 s
+            load(fullfile(path, 'mnist.mat'), 'trnImg', 'trnLabel', 'tstImg', 'tstLabel'); % 150 s
             img = cat(4, trnImg, tstImg);
             labelIdx = cat(2, trnLabel(:)', tstLabel(:)') + 1; % numbers 0 through 9, plus 1
         else
@@ -78,13 +81,13 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
         imgSz = [28,28,1];
         assert(strcmp(subset, 'trn') || strcmp(subset, 'tst') || isempty(subset));
         if strcmp(subset, 'trn') || isempty(subset)
-            x = UnzipText(fullfile(directory, 'fashion-mnist_train.csv.zip'), @importdata);
+            x = UnzipText(fullfile(path, 'fashion-mnist_train.csv.zip'), @importdata);
             assert(strcmp(x.colheaders{1}, 'label'));
             img = x.data(:,2:end)' ./ 255;
             labelIdx = x.data(:,1)' + 1; % these numbers index into uniqueLabel
         end
         if strcmp(subset, 'tst') || isempty(subset)
-            x = UnzipText(fullfile(directory, 'fashion-mnist_test.csv.zip'), @importdata);
+            x = UnzipText(fullfile(path, 'fashion-mnist_test.csv.zip'), @importdata);
             assert(strcmp(x.colheaders{1}, 'label'));
             img = cat(2, img, x.data(:,2:end)' ./ 255);
             labelIdx = cat(2, labelIdx, x.data(:,1)' + 1); % these numbers index into uniqueLabel
@@ -94,19 +97,19 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
     elseif strcmp(datasetName, 'emnist')
         imgSz = [28,28,1];
         if startsWith(subset, 'byclass')
-            load(fullfile(directory, 'matlab', 'emnist-byclass.mat'), 'dataset'); % 814,255 characters, 62 UNbalanced classes (0 --> 9, A --> Z, a --> z)
+            load(fullfile(path, 'matlab', 'emnist-byclass.mat'), 'dataset'); % 814,255 characters, 62 UNbalanced classes (0 --> 9, A --> Z, a --> z)
             indexAdjustment = 1; % uses 0-based indexing
         elseif startsWith(subset, 'bymerge')
-            load(fullfile(directory, 'matlab', 'emnist-bymerge.mat'), 'dataset');
+            load(fullfile(path, 'matlab', 'emnist-bymerge.mat'), 'dataset');
             error('untested');
         elseif startsWith(subset, 'letters')
-            load(fullfile(directory, 'matlab', 'emnist-letters.mat'), 'dataset'); % 145,600 characters, 26 balanced classes (case-insensitive!)
+            load(fullfile(path, 'matlab', 'emnist-letters.mat'), 'dataset'); % 145,600 characters, 26 balanced classes (case-insensitive!)
             indexAdjustment = 0; % uses 1-based indexing
         elseif startsWith(subset, 'digits')
-            load(fullfile(directory, 'matlab', 'emnist-digits.mat'), 'dataset'); % 280,000 characters, 10 balanced classes (0 --> 9)
+            load(fullfile(path, 'matlab', 'emnist-digits.mat'), 'dataset'); % 280,000 characters, 10 balanced classes (0 --> 9)
             indexAdjustment = 1; % uses 0-based indexing
         elseif startsWith(subset, 'mnist')
-            load(fullfile(directory, 'matlab', 'emnist-mnist.mat'), 'dataset');
+            load(fullfile(path, 'matlab', 'emnist-mnist.mat'), 'dataset');
             error('untested');
         else
             error('unexpected subset');
@@ -156,29 +159,29 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
             if ~isempty(subset) && ~strcmp(subset, distortionType{i})
                 continue
             end
-            if isfile(fullfile(directory, [distortionType{i},'.mat']))
-                load(fullfile(directory, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt');
+            if isfile(fullfile(path, [distortionType{i},'.mat']))
+                load(fullfile(path, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt');
             else
                 distortionImg      = [];
                 distortionLabelIdx = [];
                 distortionAmt      = [];
                 unzipDir = fullfile(ComputerProfile.CacheDir(), ['loadcaptchas_',GetMD5(now, 'array', 'hex')]);
-                unzip(fullfile(directory, [distortionType{i},'.zip']), unzipDir);
+                unzip(fullfile(path, [distortionType{i},'.zip']), unzipDir);
                 for c = 1 : 10
-                    listing1 = dir(fullfile(unzipDir, distortionType{i}, '0', num2str(c-1), '*.png'));
-                    listing2 = dir(fullfile(unzipDir, distortionType{i}, '1', num2str(c-1), '*.png'));
-                    listing3 = dir(fullfile(unzipDir, distortionType{i}, '2', num2str(c-1), '*.png'));
+                    listing1 = path(fullfile(unzipDir, distortionType{i}, '0', num2str(c-1), '*.png'));
+                    listing2 = path(fullfile(unzipDir, distortionType{i}, '1', num2str(c-1), '*.png'));
+                    listing3 = path(fullfile(unzipDir, distortionType{i}, '2', num2str(c-1), '*.png'));
                     classImg = zeros(imgSz(1), imgSz(2), imgSz(3), numel(listing1) + numel(listing2) + numel(listing3));
                     classAmt = NaN(1, numel(listing1) + numel(listing2) + numel(listing3));
-                    for j = 1 : numel(listing1) % for each image in this dir
+                    for j = 1 : numel(listing1) % for each image in this path
                         classImg(:,:,:,j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '0', num2str(c-1), listing1(j).name))));
                         classAmt(j) = 0;
                     end
-                    for j = 1 : numel(listing2) % for each image in this dir
+                    for j = 1 : numel(listing2) % for each image in this path
                         classImg(:,:,:,numel(listing1) + j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '1', num2str(c-1), listing2(j).name))));
                         classAmt(numel(listing1) + j) = 1;
                     end
-                    for j = 1 : numel(listing3) % for each image in this dir
+                    for j = 1 : numel(listing3) % for each image in this path
                         classImg(:,:,:,numel(listing1) + numel(listing2) + j) = im2double(rgb2gray(imread(fullfile(unzipDir, distortionType{i}, '2', num2str(c-1), listing3(j).name))));
                         classAmt(numel(listing1) + numel(listing2) + j) = 2;
                     end
@@ -186,8 +189,8 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
                     distortionLabelIdx = cat(2, distortionLabelIdx, c .* ones(1, size(classImg, 4)));
                     distortionAmt      = cat(2, distortionAmt, classAmt);
                 end
-                rmdir(unzipDir, 's');
-                save(fullfile(directory, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt', '-v7.3');
+                rmpath(unzipDir, 's');
+                save(fullfile(path, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt', '-v7.3');
             end
             
             img           = cat(4, img, distortionImg);

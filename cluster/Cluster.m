@@ -76,9 +76,10 @@ function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
             [~,idx] = min(data, [], 2); % idx must be re-computed
             data = double(OneHot(idx, model.k));
         else
-            data = ClustResponse(model, data);
+            data = ClustResponse(model, data); % data are not *similarities*
+%             figure;imagesc(normalize(data, 2, 'range'));colorbar
             if nargout() > 2
-                [~,idx] = min(data, [], 2); % idx must be re-computed
+                [~,idx] = max(data, [], 2); % idx must be re-computed
             end
         end
     end

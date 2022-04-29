@@ -6,7 +6,11 @@
 % INPUTS:
 %   path
 %   fileName
-%   sz - OPTIONAL [nRows,nCols] aka [height,width] - size of video; if provided, and video is a different size, we'll resize it automagically
+%   sz - OPTIONAL [n_rows,n_cols] aka [height,width] - size of video; if provided, and video is a different size, we'll resize it automagically
+% RETURNS:
+%   video     - n_rows x n_cols x n_chan x n_frames (uint8)
+%   frameRate - scalar (int-valued numeric) in hz
+% see also LoadVideoMetadata
 function [video,frameRate] = LoadVideo(path, fileName, sz)
     validateattributes(path, {'char'}, {'nonempty','vector'}, 1);
     validateattributes(fileName, {'char'}, {'nonempty','vector'}, 2);
@@ -18,7 +22,7 @@ function [video,frameRate] = LoadVideo(path, fileName, sz)
         load(fullfile(path, fileName), 'video', 'frameRate');
         validateattributes(video, {'uint8'}, {'nonempty'});
         validateattributes(frameRate, {'numeric'}, {'nonempty','scalar','positive','integer'});
-        return;
+        return
     end
 
     vidH = VideoReader(fullfile(path, fileName));
