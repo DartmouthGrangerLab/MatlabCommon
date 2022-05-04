@@ -27,14 +27,14 @@ function counts = CountNumericOccurrences(arr, uniqueArr)
     end
 
     if numel(uniqueArr) == max(uniqueArr) && all(uniqueArr(:)' == 1:numel(uniqueArr))
-        % below is suuuper fast, but to use it with uniqueArr ~= 1:nUniqueNums we need to run unique with nargout=3 which is slow
+        % below is suuuper fast, but to use it with uniqueArr ~= 1:n_unique_nums we need to run unique with nargout=3 which is slow
         counts = accumarray(arr(:), ones(numel(arr), 1), [numel(uniqueArr),1])';
     elseif numel(arr) * numel(uniqueArr) * 64 / 8 / 1024 / 1024 / 1024 < DetermineComputerRAMSize()
         counts = sum(arr(:)'==uniqueArr(:), 2)'; % implicit expansion, 2x as fast as loops (but briefly creates large matrices sometimes)
     else
         % this will be very slow whenever called
         counts = zeros(1, numel(uniqueArr));
-        for i = 1:numel(uniqueArr)
+        for i = 1 : numel(uniqueArr)
             counts(i) = sum(arr==uniqueArr(i));
         end
     end

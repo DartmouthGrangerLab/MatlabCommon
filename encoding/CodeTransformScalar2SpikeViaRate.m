@@ -5,7 +5,7 @@
 %   data - any dimensionality (numeric)
 % RETURNS:
 %   data - logical same size as input data
-function [data] = CodeTransformScalar2SpikeViaRate(data)
+function data = CodeTransformScalar2SpikeViaRate(data)
     validateattributes(data, {'numeric'}, {'nonempty'}, 1);
     assert(min(data(:)) >= 0 && max(data(:)) <= 1, 'input scalar code must be in range 0-->1');
 

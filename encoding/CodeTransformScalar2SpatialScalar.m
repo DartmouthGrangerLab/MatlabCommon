@@ -19,13 +19,25 @@ function [data,spatialStop,meta] = CodeTransformScalar2SpatialScalar(data, n_spa
         data = data(:); % place vector along dim 1
     end
 
+    % another way to do it, with quantiles:
+%     quantiles = zeros(numel(0:1/n_spatial_stops:0.9999), size(data, 2));
+%     for i = 1 : size(data, 2)
+%         tempData = data(:,i);
+%         quantiles(:,i) = quantile(tempData(tempData~=0), 0:1/n_spatial_stops:0.9999, 1);
+%     end
+%     quantiles = sort(quantiles, 1, 'ascend'); % stupid matlab bug - quantile doesn't always produce sorted results (only almost always)
+% 
+%     for i = 1 : size(data, 2)
+%         data(:,i) = discretize(data(:,i), [-Inf;quantiles(:,i);Inf]);
+%     end
+
     d = cell(1, n_spatial_stops);
     for i = 1 : n_spatial_stops
         d{i} = normpdf(data, i/n_spatial_stops, i/(2*n_spatial_stops)) ./ normpdf(i/n_spatial_stops, i/n_spatial_stops, i/(2*n_spatial_stops));
         % note there is no detector for scalar=0, by preference
     end
     data = cat(n_used_dims + 1, d{:});
-    
+
     % spatial stop number
     if nargout() > 1
         spatialStop = zeros(size(data));

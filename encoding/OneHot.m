@@ -1,12 +1,12 @@
 % Eli Bowen 3/2022
 % INPUTS:
-%   idx       - 1 x n (int-valued numeric) NaN = no category
+%   idx       - 1 x n (int-valued numeric) NaN or 0 means no category
 %   n_classes - OPTIONAL scalar (numeric) number of classes assumed to be indexed by idx DEFAULT = max(idx)
 %   is_sparse - OPTIONAL scalar (logical) DEFAULT = false
 % RETURNS:
 %   code - n x n_classes (logical)
 function code = OneHot(idx, n_classes, is_sparse)
-    validateattributes(idx, {'numeric'}, {'positive'}, 1);
+    validateattributes(idx, {'numeric'}, {'nonnegative'}, 1);
     assert(all(isnan(idx) | mod(idx, 1) == 0)); % must be integer or NaN
     if ~exist('n_classes', 'var') || isempty(n_classes)
         n_classes = max(idx);

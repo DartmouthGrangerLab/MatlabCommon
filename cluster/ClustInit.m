@@ -121,7 +121,7 @@ function centroids = InitKMeansSupervised(data, K, labels)
 %         centroids = SimpleMeans(data, pts, labels);
     elseif K == n_labels
         centroids = classMeans;
-    else % K < numLabels
+    else % K < n_labels
         error('We don''t currently support KMeans with supervised labels if there are more category labels than K');
 %         clustLbls = OldSimpleMeans(classMeans);
 %         countsK = zeros(K, 1);
@@ -136,7 +136,7 @@ function centroids = InitKMeansSupervised(data, K, labels)
 %             countsK(clustLbls(k)) = countsK(clustLbls(k)) + 1;
 %         end
 % 
-%         for k = 1:K
+%         for k = 1 : K
 %             centroids(k,:) ./ countsK(k);
 %         end
     end
@@ -145,12 +145,12 @@ end
 
 % set each centroid to a randomly selected data point (selected without replacement)
 % INPUTS:
-%   data - dimensionality of [#datapts][#dims]
+%   data - n_pts x n_dims
 %   K - number of clusters
 function centroids = InitKMeansRandomly(data, K)
     usablePts = find(sum(data, 2) ~= 0);
     N = numel(usablePts);
-    assert(N >= K); % must have enough points to actually pick K of them
+    assert(N >= K, 'must have enough points to actually pick K of them');
 
     randPointIdx = randperm(N, K); % random sample without replacement
 %     m_centroids = zeros(K, size(data, 2));
@@ -167,7 +167,7 @@ end
 % Using too many data points for initialization actually makes things WORSE!!! (Fast recognition of musical genres using RBF networks, Turnbull & Elkan 2005)
 % This is basically an approximation of the "Metric k-center" problem", which is NP-complete, but desiring longer distance not shorter.
 % INPUTS:
-%   data - dimensionality of [#datapts][#dims]
+%   data - n_pts x n_dims
 function centroids = InitKMeansFurthestFirst(data, K, distance)
     N = size(data, 1);
     if strcmp(distance, 'euclidean')
@@ -224,7 +224,7 @@ end
 
 % copied from apache commons math and translated by Eli Bowen
 % INPUTS:
-%   data     - dimensionality of [#datapts][#dims]
+%   data     - n_pts x n_dims
 %   K        - scalar (numeric) num clusters
 %   distance - char
 function centroids = InitKMeansPlusPlus(data, K, distance)

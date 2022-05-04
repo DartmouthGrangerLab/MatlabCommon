@@ -6,7 +6,7 @@
 %   thresh - scalar (numeric between 0 and 1)
 % RETURNS:
 %   data - logical same size as input data
-function [data] = CodeTransformScalar2SpikeViaThresh(data, thresh)
+function data = CodeTransformScalar2SpikeViaThresh(data, thresh)
     validateattributes(data, {'numeric'}, {'nonempty'}, 1);
     validateattributes(thresh, {'numeric'}, {'nonempty','scalar','positive'}, 2);
     assert(min(data(:)) >= 0 && max(data(:)) <= 1, 'input scalar code must be in range 0-->1');

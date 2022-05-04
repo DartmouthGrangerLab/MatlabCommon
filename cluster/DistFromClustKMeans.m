@@ -8,7 +8,6 @@
 function data = DistFromClustKMeans(model, data)
     prototypes = model.mu;
     assert(size(data, 2) == size(prototypes, 2));
-%     import matlabclusternetworkjavahelper.*;
 
     if strcmp(model.distance, 'euclidean')
         try
@@ -19,24 +18,25 @@ function data = DistFromClustKMeans(model, data)
             end
             data = distances;
         catch
+            data = bsxfun(@plus, sum(data.*data, 2), sum(prototypes.*prototypes, 2)') - 2*(data*prototypes'); % 4x as fast as pdist2
+            data = max(data, 0); % can be within floating point error of 0, but negative
+            data = sqrt(data);
 %             for i = 1 : size(prototypes, 1)
 %                 distances(:,i) = sqrt(sum((data - repmat(prototypes(i,:), size(data, 1), 1)).^2, 2)); % same thing, sometimes 5X faster, sometimes 5X slower (more RAM)
 %             end
 %             data = distances;
 %             data = pdist2(data, prototypes, 'euclidean'); % faster than above
-            data = bsxfun(@plus, sum(data.*data, 2), sum(prototypes.*prototypes, 2)') - 2*(data*prototypes'); % 4x as fast as pdist2
-            data = max(data, 0); % can be within floating point error of 0, but negative
-            data = sqrt(data);
         end
     elseif strcmp(model.distance, 'cosine')
+        data = data ./ sqrt(sum(data .* data, 2));
+        data(isnan(data)) = 0;
+        data = 1 - (data * prototypes');
+%         import matlabclusternetworkjavahelper.*;
 %         assert(size(data, 1) < 2^31, 'data must have a length less than MAX_INT');
 %         data = matlabclusternetworkjavahelper.PDistComputer.PDistCos(data, prototypes, DetermineNumJavaComputeCores());
 %         data = pdist2(data, prototypes, 'cosine'); % a few times faster in recent matlab releases
 %         l2Norms = sqrt(sum(data .* data, 2));
-        data = data ./ sqrt(sum(data .* data, 2));
-        data(isnan(data)) = 0;
-        data = 1 - (data * prototypes');
-
+% 
 %         data2 = matlabclusternetworkjavahelper.PDistComputer.PDistCosJBLAS(data, prototypes, DetermineNumJavaComputeCores());
 %         data3 = matlabclusternetworkjavahelper.PDistComputer.PDistCos(data, prototypes, DetermineNumJavaComputeCores());
 %         data4 = double(matlabclusternetworkjavahelper.PDistComputer.PDistCosJBLASSingle(data, prototypes, DetermineNumJavaComputeCores()));
@@ -47,6 +47,8 @@ function data = DistFromClustKMeans(model, data)
         data = data ./ sqrt(sum(data .* data, 2));
         data(isnan(data)) = 0;
         data = 1 - (data * prototypes');
+    elseif strcmp(model.distance, 'hamming')
+        error('TODO');
     else
         error('invalid param distance');
     end

@@ -9,7 +9,7 @@
 %               range is 0-->1, same as range of data
 % RETURNS:
 %   data - logical same size as input data
-function [data] = CodeTransformScalar2SpikeViaKWTA(data, n_winners, dim, min2Win)
+function data = CodeTransformScalar2SpikeViaKWTA(data, n_winners, dim, min2Win)
     validateattributes(data,      {'numeric'}, {'nonempty'}, 1);
     validateattributes(n_winners, {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);
     validateattributes(dim,       {'numeric'}, {'nonempty','scalar','positive','integer'}, 3);

@@ -22,7 +22,7 @@ function data = ClustResponse(model, data)
 
         if strcmp(model.distance, 'euclidean')
             data = 1 ./ (1+data);
-        elseif strcmp(model.distance, 'cosine')
+        elseif strcmp(model.distance, 'cosine') || strcmp(model.distance, 'jaccard')
             data = 1 - data;
         elseif strcmp(model.distance, 'correlation')
             data = 2 - data;

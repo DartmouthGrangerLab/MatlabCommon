@@ -6,7 +6,7 @@
 %   responsesToTstData = ClustResponse(model, tstData);
 % INPUTS:
 %   model    - (struct) result of ClustInit()
-%   data     - N x D (numeric)
+%   data     - N x D (numeric or logical)
 %   do_fuzzy - OPTIONAL scalar (logical)
 %   n_iter   - OPTIONAL scalar (numeric)
 % RETURNS:
@@ -18,8 +18,14 @@ function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
     if ~isfloat(data)
         data = double(data);
     end
+    if ~exist('do_fuzzy', 'var') || isempty(do_fuzzy)
+        do_fuzzy = false;
+    end
+    if do_fuzzy
+        assert(strcmp(model.clusterer, 'kmeans'));
+    end
 
-    if strcmp(model.distance, 'cosine')
+    if strcmp(model.distance, 'cosine') || strcmp(model.distance, 'jaccard')
         % fix zeroish-length vectors
         Xnorm = realsqrt(sum(data.^2, 2));
         tIdxs = find(Xnorm <= eps(max(Xnorm)));
@@ -28,9 +34,8 @@ function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
     end
 
     if strcmp(model.clusterer, 'kmeans')
-        [idx,model.mu,~] = KMeans(model, data, n_iter, do_fuzzy, false);
+        [idx,model.mu,~] = KMeans(model.mu, model.distance, data, n_iter, do_fuzzy, false);
     elseif strcmp(model.clusterer, 'gmm')
-        assert(~do_fuzzy);
         [idx,model] = GMM(data, model.k, n_iter, model);
     elseif startsWith(model.clusterer, 'hierarchical')
         linkage = strrep(model.clusterer, 'hierarchical', ''); % linkage - (char) 'average' | 'centroid' | 'complete' | 'median' | 'single' | 'ward' | 'weighted'
