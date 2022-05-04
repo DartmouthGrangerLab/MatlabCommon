@@ -7,5 +7,5 @@
 %       if the caller's caller is a script,       this is the script name
 function x = CallingFile()
     st = dbstack();
-    [~,x,~] = fileparts(st(end-1).file); % end would be CallingFile()'s caller - I want my caller's caller
+    [~,x,~] = fileparts(st(3).file); % 1 would be CallingFile.m, 2 would be CallingFile()'s caller - I want my caller's caller
 end
