@@ -28,6 +28,7 @@ function [] = InjectRowIntoTableFile(path, file, keyVar, s)
     end
 
     % find the right row for this data
+    row = [];
     if ~isempty(t)
         if ischar(key)
             row = StringFind(table2cell(t(:,1)), key, true); % overwrite if possible
