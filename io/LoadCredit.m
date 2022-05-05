@@ -152,9 +152,9 @@ function dataset = LoadCredit(name, path)
         dataset.category_info.A123 = 'property = if not A121/A122 : car or other, not in attribute 6'; % a12 property
         dataset.category_info.A124 = 'property = unknown / none'; % a12 property
 
-        dataset.category_info.A141 = 'bank'; % a14 other installment plans
-        dataset.category_info.A142 = 'stores'; % a14 other installment plans
-        dataset.category_info.A143 = 'none'; % a14 other installment plans
+        dataset.category_info.A141 = 'other installment plans = bank'; % a14 other installment plans
+        dataset.category_info.A142 = 'other installment plans = stores'; % a14 other installment plans
+        dataset.category_info.A143 = 'other installment plans = none'; % a14 other installment plans
 
         dataset.category_info.A151 = 'housing = rent'; % a15 housing
         dataset.category_info.A152 = 'housing = own'; % a15 housing
