@@ -21,7 +21,9 @@ function [] = InjectRowIntoTableFile(path, file, keyVar, s)
     % load or initialize the table
     if isfile(fullfile(path, file))
         t = readtable(fullfile(path, file));
-        assert(all(varNames == t.Properties.VariableNames));
+        for i = 1 : numel(varNames)
+            assert(strcmp(varNames{i}, t.Properties.VariableNames{i}));
+        end
     else
         warning('off', 'MATLAB:table:PreallocateCharWarning'); % shh
         t = table('Size', [0,numel(data)], 'VariableTypes', cellfun(@class, data, 'UniformOutput', false), 'VariableNames', varNames);
