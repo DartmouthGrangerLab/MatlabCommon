@@ -1,7 +1,8 @@
-% Eli bowen 12/17/2021
+% Eli Bowen 12/17/2021
 % less error-prone version of matlab's plot()
 % matlab's plot is annoying about x and y looking just right - this function pleases it
 % also supports the additional name-value argument "alpha", for color transparency
+% also supports color = 'redblue' (gradient red to blue)
 % INPUTS:
 %   x
 %   y
@@ -15,11 +16,11 @@ function h = Plot(x, y, varargin)
     y = double(y);
 
     alpha = 1; % full opacity
-    if any(strcmpi(varargin, 'alpha'))
-        idx = find(strcmpi(varargin, 'alpha'));
+    idx = find(strcmpi(varargin, 'alpha'));
+    if ~isempty(idx)
         alpha = varargin{idx+1};
-        validateattributes(alpha, {'numeric'}, {'nonempty','scalar','nonnegative'});
-        assert(alpha <= 1);
+        validateattributes(alpha, {'numeric'}, {'nonempty','nonnegative'});
+        assert(all(alpha <= 1));
         varargin([idx,idx+1]) = [];
     end
 
@@ -43,11 +44,21 @@ function h = Plot(x, y, varargin)
         error('bug in code - all conditions should be handled');
     end
 
-    h = plot(x, y, varargin{:});
+    idx = find(strcmpi(varargin, 'color'));
+    if ~isempty(idx) && strcmpi(varargin{idx+1}, 'redblue')
+        varargin([idx,idx+1]) = [];
+        h = plot(x, y, varargin{:});
+        set(h.Edge, 'ColorBinding', 'interpolated', 'ColorData', redblue());
+    else
+        h = plot(x, y, varargin{:});
+    end
 
-    if alpha ~= 1
+    if ~all(alpha == 1)
+        if isscalar(alpha)
+            alpha = repmat(alpha, numel(h), 1);
+        end
         for i = 1 : numel(h) % for each line we've plotted
-            h(i).Color(4) = alpha; % undocumented matlab
+            h(i).Color(4) = alpha(i); % undocumented matlab
         end
     end
 end

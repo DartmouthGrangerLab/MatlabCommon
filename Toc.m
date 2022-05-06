@@ -8,9 +8,9 @@ function [] = Toc(t, verbose, append)
 
     if ~exist('verbose', 'var') || isempty(verbose) || verbose == true
         if t > 60 * 60 * 2 % > 2 hours
-            txt = [num2str(t),' s (',num2str(t / 60 / 60),' hr)'];
+            txt = [num2str(t, '%.0f'),' s (',num2str(t / 60 / 60),' hr)'];
         else
-            txt = [num2str(t),' s'];
+            txt = [num2str(t, '%.4f'),' s'];
         end
 
         if exist('append', 'var') && ~isempty(append)
