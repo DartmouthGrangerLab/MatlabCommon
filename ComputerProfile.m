@@ -1,5 +1,3 @@
-% Eli Bowen
-% 7/6/2021
 % computer profiles
 % add your computer here!
 % to determine your username, call NameOfUser()
@@ -20,34 +18,46 @@ classdef ComputerProfile
             'eli',       'eb-desktop',               'D:\Projects\datasets',  'D:\tempcache';...            % Eli's desktop
             'grangerlab','grangerlab-aspire-m3985',  '/home/grangerlab/Desktop/Projects/Logicnet/datasets','/home/grangerlab/Desktop/Projects/Logicnet/tempcache'; % Anand's desktop
             'cfoye',      'clays-macbook-pro.local', '/Users/cfoye/Granger/', '/Users/cfoye/Granger/cache';... %Clay's macbook
-       
+            'rhg',        'rhg-7.local',             '/Users/rhg/Documents/MATLAB', '/Users/rhg/Documents/MATLAB/logicnet2/cache';...
             }
     end
 
 
     methods (Static)
-        function [x] = DatasetDir()
+        function x = DatasetDir()
             idx = ComputerProfile.FindProfile();
+            if isempty(idx) || numel(idx) > 1
+                error('unrecognized computer / user - add your computer to MatlabCommon ComputerProfile.m');
+            end
             x = ComputerProfile.profiles{idx,3};
         end
-        function [x] = CacheDir()
+
+
+        function x = CacheDir()
             idx = ComputerProfile.FindProfile();
-            x = ComputerProfile.profiles{idx,4};
+            if isempty(idx) || numel(idx) > 1 || isempty(ComputerProfile.profiles{idx,4})
+                x = fullfile(tempdir(), 'matlabcachedir');
+            else
+                x = ComputerProfile.profiles{idx,4};
+            end
+            
             if ~exist(x, 'dir')
                 mkdir(x);
             end
+        end
+        
+        
+        function x = MatlabCommonDir()
+             [x,~,~] = fileparts(mfilename('fullpath'));
         end
     end
 
 
     methods (Static, Access = private)
-        function [idx] = FindProfile()
+        function idx = FindProfile()
             idx = find(strcmpi(ComputerProfile.profiles(:,1), NameOfUser()) & strcmpi(ComputerProfile.profiles(:,2), NameOfComputer()));
             if isempty(idx)
                 idx = find(strcmp(ComputerProfile.profiles(:,1), NameOfUser()) & endsWith(ComputerProfile.profiles(:,2), NameOfComputer()));
-                if isempty(idx) || numel(idx) > 1
-                    error('unrecognized computer / user - add your computer to MatlabCommon ComputerProfile.m');
-                end
             end
         end
     end
@@ -59,10 +69,10 @@ classdef ComputerProfile
         cache_dir
     end
     methods
-        function [x] = get.dataset_dir(obj)
+        function x = get.dataset_dir(obj)
             x = ComputerProfile.DatasetDir();
         end
-        function [x] = get.cache_dir(obj)
+        function x = get.cache_dir(obj)
             x = ComputerProfile.CacheDir();
         end
     end
