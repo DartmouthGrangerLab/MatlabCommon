@@ -1,8 +1,8 @@
 % Eli Bowen 3/2022
-% INPUTS:
+% INPUTS
 %   name - (char) name of dataset
 %   path - OPTIONAL (char) directory in which to find the dataset file(s)
-% RETURNS:
+% RETURNS
 %   dataset - (struct) with fields:
 %       .t      - n x d (table) dataset
 %       .t_bin  - n x X (table) dataset with categorical variables binarized (continuous variables unchanged)
@@ -23,7 +23,7 @@ function dataset = LoadCredit(name, path)
         dataset.t.a9  = strcmp(dataset.t.a9, 't');
         dataset.t.a10 = strcmp(dataset.t.a10, 't');
         dataset.t.a12 = strcmp(dataset.t.a12, 't');
-        dataset.t.dv = strcmp(dataset.t.dv, '+'); % make logical for simplicity
+        dataset.t.dv  = strcmp(dataset.t.dv, '+'); % make logical for simplicity
         
         % get unique values for categorical vars
         dataset.uniq_a1  = {'a','b'};

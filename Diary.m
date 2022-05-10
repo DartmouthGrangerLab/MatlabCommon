@@ -10,7 +10,7 @@ function [] = Diary(path, file)
     assert(endsWith(file, '.txt'));
 
     if ~isfolder(path)
-        mkpath(path);
+        mkdir(path);
     end
 
     if isfile(fullfile(path, file))
