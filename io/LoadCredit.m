@@ -102,68 +102,68 @@ function dataset = LoadCredit(name, path)
         
         % add a lookup table for definitions of category names
         dataset.category_info = struct();
-        dataset.category_info.A11 = 'salary for at least 1 year = under zero dm'; % a1 status of existing checking account
-        dataset.category_info.A12 = 'salary for at least 1 year = under 200 dm'; % a1 status of existing checking account
-        dataset.category_info.A13 = 'salary for at least 1 year = over 200 dm'; % a1 status of existing checking account
-        dataset.category_info.A14 = 'no checking acct'; % a1 status of existing checking account
+        dataset.category_info.a1_A11 = 'salary for at least 1 year = under zero dm'; % a1 status of existing checking account
+        dataset.category_info.a1_A12 = 'salary for at least 1 year = under 200 dm'; % a1 status of existing checking account
+        dataset.category_info.a1_A13 = 'salary for at least 1 year = over 200 dm'; % a1 status of existing checking account
+        dataset.category_info.a1_A14 = 'no checking acct'; % a1 status of existing checking account
         
-        dataset.category_info.A30 = 'no credits taken / all credits paid back duly'; % a3 credit history
-        dataset.category_info.A31 = 'all credits at this bank paid back duly'; % a3 credit history
-        dataset.category_info.A32 = 'existing credits paid back duly till now'; % a3 credit history
-        dataset.category_info.A33 = 'delay in paying off in the past'; % a3 credit history
-        dataset.category_info.A34 = 'critical account / other credits existing (not at this bank)'; % a3 credit history
+        dataset.category_info.a3_A30 = 'no credits taken / all credits paid back duly'; % a3 credit history
+        dataset.category_info.a3_A31 = 'all credits at this bank paid back duly'; % a3 credit history
+        dataset.category_info.a3_A32 = 'existing credits paid back duly till now'; % a3 credit history
+        dataset.category_info.a3_A33 = 'delay in paying off in the past'; % a3 credit history
+        dataset.category_info.a3_A34 = 'critical account / other credits existing (not at this bank)'; % a3 credit history
 
-        dataset.category_info.A40 = 'purpose = car (new)'; % a4 purpose
-        dataset.category_info.A41 = 'purpose = car (used)'; % a4 purpose
-        dataset.category_info.A42 = 'purpose = furniture / equipment'; % a4 purpose
-        dataset.category_info.A43 = 'purpose = radio / television'; % a4 purpose
-        dataset.category_info.A44 = 'purpose = domestic appliances'; % a4 purpose
-        dataset.category_info.A45 = 'purpose = repairs'; % a4 purpose
-        dataset.category_info.A46 = 'purpose = education'; % a4 purpose
-        dataset.category_info.A47 = 'purpose = (vacation - does not exist?)'; % a4 purpose
-        dataset.category_info.A48 = 'purpose = retraining'; % a4 purpose
-        dataset.category_info.A49 = 'purpose = business'; % a4 purpose
-        dataset.category_info.A410 = 'purpose = other'; % a4 purpose
+        dataset.category_info.a4_A40 = 'purpose = car (new)'; % a4 purpose
+        dataset.category_info.a4_A41 = 'purpose = car (used)'; % a4 purpose
+        dataset.category_info.a4_A42 = 'purpose = furniture / equipment'; % a4 purpose
+        dataset.category_info.a4_A43 = 'purpose = radio / television'; % a4 purpose
+        dataset.category_info.a4_A44 = 'purpose = domestic appliances'; % a4 purpose
+        dataset.category_info.a4_A45 = 'purpose = repairs'; % a4 purpose
+        dataset.category_info.a4_A46 = 'purpose = education'; % a4 purpose
+        dataset.category_info.a4_A47 = 'purpose = (vacation - does not exist?)'; % a4 purpose
+        dataset.category_info.a4_A48 = 'purpose = retraining'; % a4 purpose
+        dataset.category_info.a4_A49 = 'purpose = business'; % a4 purpose
+        dataset.category_info.a4_A410 = 'purpose = other'; % a4 purpose
 
-        dataset.category_info.A61 = 'savings and bonds = < 100 dm'; % a6 savings account / bonds
-        dataset.category_info.A62 = 'savings and bonds = 100 to 500 dm'; % a6 savings account / bonds
-        dataset.category_info.A63 = 'savings and bonds = 500 to 1000 dm'; % a6 savings account / bonds
-        dataset.category_info.A64 = 'savings and bonds = over 1000 dm'; % a6 savings account / bonds
-        dataset.category_info.A65 = 'savings and bonds = unknown / none'; % a6 savings account / bonds
+        dataset.category_info.a6_A61 = 'savings and bonds = < 100 dm'; % a6 savings account / bonds
+        dataset.category_info.a6_A62 = 'savings and bonds = 100 to 500 dm'; % a6 savings account / bonds
+        dataset.category_info.a6_A63 = 'savings and bonds = 500 to 1000 dm'; % a6 savings account / bonds
+        dataset.category_info.a6_A64 = 'savings and bonds = over 1000 dm'; % a6 savings account / bonds
+        dataset.category_info.a6_A65 = 'savings and bonds = unknown / none'; % a6 savings account / bonds
 
-        dataset.category_info.A71 = 'unemployed'; % a7 present employment since
-        dataset.category_info.A72 = 'present job held < 1 year'; % a7 present employment since
-        dataset.category_info.A73 = 'present job held 1 to 4 years'; % a7 present employment since
-        dataset.category_info.A74 = 'present job held 4 to 7 years'; % a7 present employment since
-        dataset.category_info.A75 = 'present job held over 7 years'; % a7 present employment since
+        dataset.category_info.a7_A71 = 'unemployed'; % a7 present employment since
+        dataset.category_info.a7_A72 = 'present job held < 1 year'; % a7 present employment since
+        dataset.category_info.a7_A73 = 'present job held 1 to 4 years'; % a7 present employment since
+        dataset.category_info.a7_A74 = 'present job held 4 to 7 years'; % a7 present employment since
+        dataset.category_info.a7_A75 = 'present job held over 7 years'; % a7 present employment since
 
-        dataset.category_info.A91 = 'male, divorced / separated'; % a9 personal status and sex
-        dataset.category_info.A92 = 'female, divorced / separated / married'; % a9 personal status and sex
-        dataset.category_info.A93 = 'male, single'; % a9 personal status and sex
-        dataset.category_info.A94 = 'male, married / widowed'; % a9 personal status and sex
-        dataset.category_info.A95 = 'female, single'; % a9 personal status and sex
+        dataset.category_info.a9_A91 = 'male, divorced / separated'; % a9 personal status and sex
+        dataset.category_info.a9_A92 = 'female, divorced / separated / married'; % a9 personal status and sex
+        dataset.category_info.a9_A93 = 'male, single'; % a9 personal status and sex
+        dataset.category_info.a9_A94 = 'male, married / widowed'; % a9 personal status and sex
+        dataset.category_info.a9_A95 = 'female, single'; % a9 personal status and sex
 
-        dataset.category_info.A101 = 'other debtors / guarantors = none'; % a10 other debtors / guarantors
-        dataset.category_info.A102 = 'other debtors / guarantors = co-applicant'; % a10 other debtors / guarantors
-        dataset.category_info.A103 = 'other debtors / guarantors = guarantor'; % a10 other debtors / guarantors
+        dataset.category_info.a10_A101 = 'other debtors / guarantors = none'; % a10 other debtors / guarantors
+        dataset.category_info.a10_A102 = 'other debtors / guarantors = co-applicant'; % a10 other debtors / guarantors
+        dataset.category_info.a10_A103 = 'other debtors / guarantors = guarantor'; % a10 other debtors / guarantors
 
-        dataset.category_info.A121 = 'property = real estate'; % a12 property
-        dataset.category_info.A122 = 'property = if not A121 : building society savings agreement / life insurance'; % a12 property
-        dataset.category_info.A123 = 'property = if not A121/A122 : car or other, not in attribute 6'; % a12 property
-        dataset.category_info.A124 = 'property = unknown / none'; % a12 property
+        dataset.category_info.a12_A121 = 'property = real estate'; % a12 property
+        dataset.category_info.a12_A122 = 'property = if not A121 : building society savings agreement / life insurance'; % a12 property
+        dataset.category_info.a12_A123 = 'property = if not A121/A122 : car or other, not in attribute 6'; % a12 property
+        dataset.category_info.a12_A124 = 'property = unknown / none'; % a12 property
 
-        dataset.category_info.A141 = 'other installment plans = bank'; % a14 other installment plans
-        dataset.category_info.A142 = 'other installment plans = stores'; % a14 other installment plans
-        dataset.category_info.A143 = 'other installment plans = none'; % a14 other installment plans
+        dataset.category_info.a14_A141 = 'other installment plans = bank'; % a14 other installment plans
+        dataset.category_info.a14_A142 = 'other installment plans = stores'; % a14 other installment plans
+        dataset.category_info.a14_A143 = 'other installment plans = none'; % a14 other installment plans
 
-        dataset.category_info.A151 = 'housing = rent'; % a15 housing
-        dataset.category_info.A152 = 'housing = own'; % a15 housing
-        dataset.category_info.A153 = 'housing = for free'; % a15 housing
+        dataset.category_info.a15_A151 = 'housing = rent'; % a15 housing
+        dataset.category_info.a15_A152 = 'housing = own'; % a15 housing
+        dataset.category_info.a15_A153 = 'housing = for free'; % a15 housing
 
-        dataset.category_info.A171 = 'job = unemployed / unskilled - non-resident'; % a17 job
-        dataset.category_info.A172 = 'job = unskilled - resident'; % a17 job
-        dataset.category_info.A173 = 'job = skilled employee / official'; % a17 job
-        dataset.category_info.A174 = 'job = management / self-employed / highly qualified employee / officer'; % a17 job
+        dataset.category_info.a17_A171 = 'job = unemployed / unskilled - non-resident'; % a17 job
+        dataset.category_info.a17_A172 = 'job = unskilled - resident'; % a17 job
+        dataset.category_info.a17_A173 = 'job = skilled employee / official'; % a17 job
+        dataset.category_info.a17_A174 = 'job = management / self-employed / highly qualified employee / officer'; % a17 job
         
         % get unique values for categorical vars
         for i = [1,3,4,6,7,9,10,12,14,15,17]
