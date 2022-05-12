@@ -30,10 +30,9 @@ function [varargout] = Julia(jlFile, func, varargin)
         end
     end
 
-    command = ['julia ',fullfile(ComputerProfile.MatlabCommonDir(), 'JuliaFromMatlab.jl'),' "',jlFile,'" "',func,'" "',inFile,'" "',outFile,'"'];
+    command = ['julia --threads=',num2str(DetermineNumJavaComputeCores()),' ',fullfile(ComputerProfile.MatlabCommonDir(), 'JuliaFromMatlab.jl'),' "',jlFile,'" "',func,'" "',inFile,'" "',outFile,'"'];
     disp(command);
     [status,cmdout] = system(command);
-%     [status,cmdout] = system(['julia Matlab2Julia.jl ',func,sprintf(' "%s"', varargin{:})]);
     if status ~= 0
         error(cmdout);
     end
