@@ -24,8 +24,10 @@ function [varargout] = Julia(jlFile, func, varargin)
         delete(outFile);
     end
     for i = 1 : numel(varargin)
-        h5create(inFile, ['/group/ds',num2str(i)], size(varargin{i}), 'Datatype', class(varargin{i})); % no compression by default
-        h5write(inFile, ['/group/ds',num2str(i)], varargin{i});
+        if ~isempty(varargin{i})
+            h5create(inFile, ['/group/ds',num2str(i)], size(varargin{i}), 'Datatype', class(varargin{i})); % no compression by default
+            h5write(inFile, ['/group/ds',num2str(i)], varargin{i});
+        end
     end
 
     command = ['julia ',fullfile(ComputerProfile.MatlabCommonDir(), 'JuliaFromMatlab.jl'),' "',jlFile,'" "',func,'" "',inFile,'" "',outFile,'"'];

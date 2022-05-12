@@ -1,3 +1,4 @@
+# Eli Bowen 5/2022
 using HDF5
 
 # arg = parse(Float64, ARGS[1])
@@ -17,12 +18,14 @@ func = eval(Symbol(func)) # convert func from string to actual function handle
 
 if isfile(inFile) # if we have any input params
 	fid = h5open(inFile, "r")
-	g = read(fid)
-	g = g["group"]
+	d = read(fid)
+	d = d["group"]
 	close(fid)
-	varargin = Array{Any,1}(undef,length(g))
-	for i in 1 : length(g)
-		varargin[i] = g["ds"*string(i)]
+	varargin = Array{Any,1}(undef,length(d))
+	for i in 1 : length(d)
+		if haskey(d, "ds"*string(i))
+			varargin[i] = d["ds"*string(i)]
+		end
 	end
 	varargout = func(varargin...) # varargout should be a tuple
 else
