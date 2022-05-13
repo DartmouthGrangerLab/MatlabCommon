@@ -1,9 +1,4 @@
-%Eli Bowen
-%4/25/2020
-%INPUTS:
-%   path - folder or valid image file
-%   filter - OPTIONAL - any option to ImgFilter, e.g. 'rgb2gray', 'opponency', 'retina', 'retinagray', 'gabor'
-%   resizeParam - OPTIONAL - scale the images while loading! (if scalar, this is a scaling factor e.g. 2 = double, if 1x2, this is desiredSize = [nRows,nCols])
+% deprecated
 function [count,descriptors,imgsFiltered] = GetImgs (path, filter, resizeParam)
     validateattributes(path, {'char'}, {'nonempty'});
     if ~exist('resizeParam', 'var')

@@ -1,42 +1,4 @@
-% Eli Bowen 12/20/2021
-% INPUTS:
-%   datasetStr - (char) '<datasetName>.<subset>', options:
-%       'mnist'
-%       'mnist.trn'
-%       'mnist.tst'
-%       'fashionmnist'
-%       'fashionmnist.trn'
-%       'fashionmnist.tst'
-%       'emnist.byclass*' (see code)
-%       'emnist.bymergeall'
-%       'emnist.bymergetrn'
-%       'emnist.bymergetst'
-%       'emnist.lettersall'
-%       'emnist.letterstrn'
-%       'emnist.letterstst'
-%       'emnist.digitsall'
-%       'emnist.digitstrn'
-%       'emnist.digitstst'
-%       'emnist.mnistall'
-%       'emnist.mnisttrn'
-%       'emnist.mnisttst'
-%       'noisymnisttests'
-%       'noisymnisttests.bg_noise'
-%       'noisymnisttests.boundary_box'
-%       'noisymnisttests.box_occlusion'
-%       'noisymnisttests.grid_lines'
-%       'noisymnisttests.line_clutter'
-%       'noisymnisttests.line_deletion'
-%   path - OPTIONAL (char) directory in which to find the dataset file(s)
-% RETURNS:
-%   img            - n_rows x n_cols x n_chan x n_images (double ranged 0 --> 1)
-%   labelIdx       - 1 x n_images (numeric index)
-%   uniqLabel      - 1 x n_classes (cell array of chars)
-%   imgSz          - 1 x 3 (int-valued numeric)
-%   writer         - 1 x n_images (int-valued numeric)
-%   distortionType - 1 x n_images (cell)
-%   distortionIdx  - 1 x n_images (numeric index)
-%   amount         - 1 x n_images (int-valued numeric)
+% deprecated
 function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr, path)
     validateattributes(datasetStr, {'char'}, {'nonempty'}, 1);
 

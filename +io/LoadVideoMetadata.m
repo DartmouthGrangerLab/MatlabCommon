@@ -4,11 +4,11 @@
 % supports:
 %   any file type supported by matlab's VideoReader (hopefully mjpeg in an avi or motion jpeg 2000 in an mj2, or VideoReader compatability will be iffy)
 %   .mat files (must contain a variable called video (uint8 n_rows x n_cols x n_channels x n_frames) and one called frameRate (scalar numeric)
-% INPUTS:
+% INPUTS
 %   path
 %   fileName
-% RETURNS:
-%   vidSz     - (numeric) [n_rows,n_cols,n_chan,n_frames]
+% RETURNS
+%   vidSz - (numeric) [n_rows,n_cols,n_chan,n_frames]
 %   frameRate - scalar (int-valued numeric) in hz
 % see also LoadVideo
 function [vidSz,frameRate] = LoadVideoMetadata(path, fileName)

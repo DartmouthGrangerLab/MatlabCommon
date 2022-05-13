@@ -1,16 +1,4 @@
-% Eli Bowen 8/3/2020
-% simple function for loading a video all at once in bulk
-% supports:
-%   any file type supported by matlab's VideoReader (hopefully mjpeg in an avi or motion jpeg 2000 in an mj2, or VideoReader compatability will be iffy)
-%   .mat files (must contain a variable called video (uint8 nRows x nCols x n_channels x n_frames) and one called frameRate (scalar numeric)
-% INPUTS:
-%   path
-%   fileName
-%   sz - OPTIONAL [n_rows,n_cols] aka [height,width] - size of video; if provided, and video is a different size, we'll resize it automagically
-% RETURNS:
-%   video     - n_rows x n_cols x n_chan x n_frames (uint8)
-%   frameRate - scalar (int-valued numeric) in hz
-% see also LoadVideoMetadata
+% deprecated
 function [video,frameRate] = LoadVideo(path, fileName, sz)
     validateattributes(path, {'char'}, {'nonempty','vector'}, 1);
     validateattributes(fileName, {'char'}, {'nonempty','vector'}, 2);

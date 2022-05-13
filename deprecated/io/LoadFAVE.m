@@ -1,7 +1,4 @@
-% Eli Bowen
-% loads the text file produced by running FAVE
-% INPUTS:
-%   filePath
+% deprecated
 function fave = LoadFAVE(filePath)
     validateattributes(filePath, {'char'}, {'nonempty'}, 1);
 

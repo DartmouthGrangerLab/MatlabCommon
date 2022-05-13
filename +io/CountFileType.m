@@ -1,20 +1,19 @@
-% Eli Bowen
-% 4/25/2020
+% Eli Bowen 4/25/2020
 % used to be "CountImgs", which only counted pngs
-% INPUTS:
-%   path
-%   extension - file extension (no dot), or one of the following: 'image', 'video', 'audio'
-%   isRecursive - OPTIONAL scalar (logical) - if true, will search in subfolders (default = true)
-% RETURNS:
+% INPUTS
+%   path         - (char)
+%   extension    - (char) file extension (no dot), or one of the following: 'image', 'video', 'audio'
+%   is_recursive - OPTIONAL scalar (logical) - if true, will search in subfolders (default = true)
+% RETURNS
 %   count - scalar double - number of files found
 %   filePath - 1 x count cell array of chars - list of files found - full path including folder and file name
-function [count,filePath] = CountFileType (path, extension, isRecursive)
-    validateattributes(path, {'char'}, {'nonempty','vector'});
-    validateattributes(extension, {'char'}, {'nonempty','vector'});
-    if ~exist('isRecursive', 'var') || isempty(isRecursive)
-        isRecursive = true;
+function [count,filePath] = CountFileType(path, extension, is_recursive)
+    validateattributes(path, {'char'}, {'nonempty','vector'}, 1);
+    validateattributes(extension, {'char'}, {'nonempty','vector'}, 2);
+    if ~exist('is_recursive', 'var') || isempty(is_recursive)
+        is_recursive = true;
     end
-    validateattributes(isRecursive, {'logical'}, {'nonempty','scalar'});
+    validateattributes(is_recursive, {'logical'}, {'nonempty','scalar'});
     if startsWith(extension, '.')
         extension = extension(2:end);
     end
@@ -31,12 +30,12 @@ function [count,filePath] = CountFileType (path, extension, isRecursive)
 
     count = 0;
     for i = 1:numel(ext)
-        count = CountFileTypeHelper1(path, ext{i}, count, isRecursive);
+        count = Helper1(path, ext{i}, count, is_recursive);
     end
     filePath = cell(1, count);
     count = 0; % now reset counter
     for i = 1:numel(ext)
-        [count,filePath] = CountFileTypeHelper2(path, ext{i}, count, filePath, isRecursive);
+        [count,filePath] = Helper2(path, ext{i}, count, filePath, is_recursive);
     end
 
     % remove mp4s that contain the wrong kind of content
@@ -57,13 +56,13 @@ function [count,filePath] = CountFileType (path, extension, isRecursive)
 end
 
 
-function [count] = CountFileTypeHelper1 (path, extension, count, isRecursive)
+function count = Helper1(path, extension, count, is_recursive)
     listing = dir(path);
     for i = 1:numel(listing)
         if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             if listing(i).isdir
-                if isRecursive
-                    count = CountFileTypeHelper1(fullfile(path, listing(i).name), extension, count, isRecursive);
+                if is_recursive
+                    count = CountFileTypeHelper1(fullfile(path, listing(i).name), extension, count, is_recursive);
                 end
             elseif ~isempty(regexp(listing(i).name, ['\.',extension,'$'], 'ignorecase', 'ONCE'))
                 count = count + 1;
@@ -73,13 +72,13 @@ function [count] = CountFileTypeHelper1 (path, extension, count, isRecursive)
 end
 
 
-function [count,filePath] = CountFileTypeHelper2 (path, extension, count, filePath, isRecursive)
+function [count,filePath] = Helper2(path, extension, count, filePath, is_recursive)
     listing = dir(path);
     for i = 1:numel(listing)
         if ~strcmp(listing(i).name, '.') && ~strcmp(listing(i).name, '..')
             if listing(i).isdir
-                if isRecursive
-                    [count,filePath] = CountFileTypeHelper2(fullfile(path, listing(i).name), extension, count, filePath, isRecursive);
+                if is_recursive
+                    [count,filePath] = CountFileTypeHelper2(fullfile(path, listing(i).name), extension, count, filePath, is_recursive);
                 end
             elseif ~isempty(regexp(listing(i).name, ['\.',extension,'$'], 'ignorecase', 'ONCE'))
                 count = count + 1;

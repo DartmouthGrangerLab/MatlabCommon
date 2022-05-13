@@ -1,8 +1,8 @@
 % Eli Bowen 5/20/2020
 % wrapper around a matlab file exchange project for loading midi files (https://www.mathworks.com/matlabcentral/fileexchange/27470-midi-tools)
-% INPUT:
+% INPUT
 %	path - folder or valid midi file
-% RETURNS:
+% RETURNS
 %   noteList - N x 7 matrix:
 %       noteList(:,1) is pitch (60 --> C4 = middle C)
 %       noteList(:,2) is velocity

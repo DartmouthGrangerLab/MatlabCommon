@@ -1,10 +1,4 @@
-% Eli Bowen 2/14/2018 (earlier copy from 2017 was in FindGoodWords.m)
-% loads the CMU phonetic dictionary (file named e.g. 'cmudict-0.7b.txt')
-% INPUTS:
-%   path
-% RETURNS:
-%   arpabetDictEnglish
-%   arpabetDictPhonetic
+% deprecated
 function [arpabetDictEnglish,arpabetDictPhonetic] = LoadArpabet(path)
     %% Load arpabet
     % way 1 (not working)

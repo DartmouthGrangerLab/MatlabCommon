@@ -1,6 +1,6 @@
 % Eli Bowen 11/19/2021
 % INPUTS:
-%   datasetName
+%   datasetName - (char)
 %   path - OPTIONAL (char) pathectory in which to find the dataset file(s)
 % RETURNS:
 %   text - (char) - comma separated list of datasets to load (must all be text)

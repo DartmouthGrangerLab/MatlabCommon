@@ -1,10 +1,4 @@
-% Eli Bowen 11/19/2021
-% INPUTS:
-%   name - (char) name of dataset e.g. 'wordvec_glove6' (see code for options)
-%   path - OPTIONAL (char) directory in which to find the dataset file(s)
-% RETURNS:
-%   word - 1 x n_words (cell array of chars)
-%   vec  - n_dims x n_words (numeric)
+% deprecated
 function [word,vec] = LoadWordVecs(name, path)
     validateattributes(name, 'char', {'nonempty'}, 1);
 

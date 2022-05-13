@@ -1,6 +1,4 @@
-% loads a montreal forced aligner output csv
-% INPUTS:
-%   filepath
+% deprecated
 function alignment = LoadMFA(filePath)
     validateattributes(filePath, {'char'}, {'nonempty'}, 1);
     assert(endsWith(lower(filePath), '.csv'));

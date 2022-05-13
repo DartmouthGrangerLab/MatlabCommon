@@ -1,10 +1,4 @@
-% Eli Bowen 1/7/2021
-% writes a video to file (just a wrapper around matlab code to save us time)
-% INPUTS:
-%   filePath - full path to file (including file name) - recommend .mj2 for lossless
-%   video - nCols x nRows x nChannels x nFrames uint8 (range 0-->255) or double (range 0-->1)
-%   frameRate
-%   is_lossless - scalar logical (should video be lossless or lossy)
+% deprecated
 function [] = WriteVideo(filePath, video, frameRate, is_lossless)
     validateattributes(filePath, {'char'}, {'nonempty','vector'}, 1);
     validateattributes(video, {'uint8','double'}, {'nonempty','ndims',4}, 2);

@@ -2,9 +2,9 @@
 % wrapper around an AMC+ASF or c3d file parser from http://resources.mpi-inf.mpg.de/HDM05/
 % because few datasets correctly reference asf files in their amc, we require that the dataset downloader make sure each asf's full filename minus extension is the *start* of each matching amc's filename
 % see MatlabCommon/frontends/mocap_hdm05parser/animate/animate_showFrame.m for hints on how to *use* the return values
-% INPUT:
+% INPUT
 %	path - (char) folder or valid motion capture file
-% RETURNS:
+% RETURNS
 %   anim - 1 x N (cell)
 %       mocapAnims{i} is a more machine-readable, combined version of each scene - a single struct containing:
 %           .nFrames      - scalar (double) number of frames in the animation

@@ -2,9 +2,9 @@
 % extracts a zip file, loads the text file within, then deletes the extracted copy
 % MUST be a SINGLE text file in the zip (any file extension)
 % great for loading compressed text datasets
-% INPUTS:
+% INPUTS
 %   fileName - (char) name of zip file
-%   func     - OPTIONAL (char or function_handle) function to call to read the data (default = fileread)
+%   func - OPTIONAL (char or function_handle) function to call to read the data (default = fileread)
 % RETURNS
 %   text
 function text = UnzipText(fileName, func)
