@@ -10,7 +10,7 @@ various ways to connect members of a set to one another
 ## encoding
 functions for changing the encoding of a dataset (whiten, one-hot code, ...)
 
-## figurecode
+## fig
 figure code to make rendering simpler
 
 ## frontend
@@ -33,6 +33,10 @@ various standalone scripts
 
 ## stats
 various statistics (e.g. correlation)
+
+## thirdparty
+third party code bases
+many of these have wrappers in other MatlabCommon packages
 
 ## validation
 code for validating that various conditions hold
