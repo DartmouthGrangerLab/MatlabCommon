@@ -1,13 +1,13 @@
 # MatlabCommon
 Commonly used and shared library code or utilities written in Matlab, for lab-wide use.
 
-## cluster
+## clust
 clustering algorithms
 
 ## connec
 various ways to connect members of a set to one another
 
-## encoding
+## encode
 functions for changing the encoding of a dataset (whiten, one-hot code, ...)
 
 ## fig
@@ -16,7 +16,7 @@ figure code to make rendering simpler
 ## frontend
 code to preprocess specific datatypes (images, video, audio, ...)
 
-## geometry
+## geom
 geometry and trigonometry functions (mostly for 2D and 3D spaces, but not exclusively)
 
 ## grid
@@ -31,7 +31,7 @@ supervised machine learning algs (regression, classification)
 ## scripts
 various standalone scripts
 
-## stats
+## stat
 various statistics (e.g. correlation)
 
 ## thirdparty
