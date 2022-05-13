@@ -4,10 +4,10 @@
 % switched from version 2.20 (still available as a zip) on 9/29/2021
 % on windows, I only have the compiler working via visual studio
 % note liblinear uses its own RNG, which can't be controlled
-% USAGE:
+% USAGE
 %   model = TrainLiblinear(0, labelNum, data, true, 1);
 %   [predLabel,acc,score,mse,sqcorr] = LiblinearPredict(model, labelNum, data);
-% INPUTS:
+% INPUTS
 %   solverType - char or numeric, one of:
 %       For multi-class classification:
 %       0 / 'logreg' -- L2-regularized logistic regression (primal)
@@ -26,16 +26,16 @@
 %       21 (NOT SUPPORTED YET) -- one-class support vector machine (dual)
 %   label - 1 x N (int-valued numeric) vector of category IDs for the data
 %   data - N x D (numeric or logical)
-%   doAdjust4UnequalN - scalar (logical) - if true, categories will be weighted so that rare categories get the same importance as common categories
-%   regularizationLvl - scalar (numeric) - how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
-% RETURNS:
+%   doAdjust4UnequalN - scalar (logical) if true, categories will be weighted so that rare categories get the same importance as common categories
+%   regularizationLvl - scalar (numeric) how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
+% RETURNS
 %   model - a struct as described in the 4 liblinear README files. The LAST feature is the bias/intercept term, which you may wish to remove. This struct will change in form depending on whether you passed 2 categories or more than 2
 %       .???
 %       .w
 %       .bias
 %       .norm_min
 %       .norm_max
-function [model] = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, regularizationLvl)
+function model = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, regularizationLvl)
     if ischar(solverType)
         if strcmp(solverType, 'logreg')
             solverType = 0;
@@ -54,7 +54,7 @@ function [model] = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, re
         warning('liblinear-multicore options 4 through 10 were never tested');
     end
     assert((isnumeric(regularizationLvl) && isscalar(regularizationLvl)) || strcmp(regularizationLvl, 'optimize'));
-    assert(~isa(data, 'gpuArray')); % liblinear doesn't have gpu support
+    assert(~isa(data, 'gpuArray'), 'liblinear doesn''t have gpu support');
 
     n_cores = DetermineNumJavaComputeCores();
     if ~any(solverType == [0,1,2,3,5,6,11]) % only ones implemented by the version of the parallel library we use
