@@ -1,9 +1,9 @@
 % Eli Bowen 6/10/2021
 % converts an index (integers indexing into an array) into a mask (logical the length of the array)
-% INPUTS:
+% INPUTS
 %   data - 1 x n_indices (int-valued numeric) index (if already a mask, data will just be returned)
 %   n_items - scalar (numeric) number of items in the mask
-% RETURNS:
+% RETURNS
 %   data - 1 x n_items (logical)
 function data = Idx2Mask(data, n_items)
     if isempty(data) % if empty, nothing to do (handle first = fastest)

@@ -2,7 +2,7 @@
 % writes a video to file (just a wrapper around matlab code to save us time)
 % INPUTS
 %   filePath    - full path to file (including file name) - recommend .mj2 for lossless
-%   video       - nCols x nRows x nChannels x nFrames uint8 (range 0-->255) or double (range 0-->1)
+%   video       - n_cols x n_rows x n_channels x n_frames uint8 (range 0-->255) or double (range 0-->1)
 %   frameRate   - scalar (numeric)
 %   is_lossless - scalar logical (should video be lossless or lossy)
 function [] = WriteVideo(filePath, video, frameRate, is_lossless)
@@ -50,7 +50,7 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
     % strip extension
     [path,fileNameNoExt,requestedExt] = fileparts(filePath);
     
-    isUseFFMPEG = false;
+    do_use_ffmpeg = false;
     if strcmpi(requestedExt, '.mp4') || strcmpi(requestedExt, '.m4v')
         if is_lossless
             warning('WriteVideo() will try to make .mp4/.m4v lossless, but we recommend .mj2 file extensions for true lossless video');
@@ -64,7 +64,7 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
             end
         else
             error('shitty centos doesnt support mpeg - even ffmpeg is a decade out of date - try .mj2');
-%             isUseFFMPEG = true;
+%             do_use_ffmpeg = true;
 %             ffmpegTempFile = fullfile(path, [fileNameNoExt,'.mj2']);
 %             v = VideoWriter(filePath, 'Archival'); % write as mj2, then convert via ffmpeg
         end
@@ -98,7 +98,7 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
     close(v);
 
     % nice try below, but centos cant even get ffmpeg working right
-%     if isUseFFMPEG
+%     if do_use_ffmpeg
 %         [~,cmdout] = system('command -v ffmpeg'); % unlikely to succeed on windows
 %         if contains(cmdout, 'ffmpeg', 'IgnoreCase', true)
 %             if aspectRatio == 4 / 3

@@ -1,16 +1,4 @@
-% Eli Bowen 12/17/2021
-% less error-prone version of matlab's plot()
-% matlab's plot is annoying about x and y looking just right - this function pleases it
-% also supports:
-%   an additional name-value argument "alpha", for color transparency
-%   'Color' = 'redblue' (gradient red to blue)
-% INPUTS
-%   x
-%   y
-%   other arguments to matlab's plot()
-% RETURNS
-%   h - plot handle
-% see also plot
+% deprecated
 function h = Plot(x, y, varargin)
     validateattributes(x, {'numeric','logical'}, {'nonempty'}, 1);
     validateattributes(y, {'numeric','logical'}, {'nonempty'}, 2);

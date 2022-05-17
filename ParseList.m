@@ -1,7 +1,7 @@
 % Eli Bowen 2/15/2022
-% INPUTS:
+% INPUTS
 %   str - list, either as a cell array of chars or as comma delimited text
-% RETURNS:
+% RETURNS
 %   str - cell array of chars
 function str = ParseList(str)
     validateattributes(str, {'cell','char','string'}, {}, 1);
