@@ -1,7 +1,7 @@
 % Eli Bowen
-% INPUTS:
+% INPUTS
 %   count - scalar (int-valued numeric) number of points to place on a circle
-% RETURNS:
+% RETURNS
 %   r - row position of each point
 %   c - col position of each point
 function [r,c] = FindCircleCoords(count)

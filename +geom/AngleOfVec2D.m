@@ -2,10 +2,10 @@
 % angle between a vector and the vector [1,0]
 % based on a mathworks employee's web post: https://www.mathworks.com/matlabcentral/answers/101590-how-can-i-determine-the-angle-between-two-vectors-in-matlab
 % this is the minimum angle, so return values will always be in the range 0-->180 deg (or equivalent rads)
-% INPUTS:
+% INPUTS
 %   u            - 2 x n_vecs (numeric) a vector, or collection of vectors where each column is a single vector
 %   resultFormat - (char) 'deg' or 'rad'
-% RETURNS:
+% RETURNS
 %   theta
 % see also AngleBetweenVecs
 function theta = AngleOfVec2D(u, resultFormat)

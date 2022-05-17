@@ -1,12 +1,12 @@
 % Eli Bowen 12/19/2020
-% INPUTS:
+% INPUTS
 %   rVec - (numeric) a 2D or 3D rotation formatted as [r] or [rX,rY,rZ]
 %   angleFormat - (char) 'deg' or 'rad' (is rVec in units of degrees or radians?)
-% RETURNS:
+% RETURNS
 %   rotationMat - a rotation matrix (if 3D, performs rotations in order x, y, z)
 function rotationMat = RotationMat(rVec, angleFormat)
-    validateattributes(rVec, {'numeric'}, {'nonempty','vector'});
-    validateattributes(angleFormat, {'char'}, {'nonempty'});
+    validateattributes(rVec, {'numeric'}, {'nonempty','vector'}, 1);
+    validateattributes(angleFormat, {'char'}, {'nonempty'}, 2);
 
     if numel(rVec) == 1
         if strcmp(angleFormat, 'deg')

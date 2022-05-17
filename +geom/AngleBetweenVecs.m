@@ -3,11 +3,11 @@
 % based on a mathworks employee's web post: https://www.mathworks.com/matlabcentral/answers/101590-how-can-i-determine-the-angle-between-two-vectors-in-matlab
 % if you want the angle between two connected lines (connected at point2): theta = AngleBetweenVecs(point1 - point2, point3 - point2, resultFormat)
 % this is the minimum angle, so return values will always be in the range 0-->180 deg (or equivalent rads)
-% INPUTS:
+% INPUTS
 %   u            - (numeric) a vector, or collection of vectors where each column is a single vector
 %   v            - (numeric) a vector, or collection of vectors where each column is a single vector
 %   resultFormat - (char) 'deg' or 'rad'
-% RETURNS:
+% RETURNS
 %   theta
 % see also AngleOfVec2D
 function theta = AngleBetweenVecs(u, v, resultFormat)

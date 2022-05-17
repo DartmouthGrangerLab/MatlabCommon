@@ -1,11 +1,13 @@
 % Eli Bowen 8/17/2020
-% INPUTS:
+% INPUTS
 %   pos1       - 1 x 2 (numeric)
 %   pos2       - 1 x 2 (numeric)
 %   poly1      - scalar (int-valued numeric)
 %   poly2      - scalar (int-valued numeric)
 %   polyRadius - scalar (numeric)
 %   puckerFactor - OPTIONAL (default = 1 aka none) scalar (numeric) squeeze radius this much in one direction
+% RETURNS
+%   result
 function result = PolygonsOverlap(pos1, pos2, poly1, poly2, polyRadius, puckerFactor)
     validateattributes(pos1,       {'numeric'}, {'nonempty','vector'}, 1);
     validateattributes(pos2,       {'numeric'}, {'nonempty','vector'}, 2);
@@ -16,7 +18,7 @@ function result = PolygonsOverlap(pos1, pos2, poly1, poly2, polyRadius, puckerFa
         puckerFactor = 1; % squeeze radius this much in one direction
     end
 
-    pointSet = PolygonPointSet(polyRadius, puckerFactor);
+    pointSet = geom.PolygonPointSet(polyRadius, puckerFactor);
     result = any(inpolygon(...
                     pos1(1) + pointSet{poly1}(1,:),...
                     pos1(2) + pointSet{poly1}(2,:),...

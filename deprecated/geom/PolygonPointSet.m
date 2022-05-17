@@ -1,10 +1,4 @@
-% Eli Bowen 8/17/2020
-% define shapes (in format accepted by matlab's insertShape())
-% INPUTS:
-%   polyRadius   - scalar (numeric) polygon radius in units of pixels
-%   puckerFactor - OPTIONAL (default = 1 aka none) scalar (numeric) squeeze radius this much in one direction
-% RETURNS:
-%   pointSet - cell array of sets of points, generally 2 x n_points numerics
+% deprecated
 function pointSet = PolygonPointSet(polyRadius, puckerFactor)
     validateattributes(polyRadius, {'numeric'}, {'nonempty','scalar','positive'}, 1);
     if ~exist('puckerFactor', 'var') || isempty(puckerFactor)

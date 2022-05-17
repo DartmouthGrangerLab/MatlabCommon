@@ -6,7 +6,7 @@
 %   color  - double (ranged 0-->1) or uint8 matrix of size n_items x 1 (grayscale) or n_items x 3 (color) - color for each item, or one color for all items
 % RETURNS:
 %   img
-function [img] = RenderHex2Img(img, gridSz, pos, color)
+function img = RenderHex2Img(img, gridSz, pos, color)
     if ~isempty(img)
         validateattributes(img, 'uint8', {});
     end

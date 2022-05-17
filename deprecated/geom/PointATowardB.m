@@ -1,10 +1,4 @@
-% Eli Bowen 2020
-% thanks to https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
-% INPUTS:
-%   a - 1 x 2 (numeric) [x,y] coordinates
-%   b - 1 x 2 (numeric) [x,y] coordinates
-% RETURNS:
-%   dir
+% deprecated
 function dir = PointATowardB(a, b)
     assert(numel(a) == 2 && numel(b) == 2);
 
