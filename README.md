@@ -1,9 +1,6 @@
 # MatlabCommon
 Commonly used and shared library code or utilities written in Matlab, for lab-wide use.
 
-## clust
-clustering algorithms
-
 ## connec
 various ways to connect members of a set to one another
 
@@ -26,7 +23,7 @@ grid of points (rectangular, hex, ...)
 i/o functions, e.g. for loading datasets
 
 ## ml
-supervised machine learning algs (regression, classification)
+supervised machine learning algs (regression, classification), clustering algs (k-means, GMM, ...)
 
 ## scripts
 various standalone scripts

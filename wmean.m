@@ -3,11 +3,11 @@
 % For matrices, WMEAN(X,W) is a row vector containing the weighted mean value of each column.
 % For N-D arrays, WMEAN(X,W) is the weighted mean value of the elements along the first non-singleton dimension of X.
 % Each element of X requires a corresponding weight, and hence the size  of W must match that of X.
-% INPUTS:
+% INPUTS
 %   class support for inputs X and W: float: double, single
-% RETURNS:
+% RETURNS
 %   y
-% USAGE:
+% USAGE
 %   x = rand(5,2);
 %   w = rand(5,2);
 %   wmean(x, w)

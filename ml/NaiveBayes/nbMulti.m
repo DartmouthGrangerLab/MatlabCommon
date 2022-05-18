@@ -1,9 +1,11 @@
 % multinomial naive bayes, translated from scikit-learn
 % https://github.com/scikit-learn/scikit-learn/blob/c3dd4051dda40b28877877a2405806c77502c18d/sklearn/naive_bayes.py#L508
-% INPUTS:
+% INPUTS
 %   X        - d x n (numeric) data matrix
 %   labelIdx - 1 x n (int-valued numeric) label (1~k)
-function [model] = nbMulti(X, labelIdx)
+% RETURNS
+%   model
+function model = nbMulti(X, labelIdx)
     validateattributes(X,        {'numeric'}, {'nonempty'}, 1);
     validateattributes(labelIdx, {'numeric'}, {'nonempty','vector'}, 2);
     assert(size(X, 2) == numel(labelIdx));

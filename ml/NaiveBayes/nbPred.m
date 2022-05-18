@@ -1,13 +1,31 @@
 % prediction of naive Bayes classifier with independent Gaussian
-% INPUTS:
+% INPUTS
 %   model: trained model structure
 %   X:     d x n (numeric or logical) - data matrix
-% RETURNS:
+% RETURNS
 %   y: 1 x n (int-valued numeric) - predicted class label
 % written by Mo Chen (sth4nth@gmail.com)
 % downloaded by Eli Bowen 12/5/2021 from https://www.mathworks.com/matlabcentral/fileexchange/55864-naive-bayes-classifier
 % edited only for argument validation, clarity, and style consistency, then I merged nbGaussPred and nbBernPred.
-function [y] = nbPred(model, X)
+% Copyright (c) 2016, Mo Chen All rights reserved.
+% Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+%     * Redistributions of source code must retain the above copyright
+%       notice, this list of conditions and the following disclaimer.
+%     * Redistributions in binary form must reproduce the above copyright
+%       notice, this list of conditions and the following disclaimer in
+%       the documentation and/or other materials provided with the distribution
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
+function y = nbPred(model, X)
     validateattributes(model, {'struct'}, {'nonempty'}, 1);
     validateattributes(X, {'numeric','logical'}, {'nonempty'}, 2);
     w = model.w;
