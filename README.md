@@ -1,9 +1,6 @@
 # MatlabCommon
 Commonly used and shared library code or utilities written in Matlab, for lab-wide use.
 
-## connec
-various ways to connect members of a set to one another
-
 ## encode
 functions for changing the encoding of a dataset (whiten, one-hot code, ...)
 
@@ -15,6 +12,9 @@ code to preprocess specific datatypes (images, video, audio, ...)
 
 ## geom
 geometry and trigonometry functions (mostly for 2D and 3D spaces, but not exclusively)
+
+## graph
+various ways to connect members of a set to one another
 
 ## grid
 grid of points (rectangular, hex, ...)
