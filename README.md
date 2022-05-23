@@ -31,6 +31,9 @@ various standalone scripts
 ## stat
 various statistics (e.g. correlation)
 
+## structlib
+basic struct manipulation functions
+
 ## thirdparty
 third party code bases
 many of these have wrappers in other MatlabCommon packages
