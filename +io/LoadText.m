@@ -1,12 +1,11 @@
 % Eli Bowen 11/19/2021
-% INPUTS:
+% INPUTS
 %   datasetName - (char)
-%   path - OPTIONAL (char) pathectory in which to find the dataset file(s)
-% RETURNS:
+%   path - OPTIONAL (char) dirctory in which to find the dataset file(s)
+% RETURNS
 %   text - (char) - comma separated list of datasets to load (must all be text)
 function text = LoadText(datasetName, path)
     validateattributes(datasetName, {'char'}, {'nonempty','vector'}, 1);
-
     if ~exist('path', 'var') || isempty(path)
         path = fullfile(ComputerProfile.DatasetDir(), 'text');
     end

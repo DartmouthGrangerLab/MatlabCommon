@@ -1,10 +1,10 @@
 % Eli Bowen 12/3/2021
 % this will take a long while
-% INPUTS:
+% INPUTS
 %   text            - (char)
 %   dictionary      - 1 x n_unique_words (cell array of chars)
 %   tokenDefinition - (char) - regex defining a token e.g. '\w+' = [a-zA-Z_0-9] or '\S+' (word = nonwhitespace) (newlines always included as id = -1)
-% RETURNS:
+% RETURNS
 %   tokenIdx - 1 x n_words_in_text (int-valued numeric)
 function tokenIdx = TxtTokenize(text, dictionary, tokenDefinition)
     validateattributes(text,            {'char'}, {'nonempty'}, 1);
@@ -14,6 +14,7 @@ function tokenIdx = TxtTokenize(text, dictionary, tokenDefinition)
 %     n_threads = 1;
 
     t = tic();
+
     nlIdx = find(text == newline()); % must split things up to save memory
     n_nl_per_thread = ceil(numel(nlIdx) / n_threads);
     jobText     = cell(1, n_threads); % job input
@@ -27,7 +28,7 @@ function tokenIdx = TxtTokenize(text, dictionary, tokenDefinition)
         assert(text(nlIdx(temp1)) == newline() && text(nlIdx(temp2)) == newline());
         assert(jobText{job}(1) == newline() && jobText{job}(end) == newline());
     end
-    clearvars nlIdx; % short on memory usually
+    clearvars nlIdx % short on memory usually
     
     if n_threads == 1
         tokenIdx = Helper(dictionary, tokenDefinition, jobText{1}, true);
@@ -39,11 +40,11 @@ function tokenIdx = TxtTokenize(text, dictionary, tokenDefinition)
         tokenIdx = cell2mat(jobTokenIdx);
     end
 
-    toc(t)
+    Toc(t)
 end
 
 
-function [tokenIdx] = Helper(dictionary, tokenDefinition, text, verbose)
+function tokenIdx = Helper(dictionary, tokenDefinition, text, verbose)
     nlIdx = find(text == newline()); % must split things up to save memory
     n_lines = numel(nlIdx) - 1; % should be a new line at the start and the end
     

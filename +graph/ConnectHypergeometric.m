@@ -1,12 +1,12 @@
 % Eli Bowen 1/12/2020
 % creates a random hypergeometric connectivity profile
-% INPUTS:
-%   n_src - scalar (numeric) - number of source items
-%   n_dst - scalar (numeric) - numer of destination items
-%   n_per_src - scalar (numeric) - number of connections per source item (if you'd rather specify n_per_dst, just flip src and dst in your calling code!)
-% RETURNS:
-%   srcIdx - 1 x n_connec (int-valued numeric) - for each connection, the index of the source item (ranged 1 --> n_src)
-%   dstIdx - 1 x n_connec (int-valued numeric) - for each connection, the index of the destination item (ranged 1 --> n_dst)
+% INPUTS
+%   n_src     - scalar (numeric) number of source items
+%   n_dst     - scalar (numeric) numer of destination items
+%   n_per_src - scalar (numeric) number of connections per source item (if you'd rather specify n_per_dst, just flip src and dst in your calling code!)
+% RETURNS
+%   srcIdx - 1 x n_connec (int-valued numeric) for each connection, the index of the source item (ranged 1 --> n_src)
+%   dstIdx - 1 x n_connec (int-valued numeric) for each connection, the index of the destination item (ranged 1 --> n_dst)
 function [srcIdx,dstIdx] = ConnectHypergeometric(n_src, n_dst, n_per_src)
     validateattributes(n_src, {'numeric'}, {'nonempty','scalar','positive','integer'}, 1);
     validateattributes(n_dst, {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);

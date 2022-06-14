@@ -6,11 +6,11 @@
 % 2) by Aaron Wetzler:  https://www.mathworks.com/matlabcentral/fileexchange/28190-bresenham-optimized-for-matlab
 % pix = DrawSkinnyLineSqr([1,1], [8,3]);
 % figure; [c,r] = meshgrid(0:10, 0:10); scatter(c(:), r(:), 'r.'); hold on; scatter(pix(:,2), pix(:,1), 50, 'k*'); axis([0,10,0,10]); xlabel('row'); ylabel('col');
-% INPUTS:
+% INPUTS
 %   pt1         - 1 x 2 (numeric) 2D position of point 1 (x,y or r,c - whatever - pix coordinates returned with same dimensionality)
 %   pt2         - 1 x 2 (numeric) 2D position of point 2
 %   scaleFactor - scalar (numeric)
-% RETURNS:
+% RETURNS
 %   pix - n_pixels x 2 (numeric) 2D coordinates of pixels that should be illuminated by the line
 % see also DrawSkinnyLineHex
 function pix = DrawSkinnyLineSqr(pt1, pt2, scaleFactor)

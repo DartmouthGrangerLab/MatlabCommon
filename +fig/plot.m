@@ -17,13 +17,23 @@ function h = plot(x, y, varargin)
     x = double(x);
     y = double(y);
 
-    alpha = 1; % full opacity
     idx = find(strcmpi(varargin, 'alpha'));
     if ~isempty(idx)
         alpha = varargin{idx+1};
-        validateattributes(alpha, {'numeric'}, {'nonempty','nonnegative'});
+        validateattributes(alpha, {'numeric','logical'}, {'nonempty','nonnegative'});
         assert(all(alpha <= 1));
         varargin([idx,idx+1]) = [];
+        
+        if isscalar(alpha) && alpha == 0
+            return
+        elseif isscalar(alpha) && alpha == 1
+            h = fig.plot(x, y, varargin); % just call me again now that we've removed this param
+            return
+        elseif ~isscalar(alpha) && islogical(alpha) || all(alpha == 0 | alpha == 1)
+            assert(numel(alpha) == size(x, 2)); % "The plot function plots columns of Y versus columns of X."
+            h = fig.plot(x(:,logical(alpha)), y(:,logical(alpha)), varargin{:});
+            return
+        end
     end
 
     is_x_ndvec  = (sum(size(x) ~= 1) == 1);
@@ -69,15 +79,15 @@ function h = plot(x, y, varargin)
             end
         end
     else
-        h = plot(x, y, varargin{:});
+        h = plot(x, y, varargin{:}); % pass through to matlab
     end
 
-    if ~all(alpha == 1)
+    if exist('alpha', 'var') && ~isempty(alpha) && ~all(alpha == 1)
         if isscalar(alpha)
             alpha = repmat(alpha, numel(h), 1);
         end
         for i = 1 : numel(h) % for each line we've plotted
-            h(i).Color(4) = alpha(i); % undocumented matlab
+            h(i).Color(4) = double(alpha(i)); % undocumented matlab
         end
     end
 end

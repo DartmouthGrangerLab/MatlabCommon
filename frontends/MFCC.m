@@ -1,14 +1,14 @@
 % Eli Bowen 2/27/2020
 % wrapper around the rastamat library MFCC functionality (https://labrosa.ee.columbia.edu/matlab/rastamat/)
-% USAGE:
+% USAGE
 %   [data,Fs] = audioread(fullfile('D:', 'datasets/audio/Harry_Potter_and_the_Chamber_of_Secrets-English/001_harry_potter_and_the_chamber_of_secrets_US_ch_001_the_worst_birthday-96k.wav'));
 %   data = MFCC(data, Fs, 2*128, 128);
-% INPUT:
+% INPUT
 %	data     - PCM audio vector
 %	fs       - scalar (int-valued numeric) sampling rate of the audio
 %	windowSz - scalar (int-valued numeric) size of temporal window in units of number of SAMPLES (not ms)
 %	stepSz   - scalar (int-valued numeric) size of temporal step in units of number of SAMPLES (not ms)
-% RETURNS:
+% RETURNS
 %   data - n_steps x 60 double
 function data = MFCC(data, fs, windowSz, stepSz)
     validateattributes(data,     {'numeric'}, {'nonempty','vector'}, 1);

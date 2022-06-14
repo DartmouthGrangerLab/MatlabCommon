@@ -1,12 +1,12 @@
 % Eli Bowen 10/2021
 % gpu isnt faster due to all the for loops in HMAX
-% INPUTS:
+% INPUTS
 %   img - n_rows x n_cols x n_chan x n_imgs (images; double 0 --> 1 or uint8)
 %   type - (char) 's1' or 'c1'
-% RETURNS:
+% RETURNS
 %   hmax
-% see also: HMAX
-function [hmax] = HMAXTransform(img, type)
+% see also HMAX
+function hmax = HMAXTransform(img, type)
     validateattributes(img, {'logical','numeric'}, {}, 1);
     validateattributes(type, {'char'}, {'nonempty'}, 2);
     n = size(img, 4);

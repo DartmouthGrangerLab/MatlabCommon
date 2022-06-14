@@ -189,7 +189,7 @@ function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amoun
                     distortionLabelIdx = cat(2, distortionLabelIdx, c .* ones(1, size(classImg, 4)));
                     distortionAmt      = cat(2, distortionAmt, classAmt);
                 end
-                rmpath(unzipDir, 's');
+                rmdir(unzipDir, 's');
                 save(fullfile(path, [distortionType{i},'.mat']), 'distortionImg', 'distortionLabelIdx', 'distortionAmt', '-v7.3');
             end
             

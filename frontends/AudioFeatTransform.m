@@ -1,18 +1,18 @@
 % Eli Bowen 2/6/2018
-% INPUTS:
+% INPUTS
 %   data        - audio PCM samples
 %   sr          - scalar (int-valued numeric) sampling rate of the audio
 %   mode        - char - type of features
 %   stepSz      - scalar (int-valued numeric)
 %   complexMode - char - OPTIONAL - method for handling complex-valued outputs - one of 'raw', 'power', 'real+imag' (default = 'raw')
-% RETURNS:
+% RETURNS
 %   data
 %   freqHz - frequency, in hz, of each output filter
 function [data,freqHz] = AudioFeatTransform(data, sr, mode, stepSz, complexMode)
-    validateattributes(data,   'numeric', {'nonempty'});
-    validateattributes(sr,     'numeric', {'nonempty','scalar','positive','integer'});
-    validateattributes(mode,   'char',    {'nonempty'});
-    validateattributes(stepSz, 'numeric', {'nonempty','scalar','positive','integer'});
+    validateattributes(data,   {'numeric'}, {'nonempty'}, 1);
+    validateattributes(sr,     {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);
+    validateattributes(mode,   {'char'},    {'nonempty'}, 3);
+    validateattributes(stepSz, {'numeric'}, {'nonempty','scalar','positive','integer'}, 4);
     assert(isvector(data));
     if ~exist('complexMode', 'var') || isempty(complexMode)
         complexMode = 'raw';

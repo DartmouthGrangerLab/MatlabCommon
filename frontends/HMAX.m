@@ -5,11 +5,11 @@
 % patchCache = HMAXPatchCache(orientations, nBands);
 % [s1,c1] = HMAX(img, patchCache)
 % [s1,c1,s2,c2,bestBands,bestLocations] = HMAX(img, patchCache);
-% INPUTS:
+% INPUTS
 %   img                 - one image (in a valid matlab image format), or a cell array of said images (not sure what the outputs look like in that case)
 %   patchCache          - OPTIONAL struct returned from a call to HMAXPatchCache() - reuse for efficiency
 %   do_normalize_gabors - OPTIONAL scalar (logical)
-% RETURNS:
+% RETURNS
 %   s1 - s1{nBands,nScalesPerBand,nOrientations}(nImgRows,nImgCols) contains a gabor's responses at each location on the image
 %   c1 - c1{nBands}(nImgRows/poolingAmt,nImgCols/poolingAmt,nOrientations) contains spatially pooled s1
 %   s2 - s2{nBands,nPatchesPerSz,nPatchSizes} contains ___
