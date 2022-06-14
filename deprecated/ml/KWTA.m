@@ -1,8 +1,8 @@
 % Eli Bowen 2/2022
-% INPUTS:
+% INPUTS
 %   data - d x n (numeric)
 %   k    - scalar or n x 1 (int-valued numeric)
-% RETURNS:
+% RETURNS
 %   data - d x n (numeric) if input is on gpu or sparse, so is output
 %   idx  - k x n (numeric index 1 --> d), elements are sorted largest to smallest
 function data = KWTA(data, k)

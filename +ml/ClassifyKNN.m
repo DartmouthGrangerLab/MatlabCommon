@@ -19,48 +19,12 @@ function [predLabel,predStrength] = ClassifyKNN(K, trnData, tstData, trnLabel, d
 
     n_tst_pts = size(tstData, 2);
     
-    if K == 1 && strcmpi(distance, 'euclidean')
-        idx = NaN(1, n_tst_pts); % index of the training image that best matches each test image
-        if isnumeric(trnData)
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = min(sum((trnData - tstData(:,i)).^2, 1)); % implicit expansion
-            end
-        else % binary values
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = min(sum(trnData ~= tstData(:,i), 1)); % implicit expansion
-            end
-        end
-        predLabel = trnLabel(idx);
-    elseif K == 1 && strcmpi(distance, 'cosine')
-        idx = NaN(1, n_tst_pts); % index of the training image that best matches each test image
-        trnL2Norm = vecnorm(double(trnData), 2, 1); % 1 x n_trn_pts
-        tstL2Norm = vecnorm(double(tstData), 2, 1); % 1 x n_tst_pts
-        if isnumeric(trnData)
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = max(sum(trnData .* tstData(:,i), 1) ./ (trnL2Norm.*tstL2Norm(i))); % implicit expansion
-            end
-        else % binary values
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = max(sum(trnData & tstData(:,i), 1) ./ (trnL2Norm.*tstL2Norm(i))); % implicit expansion
-            end
-        end
-        predLabel = trnLabel(idx);
-    elseif K == 1 && strcmpi(distance, 'dot') % dot product
-        idx = NaN(1, n_tst_pts); % index of the training image that best matches each test image
-        if isnumeric(trnData)
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = max(sum(trnData .* tstData(:,i), 1)); % implicit expansion
-            end
-        else % binary values
-            for i = 1 : n_tst_pts
-                [~,idx(i)] = max(sum(trnData & tstData(:,i), 1)); % implicit expansion
-            end
-        end
-        predLabel = trnLabel(idx);
+    if K == 1
+        predLabel = ml.OneNN(trnData, tstData, trnLabel, distance);
     else
-        error('TODO: validate (never tested)');
-        model = fitcknn(trnData, trnLabel, 'ClassNames', uniqueLabels, 'NumNeighbors', K, 'Distance', distance);
+        model = fitcknn(trnData, trnLabel, 'ClassNames', uniqueLabels, 'NumNeighbors', k, 'Distance', distance);
         predLabel = predict(model, tstData);
+        error('TODO: validate (never tested)');
     end
     
     predStrength = [];
