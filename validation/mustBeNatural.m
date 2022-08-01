@@ -1,8 +1,8 @@
 % Eli Bowen 11/19/2021
-% count data (non-negative integers)
-% INPUTS:
+% natural numbers (non-negative integers)
+% INPUTS
 %   x
-function [] = mustBeCount(x)
+function [] = mustBeNatural(x)
     try
         mustBeNumeric(x);
         mustBeNonnegative(x);
