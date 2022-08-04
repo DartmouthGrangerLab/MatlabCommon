@@ -1,12 +1,12 @@
 % Eli Bowen
-% INPUTS:
+% INPUTS
 %   centroids
 %   distance   - (char) 'euclidean' | 'squaredeuclidean' | 'cosine' | 'correlation' | 'hamming' | 'jaccard'
 %   data       - N x D
 %   n_max_iter - scalar (int-valued numeric)
 %   do_fuzzy   - OPTIONaL scalar (logical) if true, use fuzzy clustering (default = false) if you don't know what this means, leave false
 %   verbose    - OPTIONAL scalar (logical) default = true
-% RETURNS:
+% RETURNS
 %   clustMemberships - N x 1 integer array with values in the range 1:size(centroids, 1)
 %   centroids        - K x D (numeric)
 %   iterCentroids    - n_iter x 1 (cell) centroids for each iteration (each cell is the same format as above)
@@ -91,7 +91,7 @@ end
 
 
 % Determine which cluster this data point belongs to, meanwhile update the cluster definitions to incorporate this point
-% INPUTS:
+% INPUTS
 %   dataPt
 %   changeRate - rate at which this new information is incorporated into its centroid. This new data point will have a weight of 1/changeRate
 % function [k,centroids] = OnlineCluster (dataPt, centroids, changeRate)
@@ -104,7 +104,7 @@ end
 
 % Performs offline clustering of the supplied data
 % Can only be called if this clusterer has not already performed clustering
-% INPUTS:
+% INPUTS
 %   data - dimensionality of #datapts x #dims
 function [clustMemberships,centroids,iterCentroids] = ClusterData(data, n_max_iter, centroids, distance, changeFrac, verbose)
     N = size(data, 1);
@@ -315,11 +315,11 @@ end
 
 
 % copied from JavaCommon
-% INPUTS:
+% INPUTS
 %   data
 %   centroids
-%   kernel - 'euclidean', 'squaredeuclidean', or 'cosine'
-%   is_orthogonal - scalar (logical)
+%   kernel             - (char) 'euclidean' | 'squaredeuclidean' | 'cosine'
+%   is_orthogonal      - scalar (logical)
 %   n_input_categories - OPTIONAL unless is_orthogonal == true
 function [clustMemberships,counts] = ComputeClustMemberships(data, centroids, kernel, is_orthogonal, n_input_categories)
     K = size(centroids, 1);
@@ -413,10 +413,10 @@ end
 
 
 % copied from JavaCommon
-% INPUTS:
+% INPUTS
 %   data
 %   centroids - K x D
-%   distance - 'euclidean', 'squaredeuclidean', or 'cosine'
+%   distance  - (char) 'euclidean' | 'squaredeuclidean' | 'cosine'
 %   m
 function clustMemberWeights = ComputeClustMembershipWeights(clustMemberWeights, data, centroids, distance, m)
     %% compute distance

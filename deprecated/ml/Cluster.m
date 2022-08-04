@@ -1,18 +1,4 @@
-% Eli Bowen 11/30/2019
-% copied and enhanced from LSRExperiments() (Eli Bowen, 7/2/2019)
-% USAGE:
-%   model = ClustInit('clusterer', K, 'distance', init, trnData);
-%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, n_iter);
-%   responsesToTstData = ClustResponse(model, tstData);
-% INPUTS:
-%   model    - (struct) result of ClustInit()
-%   data     - N x D (numeric or logical)
-%   do_fuzzy - OPTIONAL scalar (logical)
-%   n_iter   - OPTIONAL scalar (numeric)
-% RETURNS:
-%   model - (struct) model with modified clusters
-%   data  - N x K (numeric) similarity between each cluster and each datapoint
-%   idx   - N x 1 (numeric index) index of the cluster closest to each datapoint
+% deprecated (instead, see ml package)
 function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
     validateattributes(model, {'struct'}, {'nonempty'}, 1);
     if ~isfloat(data)

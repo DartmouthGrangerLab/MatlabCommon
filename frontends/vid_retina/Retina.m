@@ -33,17 +33,17 @@ classdef Retina < handle
     properties (SetAccess = private)
         retinaParams(1,1) struct = struct('OPLandIplParvo', struct(), 'IplMagno', struct()) % structure of parameters
 
-        retinaFilter(1,1);
+        retinaFilter(1,1)
     end
         
     methods
         % Complete Retina filter constructor which allows all basic structural parameters definition
         % @param inputSize : the input frame size
         % @param isColor - scalar logical, the chosen processing mode : with or without color processing
-        % @param colorSamplingMethod - scalar int specifies which kind of color sampling will be used
-        % @param useRetinaLogSampling - scalar logical, activate retina log sampling, if true, the 2 following parameters can be used
-        % @param reductionFactor - scalar double, only usefull if param useRetinaLogSampling=true, specifies the reduction factor of the output frame (as the center (fovea) is high resolution and corners can be underscaled, then a reduction of the output is allowed without precision leak
-        % @param samplingStrength - scalar double, only usefull if param useRetinaLogSampling=true, specifies the strength of the log scale that is applied
+        % @param colorSamplingMethod - OPTIONAL scalar int specifies which kind of color sampling will be used
+        % @param useRetinaLogSampling - OPTIONAL scalar logical, activate retina log sampling, if true, the 2 following parameters can be used
+        % @param reductionFactor - OPTIONAL scalar double, only usefull if param useRetinaLogSampling=true, specifies the reduction factor of the output frame (as the center (fovea) is high resolution and corners can be underscaled, then a reduction of the output is allowed without precision leak
+        % @param samplingStrength - OPTIONAL scalar double, only usefull if param useRetinaLogSampling=true, specifies the strength of the log scale that is applied
         function [obj] = Retina (nRowsIn, nColsIn, isColor, colorSamplingMethod, useRetinaLogSampling, reductionFactor, samplingStrength)
             assert(nRowsIn * nColsIn > 0, 'Bad retina size setup : size height and with must be > 0');
             if ~exist('colorSamplingMethod', 'var') || isempty(colorSamplingMethod)
@@ -79,7 +79,7 @@ classdef Retina < handle
         % @param photoreceptorTemporalConstant - scalar double, the time constant of the first order low pass filter of the photoreceptors, use it to cut high temporal frequencies (noise or fast motion), unit is frames, typical value is 1 frame
         % @param photoreceptorSpatialConstant - scalar double, the spatial constant of the first order low pass filter of the photoreceptors, use it to cut high spatial frequencies (noise or thick contours), unit is pixels, typical value is 1 pixel
         % @param horizontalCellGain - scalar double, gain of the horizontal cells network, if 0, then the mean value of the output is zero, if the parameter is near 1, then, the luminance is not filtered and is still reachable at the output, typicall value is 0
-        % @param HcellTemporalConstant - scalar double, the time constant of the first order low pass filter of the horizontal cells, use it to cut low temporal frequencies (local luminance variations), unit is frames, typical value is 1 frame, as the photoreceptors
+        % @param HcellTemporalConstant - scalar double, the time constant of the first order low pass filter of the horizontal cells, use it to cut low temporal frequencies (local luminance variations), unit is frames, typical value is 1 frame
         % @param HcellSpatialConstant - scalar double, the spatial constant of the first order low pass filter of the horizontal cells, use it to cut low spatial frequencies (local luminance), unit is pixels, typical value is 5 pixel, this value is also used for local contrast computing when computing the local contrast adaptation at the ganglion cells level (Inner Plexiform Layer parvocellular channel model)
         % @param ganglionCellSensitivity - scalar double, the compression strengh of the ganglion cells local adaptation output, set a value between 160 and 250 for best results, a high value increases more the low value sensitivity... and the output saturates faster, recommended value: 230
         function [] = setupOPLandIPLParvoChannel (obj, isColor, normaliseOutput, photoreceptorLocalAdaptationSensitivity, photoreceptorTemporalConstant, photoreceptorSpatialConstant, horizontalCellGain, HcellTemporalConstant, HcellSpatialConstant, ganglionCellSensitivity)

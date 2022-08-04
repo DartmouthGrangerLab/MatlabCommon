@@ -2,7 +2,7 @@
 % INPUTS
 %   hist - n_classes x n_discriminators (non-negative numeric)
 % RETURNS
-%   discriminability - 1 x n_discriminators (numeric, can be nan)
+%   discriminability - 1 x n_discriminators (numeric ranged 0 --> 1, can be nan)
 %   sharedness - 1 x n_discriminators (numeric, can be nan) the fraction of classes that a discriminator is selective for
 function [discriminability,sharedness] = SparseClassResponderDiscriminability(hist)
     validateattributes(hist, {'numeric'}, {'nonnegative'}, 1);

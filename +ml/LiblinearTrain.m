@@ -24,8 +24,8 @@
 %       13 (NOT SUPPORTED YET) -- L2-regularized L1-loss support vector regression (dual)
 %   for outlier detection
 %       21 (NOT SUPPORTED YET) -- one-class support vector machine (dual)
-%   label - 1 x N (int-valued numeric) vector of category IDs for the data
-%   data - N x D (numeric or logical)
+%   label             - 1 x N (int-valued numeric) vector of category IDs for the data
+%   data              - N x D (numeric or logical)
 %   doAdjust4UnequalN - scalar (logical) if true, categories will be weighted so that rare categories get the same importance as common categories
 %   regularizationLvl - scalar (numeric) how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
 % RETURNS

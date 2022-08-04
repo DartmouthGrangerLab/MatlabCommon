@@ -1,26 +1,4 @@
-% Eli Bowen 10/1/2021
-% INPUTS
-%   trnData          - n_trnpts x n_dims (numeric or logical)
-%   trnLabel         - 1 x n_trnpts (int-valued numeric or cell array of chars)
-%   tstData          - n_tstpts x n_dims (numeric or logical)
-%   tstLabel         - 1 x n_tstpts (int-valued numeric or cell array of chars)
-%   classifierType   - (char) 'lda' | 'svm' | 'svmjava' | 'svmliblinear' | 'logreg' | 'logregliblinear' | 'knn' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'decisiontree'
-%   classifierParams - OPTIONAL (struct)
-%       .cost                  - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
-%       .k                     - for knn (numeric) DEFAULT = 1
-%       .distance              - for knn (char) 'euclidean' | 'correlation' | 'cosine' | 'hamming' | ...
-%       .distribution          - for nbfast (char) 'bern' | 'gauss' | 'multinomial'
-%       .hidden_sz             - for patternnet (numeric) see patternnet(); DEFAULT = [10] (one layer with 10 nodes)
-%       .train_func            - for patternnet (char) see patternnet(); DEFAULT = 'trainscg'
-%       .perform_func          - for patternnet (char) see patternnet(); DEFAULT = 'crossentropy'
-%       .n_variables_to_sample - for decisiontree (numeric or 'all') see templateTree(); DEFAULT = 'all'
-%       .method                - for decisiontree (char) see fitcensemble(); DEFAULT = 'Bag'
-%       .n_learning_cycles     - for decisiontree (numeric) see fitcensemble(); DEFAULT = 100
-%   verbose - OPTIONAL scalar (logical) should we print text? (default=false)
-% RETURNS
-%   acc - scalar (double ranged 0 --> 1) accuracy (mean across folds)
-%   predLabel
-%   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
+% deprecated (instead, see ml package)
 function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
     validateattributes(trnData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)}, 1);
     validateattributes(trnLabel,       {'numeric'},           {'nonempty','vector'}, 2);

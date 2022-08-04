@@ -1,10 +1,4 @@
-% Eli Bowen 12/6/16
-% performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
-% INPUTS:
-%   model - struct containing fields such as mu and sigma
-%   data
-% RETURNS:
-%   distances - #signals x #prototypes distance matrix
+% deprecated (instead, see ml package)
 function [data] = DistFromClustGMM(model, data)
     if strcmp(model.modelType, 'matlabbuiltin')
         data = posterior(model, data);

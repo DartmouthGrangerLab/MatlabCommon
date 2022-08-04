@@ -1,10 +1,4 @@
-% Eli Bowen 2/2022
-% INPUTS
-%   data - d x n (numeric)
-%   k    - scalar or n x 1 (int-valued numeric)
-% RETURNS
-%   data - d x n (numeric) if input is on gpu or sparse, so is output
-%   idx  - k x n (numeric index 1 --> d), elements are sorted largest to smallest
+% deprecated (instead, see ml package)
 function data = KWTA(data, k)
     validateattributes(data, {'numeric'}, {}, 1);
     validateattributes(k, {'numeric'}, {'nonempty','integer'}, 2);

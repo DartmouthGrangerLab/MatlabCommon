@@ -33,12 +33,12 @@ end
 
 
 % dot product that handle the sparse matrix case correctly
-% INPUTS:
+% INPUTS
 %   a : {ndarray, sparse matrix}
 %   b : {ndarray, sparse matrix}
-% RETURNS:
+% RETURNS
 %   dot_product : {ndarray, sparse matrix}
-function [ret] = safe_sparse_dot(a, b)
+function ret = safe_sparse_dot(a, b)
     if a.ndim > 2 || b.ndim > 2
         ret = np.dot(a, b);
     else

@@ -1,12 +1,4 @@
-% performs KNN classification
-% if interested in cross-validation, just call ClassifyCrossvalidate(data, label, n_folds, 'knn', ...)
-% INPUTS:
-%   k        - scalar (int-valued numeric) number of neighbors to use
-%   data     - n_dims x n_pts (numeric or logical)
-%   label    - 1 x n_pts (cell, numeric, or logical) "ground truth" label for each training point
-%   distance - (char or function_handle) @(X,Y) function handle or one of 'cityblock', 'chebychev', 'correlation', 'cosine', 'euclidean', 'hamming', 'jaccard', 'mahalanobis', 'minkowski', 'seuclidean' (not sqeuclidean), 'spearman'
-% RETURNS:
-%   predLabel - 1 x n_tstpts (same format as trnLabel)
+% deprecated (instead, see ml package)
 function [predLabel] = ClassifyKNNHold1Out(k, data, label, distance)
     validateattributes(k,        {'numeric'},                  {'nonempty','scalar','positive','integer'}, 1);
     validateattributes(data,     {'numeric','logical'},        {'nonempty','2d','nonnan','ncols',numel(label)}, 2);

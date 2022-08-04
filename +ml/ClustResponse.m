@@ -1,10 +1,11 @@
 % Eli Bowen 12/6/16
 % performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
-% INPUTS:
+% INPUTS
 %   model - struct
 %   data
-% RETURNS:
+% RETURNS
 %   data
+% see also ml.ClustInit, ml.Cluster
 function data = ClustResponse(model, data)
     if strcmp(model.clusterer, 'kmeans')
         if iscell(model.mu) % bagging was used
@@ -17,7 +18,7 @@ function data = ClustResponse(model, data)
             end
             data = projecteddata;
         else
-            data = DistFromClustKMeans(model, data);
+            data = ml.DistFromClustKMeans(model, data);
         end
 
         if strcmp(model.distance, 'euclidean')
@@ -30,7 +31,7 @@ function data = ClustResponse(model, data)
             error('invalid param distance');
         end
     elseif strcmp(model.clusterer, 'gmm')
-        data = DistFromClustGMM(model, data);
+        data = ml.DistFromClustGMM(model, data);
         
         data = 1 - data;
     elseif startsWith(model.clusterer, 'hierarchical')

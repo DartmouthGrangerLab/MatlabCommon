@@ -1,20 +1,4 @@
-% Eli Bowen 11/30/2019
-% USAGE:
-%   model = ClustInit(trnData, k, 'clusterer', 'distance', init);
-%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, maxIter);
-%   responsesToTstData = ClustResponse(model, tstData);
-% INPUTS:
-%   clusterer - (char) 'kmeans' | 'gmm' | 'hierarchical<linkage>' | 'spectralkmeans<1|2|3>'
-%   K         - scalar (int-valued numeric)
-%   distance  - (char) any valid distance measure e.g. 'euclidean'
-%   init      - OPTIONAL (numeric, struct, char) if numeric, a cluster idx for each datapoint. if struct, a pre-existing model. if char, one of 'random', 'furthestfirst', 'kmeans++'
-%   data      - OPTIONAL N x D (numeric)
-% RETURNS:
-%   model - struct
-%       .clusterer
-%       .distance
-%       .mu
-%       [other fields]
+% deprecated (instead, see ml package)
 function model = ClustInit(clusterer, K, distance, init, data)
     validateattributes(clusterer, {'char'}, {'nonempty'}, 1);
     validateattributes(K, {'numeric'}, {'nonempty','scalar','integer'}, 2);

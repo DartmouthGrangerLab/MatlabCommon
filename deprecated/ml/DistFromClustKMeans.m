@@ -1,10 +1,4 @@
-% Eli Bowen 12/6/16
-% performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
-% INPUTS:
-%   model
-%   data - n_pts x n_dim
-% RETURNS:
-%   data - n_pts x n_prototypes (numeric) distance between each point and each cluster
+% deprecated (instead, see ml package)
 function data = DistFromClustKMeans(model, data)
     prototypes = model.mu;
     assert(size(data, 2) == size(prototypes, 2));

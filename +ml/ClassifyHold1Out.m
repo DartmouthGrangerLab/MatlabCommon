@@ -1,15 +1,15 @@
 % Eli Bowen 10/1/2021
-% INPUTS:
+% INPUTS
 %   data             - n_pts x n_dims (numeric or logical)
-%   label            - 1 x n_pts (int-valued numeric or cell array of chars)
-%   classifierType   - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   classifierParams - OPTIONAL struct
+%   label            - 1 x n_pts (int-valued numeric or cellstr)
+%   classifierType   - (char) 'knn' | others pending...
+%   classifierParams - OPTIONAL (struct)
 %       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k           - for KNN
 %       .distance    - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
-%   verbose          - OPTIONAL scalar (logical) - should we print text? (default=false)
-% RETURNS:
-%   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
+%   verbose          - OPTIONAL scalar (logical) should we print text? (default=false)
+% RETURNS
+%   acc - scalar (double ranged 0 --> 1) accuracy, mean across folds
 %   predLabel
 function [acc,predLabel] = ClassifyHold1Out(data, label, classifierType, classifierParams, verbose)
     validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)}, 1);
@@ -47,7 +47,7 @@ function [acc,predLabel] = ClassifyHold1Out(data, label, classifierType, classif
 
     %% classify
     if strcmp(classifierType, 'knn') % --- knn ---
-        predLabel = ClassifyKNNHold1Out(classifierParams.k, data', labelIdx, classifierParams.distance);
+        predLabel = ml.ClassifyKNNHold1Out(classifierParams.k, data', labelIdx, classifierParams.distance);
         acc = sum(predLabel == labelIdx) / n_pts;
     else
         error('unexpected classifierType');

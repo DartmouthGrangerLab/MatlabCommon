@@ -1,11 +1,4 @@
-% Eli Bowen 1/6/2017
-% INPUTS:
-%   data           - n_datapts x n_dims (double)
-%   label
-%   classifierType - one of 'lda', 'svm' (BROKEN), 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear'
-%   verbose        - OPTIONAL (default = true)
-% RETURNS:
-%   primaryAxis - 1 x n_dims (numeric)
+% deprecated (instead, see ml package)
 function [primaryAxis] = Classify4DiscrimDim(data, label, classifierType, verbose)
     validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)}, 1);
     validateattributes(label, {'numeric','cell'}, {'nonempty','vector'}, 2);

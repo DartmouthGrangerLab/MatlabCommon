@@ -55,19 +55,19 @@ function img = insertShape(img, shape, position, varargin)
         
         idx = find(strcmpi(varargin, 'color'));
         if strcmp(color, 'redblue')
-            cmap = redblue(11); % 10 color stops
-            cmap(6,:) = []; % excluding the white middle part
-            n_color_stops = size(cmap, 1);
+            n_color_stops = 10;
+            cmap = redblue(n_color_stops+1);
+            cmap(n_color_stops/2 + 1,:) = []; % excluding the white middle part
             temp = zeros(n_lines * n_color_stops, 4); % n_lines*n_color_stops x 4 (numeric)
             color = zeros(n_lines * n_color_stops, 3); % n_lines*n_color_stops x 3 (numeric)
             for i = 1 : n_color_stops
-                temp((i-1)*n_color_stops + (1:n_lines),1) = position(:,1) + (position(:,3) - position(:,1)) * (i-1) / size(cmap, 1);
-                temp((i-1)*n_color_stops + (1:n_lines),2) = position(:,2) + (position(:,4) - position(:,2)) * (i-1) / size(cmap, 1);
-                temp((i-1)*n_color_stops + (1:n_lines),3) = position(:,1) + (position(:,3) - position(:,1)) * i / size(cmap, 1);
-                temp((i-1)*n_color_stops + (1:n_lines),4) = position(:,2) + (position(:,4) - position(:,2)) * i / size(cmap, 1);
-                color((i-1)*n_color_stops + (1:n_lines),1) = cmap(i,1);
-                color((i-1)*n_color_stops + (1:n_lines),2) = cmap(i,2);
-                color((i-1)*n_color_stops + (1:n_lines),3) = cmap(i,3); % ugh yes matlab can't handle this in one line
+                temp((i-1)*n_lines + (1:n_lines),1) = position(:,1) + (position(:,3) - position(:,1)) .* ((i-1) / n_color_stops);
+                temp((i-1)*n_lines + (1:n_lines),2) = position(:,2) + (position(:,4) - position(:,2)) .* ((i-1) / n_color_stops);
+                temp((i-1)*n_lines + (1:n_lines),3) = position(:,1) + (position(:,3) - position(:,1)) .* (i / n_color_stops);
+                temp((i-1)*n_lines + (1:n_lines),4) = position(:,2) + (position(:,4) - position(:,2)) .* (i / n_color_stops);
+                color((i-1)*n_lines + (1:n_lines),1) = cmap(i,1);
+                color((i-1)*n_lines + (1:n_lines),2) = cmap(i,2);
+                color((i-1)*n_lines + (1:n_lines),3) = cmap(i,3); % ugh yes matlab can't handle this in one line
             end
             
             varargin([idx,idx+1]) = [];

@@ -1,8 +1,8 @@
 % Eli Bowen 1/7/2021
 % writes a video to file (just a wrapper around matlab code to save us time)
 % INPUTS
-%   filePath    - full path to file (including file name) - recommend .mj2 for lossless
-%   video       - n_cols x n_rows x n_channels x n_frames uint8 (range 0-->255) or double (range 0-->1)
+%   filePath    - full path to file (including file name) recommend .mj2 for lossless
+%   video       - n_cols x n_rows x n_channels x n_frames (uint8 or double ranged 0 --> 1)
 %   frameRate   - scalar (numeric)
 %   is_lossless - scalar logical (should video be lossless or lossy)
 function [] = WriteVideo(filePath, video, frameRate, is_lossless)
@@ -14,38 +14,8 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
         assert(max(video(:)) <= 1 && min(video(:)) >= 0); % range of double inputs must be 0-->1 (a matlab image convention)
         video = uint8(video .* 255);
     end
-
-    % pad for video player compatability
-    aspectRatio = size(video, 2) / size(video, 1);
-    if ~is_lossless
-        rows2Add = 0;
-        cols2Add = 0;
-        if aspectRatio > 16 / 9
-            aspectRatio = 16 / 9; % pad vertically (rows) to reach 16:9
-            rows2Add = round(size(video, 2) / aspectRatio - size(video, 1)); % yes divide
-        else
-            if aspectRatio < 4 / 3
-                aspectRatio = 4 / 3; % pad horizontally (cols) to reach 4:3
-                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
-            elseif aspectRatio > 4 / 3 && aspectRatio < 16 / 10 % between 4:3 and 16:10
-                aspectRatio = 16 / 10; % pad horizontally (cols) to reach 16:10
-                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
-            elseif aspectRatio > 16 / 10 && aspectRatio < 16 / 9 % between 16:10 and 16:9
-                aspectRatio = 16 / 9; % pad horizontally (cols) to reach 16:9
-                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
-            end
-        end
-        if rows2Add > 0
-            padding1 = zeros(floor(rows2Add/2), size(video, 2), size(video, 3), size(video, 4), 'like', video);
-            padding2 = zeros(ceil(rows2Add/2),  size(video, 2), size(video, 3), size(video, 4), 'like', video);
-            video = [padding1;video;padding2];
-        end
-        if cols2Add > 0
-            padding1 = zeros(size(video, 1), floor(cols2Add/2), size(video, 3), size(video, 4), 'like', video);
-            padding2 = zeros(size(video, 1), ceil(cols2Add/2),  size(video, 3), size(video, 4), 'like', video);
-            video = [padding1,video,padding2];
-        end
-    end
+    [~,~,n_chan,n_frames] = size(video);
+    assert(n_chan == 1 || n_chan == 3, 'video must be grayscale or RGB');
 
     % strip extension
     [path,fileNameNoExt,requestedExt] = fileparts(filePath);
@@ -83,7 +53,7 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
         else
            % matlab only writes .avi files with mj2 compression - consider .mp4, which has superior compression
             v = VideoWriter(filePath, 'Motion JPEG AVI');
-            v.CompressionRatio = 5; % only for motion jpeg 2000, default = 10
+            v.Quality = 75;
         end
     else
         error('unsupported file extension - try mp4 or mj2');
@@ -91,9 +61,45 @@ function [] = WriteVideo(filePath, video, frameRate, is_lossless)
 
     v.FrameRate = frameRate; % fps
 
+    % pad for video player compatability
+    aspectRatio = size(video, 2) / size(video, 1);
+    if ~is_lossless
+        rows2Add = 0;
+        cols2Add = 0;
+        if aspectRatio > 16 / 9
+            aspectRatio = 16 / 9; % pad vertically (rows) to reach 16:9
+            rows2Add = round(size(video, 2) / aspectRatio - size(video, 1)); % yes divide
+        else
+            if aspectRatio < 4 / 3
+                aspectRatio = 4 / 3; % pad horizontally (cols) to reach 4:3
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
+            elseif aspectRatio > 4 / 3 && aspectRatio < 16 / 10 % between 4:3 and 16:10
+                aspectRatio = 16 / 10; % pad horizontally (cols) to reach 16:10
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
+            elseif aspectRatio > 16 / 10 && aspectRatio < 16 / 9 % between 16:10 and 16:9
+                aspectRatio = 16 / 9; % pad horizontally (cols) to reach 16:9
+                cols2Add = round(size(video, 1) * aspectRatio - size(video, 2));
+            end
+        end
+        if rows2Add > 0
+            padding1 = zeros(floor(rows2Add/2), size(video, 2), size(video, 3), 'like', video);
+            padding2 = zeros(ceil(rows2Add/2),  size(video, 2), size(video, 3), 'like', video);
+        end
+        if cols2Add > 0
+            padding1 = zeros(size(video, 1), floor(cols2Add/2), size(video, 3), 'like', video);
+            padding2 = zeros(size(video, 1), ceil(cols2Add/2),  size(video, 3), 'like', video);
+        end
+    end
+
     open(v);
-    for frame = 1:size(video, 4)
-        writeVideo(v, video(:,:,:,frame));
+    for frame = 1 : n_frames
+        if ~is_lossless && rows2Add > 0
+            writeVideo(v, [padding1;video(:,:,:,frame);padding2]); % uses less memory to do the padding frame by frame
+        elseif ~is_lossless && cols2Add > 0
+            writeVideo(v, [padding1,video(:,:,:,frame),padding2]);
+        else
+            writeVideo(v, video(:,:,:,frame));
+        end
     end
     close(v);
 

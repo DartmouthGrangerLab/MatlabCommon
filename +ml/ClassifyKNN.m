@@ -1,14 +1,14 @@
 % performs KNN classification
-% if interested in cross-validation, just call ClassifyCrossvalidate(data, label, n_folds, 'knn', ...)
-% INPUTS:
-%   K        - scalar (int-valued numeric) number of neighbors to use
+% INPUTS
+%   k        - scalar (int-valued numeric) number of neighbors to use
 %   trnData  - n_dims x n_trnpts (numeric or logical)
 %   tstData  - n_dims x n_tstpts (numeric or logical)
 %   trnLabel - 1 x n_trnpts (cell, numeric, or logical) "ground truth" label for each training point
-%   distance - char or function_handle - @(X,Y) function handle or one of 'cityblock', 'chebychev', 'correlation', 'cosine', 'euclidean', 'hamming', 'jaccard', 'mahalanobis', 'minkowski', 'seuclidean' (not sqeuclidean), 'spearman'
-% RETURNS:
+%   distance - (char or function_handle) @(X,Y) function handle or one of 'cityblock', 'chebychev', 'correlation', 'cosine', 'euclidean', 'hamming', 'jaccard', 'mahalanobis', 'minkowski', 'seuclidean' (not sqeuclidean), 'spearman'
+% RETURNS
 %   predLabel    - 1 x n_tstpts (same format as trnLabel)
 %   predStrength - 1 x n_tstpts (double ranged 0-->1) a measure of how strongly KNN believes in the prediction in predLabel (SLOW TO COMPUTE) (ONLY returned for euclidean or cosine distance)
+% see also ml.Classify, ml.ClassifyCrossvalidate, ml.ClassifyHold1Out
 function [predLabel,predStrength] = ClassifyKNN(K, trnData, tstData, trnLabel, distance)
     validateattributes(K,        {'numeric'},                  {'nonempty','scalar','positive','integer'}, 1);
     validateattributes(trnData,  {'numeric','logical'},        {'nonempty','2d','nonnan','nrows',size(tstData, 1),'ncols',numel(trnLabel)}, 2);

@@ -1,16 +1,4 @@
-% Eli Bowen 10/1/2021
-% INPUTS:
-%   data             - n_pts x n_dims (numeric or logical)
-%   label            - 1 x n_pts (int-valued numeric or cell array of chars)
-%   classifierType   - 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   classifierParams - OPTIONAL struct
-%       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
-%       .k           - for KNN
-%       .distance    - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
-%   verbose          - OPTIONAL scalar (logical) - should we print text? (default=false)
-% RETURNS:
-%   acc - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
-%   predLabel
+% deprecated (instead, see ml package)
 function [acc,predLabel] = ClassifyHold1Out(data, label, classifierType, classifierParams, verbose)
     validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(label)}, 1);
     validateattributes(label,          {'numeric'},           {'nonempty','vector'}, 2);

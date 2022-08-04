@@ -1,12 +1,12 @@
 % Eli Bowen 1/6/2017
-% INPUTS:
+% INPUTS
 %   data           - n_datapts x n_dims (double)
 %   label
-%   classifierType - one of 'lda', 'svm' (BROKEN), 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear'
+%   classifierType - (char) 'lda' | 'svm' (BROKEN) | 'svmjava' | 'svmliblinear' | 'logreg' | 'logregliblinear'
 %   verbose        - OPTIONAL (default = true)
-% RETURNS:
-%   primaryAxis - 1 x n_dims (numeric)
-function [primaryAxis] = Classify4DiscrimDim(data, label, classifierType, verbose)
+% RETURNS
+%   primaryAxis - n_dims x 1 (numeric)
+function primaryAxis = Classify4DiscrimDim(data, label, classifierType, verbose)
     validateattributes(data, {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)}, 1);
     validateattributes(label, {'numeric','cell'}, {'nonempty','vector'}, 2);
     validateattributes(classifierType, {'char'}, {'nonempty'}, 3);
@@ -56,14 +56,14 @@ function [primaryAxis] = Classify4DiscrimDim(data, label, classifierType, verbos
     elseif strcmp(classifierType, 'svmjava')
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % L2-regularized SVM using LIBLINEAR
-        model = LiblinearTrain(2, labelNum, data, true, 1);
+        model = ml.LiblinearTrain(2, labelNum, data, true, 1);
         primaryAxis(variances~=0) = model.w(:,1:end-1)'; % remove bias/intercept term - we just want the direction of the line
     elseif strcmp(classifierType, 'logreg') % non-regularized logistic regression
         model = fitglm(data, labelNum-1, 'Distribution', 'binomial');
         primaryAxis(variances~=0) = model.Coefficients.Estimate(2:end); % first is intercept - we just want the direction of the line
         error('logreg not currently accounting for unequal N as it should');
     elseif strcmp(classifierType, 'logregliblinear') % L2-regularized logistic regression using LIBLINEAR
-        model = LiblinearTrain(0, labelNum, data, true, 1);
+        model = ml.LiblinearTrain(0, labelNum, data, true, 1);
         primaryAxis(variances~=0) = model.w(:,1:end-1)'; % remove bias/intercept term - we just want the direction of the line
     else
         error('unknown classifierType');

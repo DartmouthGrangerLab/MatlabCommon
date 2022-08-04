@@ -1,10 +1,4 @@
-% Eli Bowen 2/2022
-% inject noise into each datapoint to reach the desired number of trues / ones per column
-% INPUTS:
-%   data           - d x n (logical)
-%   n_desired_ones - scalar (int-valued numeric)
-% RETURNS:
-%   data - d x n (logical)
+% deprecated
 function data = InjectNoise(data, n_desired_ones)
     validateattributes(data, {'logical'}, {}, 1);
     validateattributes(n_desired_ones, {'numeric'}, {'nonempty','scalar'}, 2);

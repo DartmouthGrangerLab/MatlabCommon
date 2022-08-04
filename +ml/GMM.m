@@ -1,13 +1,15 @@
 % Eli Bowen 11/18/2017
 % reimplementation of pseudocode "OME" from:
-% INPUTS:
-%   data    - N x D
-%   K       - scalar (numeric) num clusters
-%   maxIter - maximum number of iterations
-%   R       - number of initial categories
+% INPUTS
+%   data     - N x D
+%   k        - scalar (int-valued numeric) number of  clusters
+%   maxIter  - scalar (int-valued numeric) maximum number of iterations
 %   initType
+% RETURNS
+%   clustMemberships
+%   model
 function [clustMemberships,model] = GMM(data, K, maxIter, initType)
-    eta = 0.005; %learning rate
+    eta = 0.005; % learning rate
 
     %% way 1: matlab built-in way (still takes forever)
 %     t1 = tic();

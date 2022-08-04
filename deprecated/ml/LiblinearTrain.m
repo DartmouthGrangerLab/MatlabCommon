@@ -1,40 +1,4 @@
-% Eli Bowen 9/12/2018
-% wrapper designed to simplify and remove the chance of errors when calling liblinear's train() function
-% designed to work with liblinear-multicore version 2.43-2
-% switched from version 2.20 (still available as a zip) on 9/29/2021
-% on windows, I only have the compiler working via visual studio
-% note liblinear uses its own RNG, which can't be controlled
-% USAGE
-%   model = TrainLiblinear(0, labelNum, data, true, 1);
-%   [predLabel,acc,score,mse,sqcorr] = LiblinearPredict(model, labelNum, data);
-% INPUTS
-%   solverType - char or numeric, one of:
-%       For multi-class classification:
-%       0 / 'logreg' -- L2-regularized logistic regression (primal)
-%       1 -- L2-regularized L2-loss support vector classification (dual)
-%       2 / 'svm' -- L2-regularized L2-loss support vector classification (primal)
-%       3 -- L2-regularized L1-loss support vector classification (dual)
-%       4 (NOT SUPPORTED YET) -- support vector classification by Crammer and Singer
-%       5 -- L1-regularized L2-loss support vector classification
-%       6 -- L1-regularized logistic regression
-%       7 (MAYBE SUPPORTED) -- L2-regularized logistic regression (dual)
-%       For regression:
-%       11 -- L2-regularized L2-loss support vector regression (primal)
-%       12 (NOT SUPPORTED YET) -- L2-regularized L2-loss support vector regression (dual)
-%       13 (NOT SUPPORTED YET) -- L2-regularized L1-loss support vector regression (dual)
-%   for outlier detection
-%       21 (NOT SUPPORTED YET) -- one-class support vector machine (dual)
-%   label - 1 x N (int-valued numeric) vector of category IDs for the data
-%   data - N x D (numeric or logical)
-%   doAdjust4UnequalN - scalar (logical) if true, categories will be weighted so that rare categories get the same importance as common categories
-%   regularizationLvl - scalar (numeric) how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
-% RETURNS
-%   model - a struct as described in the 4 liblinear README files. The LAST feature is the bias/intercept term, which you may wish to remove. This struct will change in form depending on whether you passed 2 categories or more than 2
-%       .???
-%       .w
-%       .bias
-%       .norm_min
-%       .norm_max
+% deprecated (instead, see ml package)
 function model = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, regularizationLvl)
     if ischar(solverType)
         if strcmp(solverType, 'logreg')

@@ -1,20 +1,21 @@
 % Eli Bowen 11/30/2019
-% USAGE:
-%   model = ClustInit(trnData, k, 'clusterer', 'distance', init);
-%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, maxIter);
-%   responsesToTstData = ClustResponse(model, tstData);
-% INPUTS:
+% USAGE
+%   model = ml.ClustInit(trnData, k, 'clusterer', 'distance', init);
+%   [model,responsesToTrnData] = ml.Cluster(model, trnData, do_fuzzy, maxIter);
+%   responsesToTstData = ml.ClustResponse(model, tstData);
+% INPUTS
 %   clusterer - (char) 'kmeans' | 'gmm' | 'hierarchical<linkage>' | 'spectralkmeans<1|2|3>'
-%   K         - scalar (int-valued numeric)
+%   k         - scalar (int-valued numeric) number of clusters
 %   distance  - (char) any valid distance measure e.g. 'euclidean'
 %   init      - OPTIONAL (numeric, struct, char) if numeric, a cluster idx for each datapoint. if struct, a pre-existing model. if char, one of 'random', 'furthestfirst', 'kmeans++'
 %   data      - OPTIONAL N x D (numeric)
-% RETURNS:
+% RETURNS
 %   model - struct
 %       .clusterer
 %       .distance
 %       .mu
 %       [other fields]
+% see also ml.Cluster
 function model = ClustInit(clusterer, K, distance, init, data)
     validateattributes(clusterer, {'char'}, {'nonempty'}, 1);
     validateattributes(K, {'numeric'}, {'nonempty','scalar','integer'}, 2);
@@ -75,9 +76,9 @@ function model = ClustInit(clusterer, K, distance, init, data)
         if isstruct(init) % init with a model
             model = init;
         elseif strcmp(init, 'random') || strcmp(init, 'sample') % sample is for compatability with matlab's built in kmeans
-            [~,model] = GMM(data, K, 1, 'random');
+            [~,model] = ml.GMM(data, K, 1, 'random');
         elseif all(size(init)==[1,size(data, 1)])  % init with labels
-            [~,model] = GMM(data, K, 1, init);
+            [~,model] = ml.GMM(data, K, 1, init);
         else
             error('invalid param init');
         end

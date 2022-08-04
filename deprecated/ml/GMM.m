@@ -1,11 +1,4 @@
-% Eli Bowen 11/18/2017
-% reimplementation of pseudocode "OME" from:
-% INPUTS:
-%   data    - N x D
-%   K       - scalar (numeric) num clusters
-%   maxIter - maximum number of iterations
-%   R       - number of initial categories
-%   initType
+% deprecated (instead, see ml package)
 function [clustMemberships,model] = GMM(data, K, maxIter, initType)
     eta = 0.005; %learning rate
 

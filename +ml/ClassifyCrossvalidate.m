@@ -1,18 +1,18 @@
 % Eli Bowen 11/18/16
 % if multiclass, it parallelizes itself, otherwise you should call this in a parfor
 % NOTE: svm is too slow, so we're using LDA (lots of datapoints, which is when LDA shines anyways)
-% INPUTS:
+% INPUTS
 %   data             - n_datapts x n_dims (numeric)
-%   label            - 1 x n_datapts (int-valued numeric or cell array of chars)
+%   label            - 1 x n_datapts (int-valued numeric or cellstr)
 %   n_folds          - scalar (int-valued numeric) how many crossvalidation folds (e.g. 10)
-%   classifierType   - (char) 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
+%   classifierType   - (char) 'lda' | 'svm' | 'svmjava' | 'svmliblinear' | 'logreg' | 'logregliblinear' | 'knn'
 %   doEvenN          - scalar (logical) if true, will equalize the number of exemplars of each category. Else, will not
-%   classifierParams - OPTIONAL struct
+%   classifierParams - OPTIONAL (struct)
 %       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k           - for KNN
 %       .distMeasure - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
 %   verbose          - OPTIONAL scalar (logical) - should we print text? (default = false)
-% RETURNS:
+% RETURNS
 %   acc         - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
 %   predLabel
 %   score       - n_datapts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
@@ -173,8 +173,8 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         predLabel = zeros(size(labelIdx));
         score = NaN(numel(labelIdx), n_classes);
         for fold = 1 : n_folds
-            model = LiblinearTrain(2, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
-            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
+            model = ml.LiblinearTrain(2, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
         end
     elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
         error('not yet implemented');
@@ -183,8 +183,8 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         predLabel = zeros(size(labelIdx));
         score = NaN(numel(labelIdx), n_classes);
         for fold = 1 : n_folds
-            model = LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
-            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
+            model = ml.LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
         end
         warning('TODO: this option not yet validated! all i did was change the TrainLiblinear param from 2 to 0');
     elseif strcmp(classifierType, 'knn') % --- knn ---

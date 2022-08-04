@@ -1,18 +1,17 @@
 % Eli Bowen 11/30/2019
 % copied and enhanced from LSRExperiments() (Eli Bowen, 7/2/2019)
-% USAGE:
-%   model = ClustInit('clusterer', K, 'distance', init, trnData);
-%   [model,responsesToTrnData] = Cluster(model, trnData, do_fuzzy, n_iter);
-%   responsesToTstData = ClustResponse(model, tstData);
-% INPUTS:
+% USAGE
+%   see ml.ClustInit()
+% INPUTS
 %   model    - (struct) result of ClustInit()
 %   data     - N x D (numeric or logical)
 %   do_fuzzy - OPTIONAL scalar (logical)
 %   n_iter   - OPTIONAL scalar (numeric)
-% RETURNS:
+% RETURNS
 %   model - (struct) model with modified clusters
 %   data  - N x K (numeric) similarity between each cluster and each datapoint
 %   idx   - N x 1 (numeric index) index of the cluster closest to each datapoint
+% see also ml.ClustInit
 function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
     validateattributes(model, {'struct'}, {'nonempty'}, 1);
     if ~isfloat(data)
@@ -34,9 +33,9 @@ function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
     end
 
     if strcmp(model.clusterer, 'kmeans')
-        [idx,model.mu,~] = KMeans(model.mu, model.distance, data, n_iter, do_fuzzy, false);
+        [idx,model.mu,~] = ml.KMeans(model.mu, model.distance, data, n_iter, do_fuzzy, false);
     elseif strcmp(model.clusterer, 'gmm')
-        [idx,model] = GMM(data, model.k, n_iter, model);
+        [idx,model] = ml.GMM(data, model.k, n_iter, model);
     elseif startsWith(model.clusterer, 'hierarchical')
         linkage = strrep(model.clusterer, 'hierarchical', ''); % linkage - (char) 'average' | 'centroid' | 'complete' | 'median' | 'single' | 'ward' | 'weighted'
         idx = clusterdata(data, 'MaxClust', model.k, 'Distance', model.distance, 'Linkage', linkage);
@@ -44,7 +43,7 @@ function [model,data,idx] = Cluster(model, data, do_fuzzy, n_iter)
         assert(size(data, 1) == size(data, 2)); % data must be a square adjacency matrix
         assert(strcmp(model.distance, 'euclidean') || strcmp(model.distance, 'sqeuclidean'));
         type = str2double(model.clusterer(end));
-        [idx,model.mu,model.L,model.U] = SpectralClustering(data, model.k, type, model.init, n_iter); % mu is K x N, L is the same dimensionality as data (N x N), U is ___
+        [idx,model.mu,model.L,model.U] = ml.SpectralClustering(data, model.k, type, model.init, n_iter); % mu is K x N, L is the same dimensionality as data (N x N), U is ___
     else
         error('unknown clusterer');
     end

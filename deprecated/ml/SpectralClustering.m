@@ -1,22 +1,4 @@
-% executes the spectral clustering algorithm on the adjacency matrix W and returns the k cluster indicator vectors as columns in C
-% INPUTS:
-%   W      - adjacency matrix, needs to be square
-%   k      - number of clusters to look for
-%   type   - Defines the type of spectral clustering algorithm that should be used. Choices are:
-%       1 - unnormalized
-%       2 - normalized according to Shi and Malik (2000)
-%       3 - normalized according to Jordan and Weiss (2002)
-%   init   - OPTIONAL (char) one of 'random', 'kmeans++'
-%   n_iter - OPTIONAL scalar (int-valued numeric)
-% RETURNS:
-%   idx
-%   centroids - k x p (numeric)
-%   L         - normalized Laplacian
-%   U         - eigenvectors
-% REFERENCES:
-%   Ulrike von Luxburg, "A Tutorial on Spectral Clustering", Statistics and Computing 17 (4), 2007
-% borrowed from: Ingo Buerk 2011/2012, bachelor thesis
-% modified by Eli Bowen just for clarity
+% deprecated (instead, see ml package)
 function [idx,centroids,L,U] = SpectralClustering(W, k, type, init, n_iter)
     validateattributes(W,    {'numeric'}, {}, 1);
     validateattributes(k,    {'numeric'}, {'nonempty','scalar','positive','integer'}, 2);

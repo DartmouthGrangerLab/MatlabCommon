@@ -1,25 +1,4 @@
-% Eli Bowen 11/18/16
-% if multiclass, it parallelizes itself, otherwise you should call this in a parfor
-% NOTE: svm is too slow, so we're using LDA (lots of datapoints, which is when LDA shines anyways)
-% INPUTS:
-%   data             - n_datapts x n_dims (numeric)
-%   label            - 1 x n_datapts (int-valued numeric or cell array of chars)
-%   n_folds          - scalar (int-valued numeric) how many crossvalidation folds (e.g. 10)
-%   classifierType   - (char) 'lda', 'svm', 'svmjava', 'svmliblinear', 'logreg', 'logregliblinear', 'knn'
-%   doEvenN          - scalar (logical) if true, will equalize the number of exemplars of each category. Else, will not
-%   classifierParams - OPTIONAL struct
-%       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
-%       .k           - for KNN
-%       .distMeasure - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
-%   verbose          - OPTIONAL scalar (logical) - should we print text? (default = false)
-% RETURNS:
-%   acc         - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
-%   predLabel
-%   score       - n_datapts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
-%   label       - only useful if doEvenN==true - your input labels, reordered + subsetted to correspond 1:1 with predLabel
-%   selectedIdx - only useful if doEvenN==true
-%   rocTPR      - OPTIONAL
-%   rocFPR      - OPTIONAL
+% deprecated (instead, see ml package)
 function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = ClassifyCrossvalidate(data, label, n_folds, classifierType, doEvenN, classifierParams, verbose)
     validateattributes(data,           {'numeric','logical'}, {'nonempty','2d','nrows',numel(label)}, 1);
     validateattributes(label,          {'numeric','cell'},    {'nonempty','vector'}, 2);

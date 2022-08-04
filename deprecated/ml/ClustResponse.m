@@ -1,10 +1,4 @@
-% Eli Bowen 12/6/16
-% performs an element-wise transform on each input in dist (changes distance to similarity via some function I really like at the moment)
-% INPUTS:
-%   model - struct
-%   data
-% RETURNS:
-%   data
+% deprecated (instead, see ml package)
 function data = ClustResponse(model, data)
     if strcmp(model.clusterer, 'kmeans')
         if iscell(model.mu) % bagging was used

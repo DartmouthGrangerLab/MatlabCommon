@@ -1,15 +1,4 @@
-% Eli Bowen
-% INPUTS:
-%   centroids
-%   distance   - (char) 'euclidean' | 'squaredeuclidean' | 'cosine' | 'correlation' | 'hamming' | 'jaccard'
-%   data       - N x D
-%   n_max_iter - scalar (int-valued numeric)
-%   do_fuzzy   - OPTIONaL scalar (logical) if true, use fuzzy clustering (default = false) if you don't know what this means, leave false
-%   verbose    - OPTIONAL scalar (logical) default = true
-% RETURNS:
-%   clustMemberships - N x 1 integer array with values in the range 1:size(centroids, 1)
-%   centroids        - K x D (numeric)
-%   iterCentroids    - n_iter x 1 (cell) centroids for each iteration (each cell is the same format as above)
+% deprecated (instead, see ml package)
 function [clustMemberships,centroids,iterCentroids] = KMeans(centroids, distance, data, n_max_iter, do_fuzzy, verbose)
     validateattributes(centroids, {'numeric','logical'}, {}, 1);
     validateattributes(distance, {'char'}, {}, 2);
