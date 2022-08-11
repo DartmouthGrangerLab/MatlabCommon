@@ -2,9 +2,9 @@
 %   'half' --> 0.5
 %   'quarter', 'qtr' = 0.25
 %   'tenth' = 0.1
-% INPUTS:
+% INPUTS
 %   x
-% RETURNS:
+% RETURNS
 %   x
 % see also str2double
 function x = Str2Double(x)

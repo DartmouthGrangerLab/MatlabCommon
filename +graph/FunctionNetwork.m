@@ -212,14 +212,18 @@ classdef FunctionNetwork
                 x = obj.cache.node_output{idx};
             end
         end
-        function x = GetOutputD(obj)
-            x = obj.g.Nodes.n_out;
-            if isfield(obj.cache, 'node_output')
-                for i = 1 : obj.n_nodes
-                    if isnan(x(i))
-                        x(i) = size(obj.cache.node_output{i}, 1);
-                    end
-                end
+        function x = GetOutputD(obj, name)
+            validateattributes(name, {'char','numeric'}, {'nonempty'});
+            if isnumeric(name)
+                idx = name;
+                assert(IsIdx(idx), 'if input is numeric, it must be a valid index');
+            else % char
+                idx = findnode(net.g, name);
+            end
+            
+            x = obj.g.Nodes.n_out(idx);
+            if isnan(x) && isfield(obj.cache, 'node_output')
+                x(idx) = size(obj.cache.node_output{idx}, 1);
             end
         end
 
