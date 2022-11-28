@@ -1,9 +1,11 @@
 % Eli Bowen 5/22/2020
 % the cells will be concatenated into a single vector
 % this works even if they are of unequal dimensionality
-% INPUTS:
+% INPUTS
 %   cellData - (cell)
 %   sizeOfVal - OPTIONAL (for performance)
+% RETURNS
+%   val
 function val = CellCat2Vec (cellData, sizeOfVal)
     validateattributes(cellData, {'cell'}, {'nonempty'}, 1);
     

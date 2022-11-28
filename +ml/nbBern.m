@@ -1,8 +1,8 @@
 % naive bayes classifier with indepenet Bernoulli
-% INPUTS:
+% INPUTS
 %   X:        d x n (numeric or logical) data matrix
-%   labelIdx: 1 x n (int-valued numeric) label (1~n_classes)
-% RETURNS:
+%   labelIdx: 1 x n (int-valued numeric) label {1 .. n_classes}
+% RETURNS
 %   model: trained model structure
 % written by Mo Chen (sth4nth@gmail.com)
 % downloaded by Eli Bowen 12/5/2021 from https://www.mathworks.com/matlabcentral/fileexchange/55864-naive-bayes-classifier

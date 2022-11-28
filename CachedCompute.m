@@ -1,9 +1,9 @@
 % Eli Bowen 6/24/2021
 % computes a function iff it's cached output can't be found
-% INPUTS:
+% INPUTS
 %   func     - (char or function_handle) function to compute
 %   varargin - arguments to the function
-% RETURNS:
+% RETURNS
 %   whatever func would return
 function [varargout] = CachedCompute(func, varargin)
     validateattributes(func, {'char','function_handle'}, {'nonempty'}, 1);

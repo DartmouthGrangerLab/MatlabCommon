@@ -57,7 +57,7 @@ classdef FunctionNetwork
                         obj.cache.node_output{i} = zeros(obj.g.Nodes.n_out(i), 1); % treating this blank function like it's @()zeros(x, 1)
                     end
                 else
-                    % route outputs to this node using graph edges, then compute the function
+                    % route outputs to this node using graph edges
                     [eid,nid] = inedges(obj.g, i);
                     input = obj.cache.node_output(nid(obj.edge_dst_var(eid))); % sorting nid by dst var
                     input = cat(1, obj.node_data{i}, input);
@@ -218,7 +218,7 @@ classdef FunctionNetwork
                 idx = name;
                 assert(IsIdx(idx), 'if input is numeric, it must be a valid index');
             else % char
-                idx = findnode(net.g, name);
+                idx = findnode(obj.g, name);
             end
             
             x = obj.g.Nodes.n_out(idx);
