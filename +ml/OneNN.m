@@ -27,6 +27,9 @@ function predLabel = OneNN(trnData, tstData, trnLabel, distance)
             for i = 1 : n_tst_pts
                 [~,idx(i)] = min(sum(trnData ~= tstData(:,i), 1)); % implicit expansion
             end
+            % fh = CompileCoder('OneNNEuclBinaryKernel', {trnData,tstData}, false, 'cpu');
+            % fh = CompileCoder('OneNNEuclBinaryKernel', {gpuArray(single(trnData),gpuArray(single(tstData))}, true, 'gpu');
+            % idx2 = fh(trnData, tstData);
         end
     elseif strcmpi(distance, 'cosine')
         trnL2Norm = vecnorm(double(trnData), 2, 1); % 1 x n_trn_pts

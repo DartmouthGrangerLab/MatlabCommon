@@ -5,12 +5,15 @@
 %   data             - n_datapts x n_dims (numeric)
 %   label            - 1 x n_datapts (int-valued numeric or cellstr)
 %   n_folds          - scalar (int-valued numeric) how many crossvalidation folds (e.g. 10)
-%   classifierType   - (char) 'lda' | 'svm' | 'svmjava' | 'svmliblinear' | 'logreg' | 'logregliblinear' | 'knn'
+%   classifierType   - (char) 'decisiontree' | 'knn' | 'lda' | 'logreg' | 'logregliblinear' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'svm' | 'svmjava' | 'svmliblinear'
 %   doEvenN          - scalar (logical) if true, will equalize the number of exemplars of each category. Else, will not
-%   classifierParams - OPTIONAL (struct)
-%       .cost        - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
-%       .k           - for KNN
-%       .distMeasure - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
+%   classifierParams - OPTIONAL (struct):
+%       .cost         - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
+%       .k            - for KNN
+%       .distMeasure  - for KNN. e.g. 'euclidean', 'correlation', 'cosine', 'hamming', ...
+%       .hidden_sz    - for patternnet (numeric) see patternnet(); DEFAULT = [10] (one layer with 10 nodes)
+%       .train_func   - for patternnet (char) see patternnet(); DEFAULT = 'trainscg'
+%       .perform_func - for patternnet (char) see patternnet(); DEFAULT = 'crossentropy'
 %   verbose          - OPTIONAL scalar (logical) - should we print text? (default = false)
 % RETURNS
 %   acc         - scalar (double ranged 0 --> 1) - accuracy (mean across folds)
@@ -112,7 +115,57 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
 
     %% classify
     score = [];
-    if strcmp(classifierType, 'nb') % --- naive bayes via matlab ---
+    if strcmp(classifierType, 'decisiontree') % === ensemble of decision trees ===
+        error('not yet implemented');
+    elseif strcmp(classifierType, 'knn') % === knn ===
+        models = crossval(fitcknn(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'NumNeighbors', classifierParams.k, 'Distance', classifierParams.distance), 'KFold', n_folds);
+        % below code is a different way of doing things, but it's rather unusual
+        % template = templateKNN('Standardize', 1, 'NumNeighbors', classifierParams.k);
+        % models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'KFold', n_folds, 'Learners', template, 'CrossVal', 'on', 'Options', statset('UseParallel', do_parallel));
+        for fold = 1 : n_folds
+            accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
+        end
+        if nargout > 2 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,score] = kfoldPredict(models);
+            predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
+        end
+        % predLabel = zeros(size(labelIdx));
+        % score = NaN(numel(labelIdx), n_classes);
+        % for fold = 1 : n_folds
+        %     model = LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+        %     [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
+        %     if nargout() > 3 % for efficiency, only calc scores if needed
+        %         [predLabel(tstIdx{fold}),score(tstIdx{fold},:)] = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
+        %     else
+        %         predLabel(tstIdx{fold})                         = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
+        %     end
+        %     accs(fold) = sum(predLabel == labelIdx(tstIdx{fold})) / n_pts;
+        % end
+    elseif strcmp(classifierType, 'lda') % === lda via matlab ===
+        if n_classes == 2 % 2-class lda
+            models = fitcdiscr(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'discrimType', 'pseudoLinear');
+        else % multiclass lda
+            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', do_parallel));
+        end
+        for fold = 1 : n_folds
+            accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
+        end
+        if nargout > 2 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,score] = kfoldPredict(models);
+            predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
+        end
+    elseif strcmp(classifierType, 'logreg') % === logistic regression via matlab ===
+        error('not yet implemented');
+    elseif strcmp(classifierType, 'logregliblinear') % === logistic regression via liblinear-multicore ===
+        assert(isempty(cost), 'not yet implemented: pass cost into TrainLiblinear()');
+        predLabel = zeros(size(labelIdx));
+        score = NaN(numel(labelIdx), n_classes);
+        for fold = 1 : n_folds
+            model = ml.LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
+        end
+        warning('TODO: this option not yet validated! all i did was change the TrainLiblinear param from 2 to 0');
+    elseif strcmp(classifierType, 'nb') % === naive bayes via matlab ===
         if n_classes == 2 % 2-class lda
             models = fitcnb(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds);
         else % multiclass lda
@@ -126,7 +179,7 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
             predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
         end
         warning('nb untested!');
-    elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
+    elseif strcmp(classifierType, 'nbfast') % === naive bayes via faster 3rd party lib ===
         predLabel = zeros(size(labelIdx));
         for fold = 1 : n_folds
             if islogical(data) || all(data(:) == 0 | data(:) == 1)
@@ -137,20 +190,32 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
             predLabel(tstIdx{fold}) = nbPred(model, data(tstIdx{fold},:)');
             accs(fold) = sum(predLabel(tstIdx{fold}) == labelIdx(tstIdx{fold})) / numel(labelIdx(tstIdx{fold}));
         end
-    elseif strcmp(classifierType, 'lda') % --- lda via matlab ---
-        if n_classes == 2 % 2-class lda
-            models = fitcdiscr(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'discrimType', 'pseudoLinear');
-        else % multiclass lda
-            models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'Learners', templateDiscriminant('discrimType', 'pseudoLinear'), 'Options', statset('UseParallel', do_parallel));
-        end
+    elseif strcmp(classifierType, 'perceptron') % --- a single perceptron ---
+        assert(n_classes == 2, 'classifier type perceptron only runs on 2-class problems (see patternnet)');
+        predLabel = zeros(size(labelIdx));
         for fold = 1 : n_folds
-            accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
+            model = perceptron();
+            model.trainParam.showWindow = 0; % disable gui
+            % 'useParallel' and 'useGPU': 'no' is default, can set to 'yes'
+            model = train(model, data(trnIdx{fold},:)', encode.OneHot(labelIdx(trnIdx{fold}), n_classes)', 'CheckpointDelay', 0); % data must be d x n, labels must be one-hot n_classes x n
+            temp = model(data(tstIdx{fold},:)');
+            [~,predLabel(tstIdx{fold})] = max(temp, [], 1); % convert from one-hot to idx
+            accs(fold) = sum(predLabel(tstIdx{fold}) == labelIdx(tstIdx{fold})) / numel(labelIdx(tstIdx{fold}));
         end
-        if nargout > 2 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,score] = kfoldPredict(models);
-            predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
+        warning('untested');
+    elseif strcmp(classifierType, 'patternnet') % === patternnet ===
+        predLabel = zeros(size(labelIdx));
+        for fold = 1 : n_folds
+            model = patternnet(params.hidden_sz, params.train_func, params.perform_func); % default trainFcn = 'trainscg', performFcn = 'crossentropy'
+            model.trainParam.showWindow = 0; % disable gui
+            model = train(model, data(trnIdx{fold},:)', encode.OneHot(labelIdx(trnIdx{fold}), n_classes)', 'CheckpointDelay', 0); % data must be d x n, labels must be one-hot
+            temp = sim(model, data(tstIdx{fold},:)');
+            [~,predLabel(tstIdx{fold})] = max(temp, [], 1); % convert from one-hot to idx
+            accs(fold) = sum(predLabel(tstIdx{fold}) == labelIdx(tstIdx{fold})) / numel(labelIdx(tstIdx{fold}));
         end
-    elseif strcmp(classifierType, 'svm') % --- svm via matlab
+        warning('untested');
+        % can also use feedforwardnet for more fine-grained control (patternnet is a kind of feedforwardnet)
+    elseif strcmp(classifierType, 'svm') % === svm via matlab ===
         if n_classes == 2 % 2-class svm
             models = fitcsvm(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'CrossVal', 'on', 'KFold', n_folds, 'KernelFunction', 'linear', 'Standardize', true);
         else % multiclass svm
@@ -163,12 +228,12 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
             [predLabel,score] = kfoldPredict(models);
             predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
         end
-    elseif strcmp(classifierType, 'svmjava') % --- svm via java ---
+    elseif strcmp(classifierType, 'svmjava') % === svm via java ===
         error('TODO if we care');
 %         import matlabclusternetworkjavahelper.*;
 %         helper = matlabclusternetworkjavahelper.Logistic(??, ???);
 %         helper.Train(double[][] data, int[] label, SolverType solver);
-    elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
+    elseif strcmp(classifierType, 'svmliblinear') % === svm via liblinear-multicore ===
         assert(isempty(cost), 'not yet implemented: pass cost into TrainLiblinear()');
         predLabel = zeros(size(labelIdx));
         score = NaN(numel(labelIdx), n_classes);
@@ -176,41 +241,6 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
             model = ml.LiblinearTrain(2, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
             [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
         end
-    elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
-        error('not yet implemented');
-    elseif strcmp(classifierType, 'logregliblinear') % --- logistic regression via liblinear-multicore ---
-        assert(isempty(cost), 'not yet implemented: pass cost into TrainLiblinear()');
-        predLabel = zeros(size(labelIdx));
-        score = NaN(numel(labelIdx), n_classes);
-        for fold = 1 : n_folds
-            model = ml.LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
-            [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
-        end
-        warning('TODO: this option not yet validated! all i did was change the TrainLiblinear param from 2 to 0');
-    elseif strcmp(classifierType, 'knn') % --- knn ---
-        models = crossval(fitcknn(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'NumNeighbors', classifierParams.k, 'Distance', classifierParams.distance), 'KFold', n_folds);
-        % below code is a different way of doing things, but it's rather unusual
-%         template = templateKNN('Standardize', 1, 'NumNeighbors', classifierParams.k);
-%         models = fitcecoc(data, labelIdx, 'ClassNames', classNames, 'Cost', cost, 'KFold', n_folds, 'Learners', template, 'CrossVal', 'on', 'Options', statset('UseParallel', do_parallel));
-        for fold = 1 : n_folds
-            accs(fold) = 1 - kfoldLoss(models, 'lossfun', 'classiferror', 'folds', fold); % percent incorrect for each fold on testing data
-        end
-        if nargout > 2 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,score] = kfoldPredict(models);
-            predLabel = cellfun(@str2num, predLabel); % each predLabel is a string version of labelIdx, which indexes into uniqueLabel, which are string versions of the original input labels
-        end
-%         predLabel = zeros(size(labelIdx));
-%         score = NaN(numel(labelIdx), n_classes);
-%         for fold = 1 : n_folds
-%             model = LiblinearTrain(0, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
-%             [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
-%             if nargout() > 3 % for efficiency, only calc scores if needed
-%                 [predLabel(tstIdx{fold}),score(tstIdx{fold},:)] = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
-%             else
-%                 predLabel(tstIdx{fold})                         = ClassifyKNN(classifierParams.k, trnData', tstData', labelIdx(trnIdx{fold}), classifierParams.distance);
-%             end
-%             accs(fold) = sum(predLabel == labelIdx(tstIdx{fold})) / n_pts;
-%         end
     else
         error('unknown classifierType');
     end

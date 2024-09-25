@@ -5,8 +5,14 @@
 %   path - (char) diary directory
 %   file - (char) diary file name
 function [] = diary(path, file)
-    validateattributes(path, {'char'}, {'nonempty'}, 1);
-    validateattributes(file, {'char'}, {'nonempty'}, 2);
+    if isMATLABReleaseOlderThan("R2016b") % MatlabCommon must support versions prior to the creation of strings
+        validateattributes(path, {'char'}, {'nonempty'}, 1);
+        validateattributes(file, {'char'}, {'nonempty'}, 2);
+    else
+        validateattributes(path, {'char','string'}, {'nonempty'}, 1);
+        validateattributes(file, {'char','string'}, {'nonempty'}, 2);
+    end
+    
     assert(endsWith(file, '.txt'));
 
     if ~isfolder(path)

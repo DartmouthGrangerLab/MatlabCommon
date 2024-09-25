@@ -8,8 +8,12 @@
 % RETURNS:
 %   file - char - mat file name with path
 function file = CacheFile(data2Hash, append, subDir)
-    validateattributes(append, {'char'}, {'nonempty','vector'}, 2);
-
+    if isMATLABReleaseOlderThan("R2016b") % MatlabCommon must support versions prior to the creation of strings
+        validateattributes(append, {'char'}, {'nonempty','vector'}, 2);
+    else
+        validateattributes(append, {'char','string'}, {'nonempty'}, 2);
+    end
+    
     hash = '';
     if ~isempty(data2Hash)
         try
@@ -25,7 +29,7 @@ function file = CacheFile(data2Hash, append, subDir)
         dir = fullfile(dir, subDir);
     end
 
-    file = fullfile(dir, [append,hash,'.mat']);
+    file = fullfile(dir, [char(append),hash,'.mat']);
 
     if ~isfolder(dir)
         mkdir(dir);

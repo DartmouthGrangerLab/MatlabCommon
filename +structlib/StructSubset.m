@@ -5,7 +5,7 @@
 % INPUTS:
 %   s    - scalar (struct)
 %   keep - 1 x n_items (logical mask or integer index) entries to KEEP
-%   fields2Exclude - OPTIONAL (comma-separated char or cell array of chars) list of fieldnames to NOT subset (e.g. fields that aren't the same length as the rest)
+%   fields2Exclude - OPTIONAL (comma-separated char/string or cell array of chars/strings) list of fieldnames to NOT subset (e.g. fields that aren't the same length as the rest)
 % see also StructFilter
 function s = StructSubset(s, keep, fields2Exclude)
     validateattributes(s, {'struct'}, {'nonempty','scalar'}, 1);
@@ -22,7 +22,7 @@ function s = StructSubset(s, keep, fields2Exclude)
         idx = zeros(1, numel(fields2Exclude));
         for i = 1 : numel(fields2Exclude)
             temp = find(strcmp(fn, fields2Exclude{i}));
-            assert(numel(temp) == 1, ['asked to exclude [',fields2Exclude{i},'], but it doesnt exist']);
+            assert(numel(temp) == 1, ['asked to exclude [',char(fields2Exclude{i}),'], but it doesnt exist']);
             idx(i) = temp;
         end
         fn(idx) = [];

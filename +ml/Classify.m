@@ -4,8 +4,8 @@
 %   trnLabel       - 1 x n_trnpts (int-valued numeric or cellstr)
 %   tstData        - n_tstpts x n_dims (numeric or logical)
 %   tstLabel       - 1 x n_tstpts (int-valued numeric or cellstr)
-%   classifierType - (char) 'lda' | 'svm' | 'svmjava' | 'svmliblinear' | 'logreg' | 'logregliblinear' | 'knn' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'decisiontree'
-%   params         - OPTIONAL (struct)
+%   classifierType - (char) 'decisiontree' | 'knn' | 'lda' | 'logreg' | 'logregliblinear' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'svm' | 'svmjava' | 'svmliblinear'
+%   params         - OPTIONAL (struct):
 %       .cost                  - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k                     - for knn (numeric) DEFAULT = 1
 %       .distance              - for knn (char) 'euclidean' | 'correlation' | 'cosine' | 'hamming' | ...
@@ -97,32 +97,18 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     %% classify
     acc = [];
     score = []; % in case we don't set it below
-    if strcmp(classifierType, 'nb') % --- naive bayes via matlab ---
-        if islogical(trnData)
-            error('ues classifierType=nbfast with logical data; classifierType=nb doesnt support bernoulli distributions');
-        end
-        model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost);
-        acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
-        if nargout > 1 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
-        end
-        warning('nb untested');
-    elseif strcmp(classifierType, 'nbfast') % --- naive bayes via faster 3rd party lib ---
-        if islogical(trnData)
-            trnData = double(trnData); % can't be single
-            tstData = double(tstData); % can't be single
-        end
-        if strcmp(params.distribution, 'bern') % bernoulli, for boolean/binary data
-            model = ml.nbBern(trnData', trnLabelIdx(:)');
-        elseif strcmp(params.distribution, 'gauss') % gaussian-distributed data
-            model = ml.nbGauss(trnData', trnLabelIdx(:)');
-        elseif strcmp(params.distribution, 'multinomial') % for count data
-            model = ml.nbMulti(trnData', trnLabelIdx(:)');
+    if strcmp(classifierType, 'decisiontree') % === ensemble of decision trees ===
+        t = templateTree('NumVariablesToSample', params.n_variables_to_sample, 'PredictorSelection', 'allsplits', 'Reproducible', true);
+        model = fitcensemble(trnData, trnLabelIdx, 'Method', params.method, 'NumLearningCycles', params.n_learning_cycles, 'Learners', t); % can also do 'Options', statset(.)
+        predLabel = predict(model, tstData);
+    elseif strcmp(classifierType, 'knn') % === knn ===
+        if nargout() > 2 % for efficiency, only calc scores if needed
+            [predLabel,score] = ml.ClassifyKNN(params.k, trnData', tstData', trnLabelIdx, params.distance);
         else
-            error('unexpected distribution');
+            predLabel         = ml.ClassifyKNN(params.k, trnData', tstData', trnLabelIdx, params.distance);
         end
-        predLabel = ml.nbPred(model, tstData')';
-    elseif strcmp(classifierType, 'lda') % --- lda via matlab ---
+        % for knn, score is the "strength" of the classification
+    elseif strcmp(classifierType, 'lda') % === lda via matlab ===
         if islogical(trnData)
             trnData = double(trnData);
             tstData = double(tstData);
@@ -137,7 +123,56 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
             [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
         end
         error('lda untested');
-    elseif strcmp(classifierType, 'svm') % --- svm via matlab ---
+    elseif strcmp(classifierType, 'logreg') % === logistic regression via matlab ===
+        error('not yet implemented');
+    elseif strcmp(classifierType, 'logregliblinear') % === logistic regression via liblinear-multicore ===
+        doAdjust4UnequalN = true;
+        model = ml.LiblinearTrain('logreg', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
+        [predLabel,acc,score,~,~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
+    elseif strcmp(classifierType, 'nb') % === naive bayes via matlab ===
+        if islogical(trnData)
+            error('ues classifierType=nbfast with logical data; classifierType=nb doesnt support bernoulli distributions');
+        end
+        model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost);
+        acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
+        if nargout > 1 % for efficiency, only get predLabel and scores if necessary
+            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
+        end
+        warning('nb untested');
+    elseif strcmp(classifierType, 'nbfast') % === naive bayes via faster 3rd party lib ===
+        if islogical(trnData)
+            trnData = double(trnData); % can't be single
+            tstData = double(tstData); % can't be single
+        end
+        if strcmp(params.distribution, 'bern') % bernoulli, for boolean/binary data
+            model = ml.nbBern(trnData', trnLabelIdx(:)');
+        elseif strcmp(params.distribution, 'gauss') % gaussian-distributed data
+            model = ml.nbGauss(trnData', trnLabelIdx(:)');
+        elseif strcmp(params.distribution, 'multinomial') % for count data
+            model = ml.nbMulti(trnData', trnLabelIdx(:)');
+        else
+            error('unexpected distribution');
+        end
+        predLabel = ml.nbPred(model, tstData')';
+    elseif strcmp(classifierType, 'perceptron') % --- a single perceptron ---
+        % CheckpointDelay is seconds between saving checkpoints to file
+        % 'useParallel' and 'useGPU': 'no' is default, can set to 'yes'
+        assert(n_classes == 2, 'classifier type perceptron only runs on 2-class problems (see patternnet)');
+        model = perceptron();
+        model.trainParam.showWindow = 0; % disable gui
+        model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 9999999); % data must be d x n, labels must be one-hot n_classes x n
+        predLabel = model(tstData');
+        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
+    elseif strcmp(classifierType, 'patternnet') % === patternnet ===
+        % CheckpointDelay is seconds between saving checkpoints to file
+        % 'useParallel' and 'useGPU': 'no' is default, can set to 'yes'
+        % can also use feedforwardnet for more fine-grained control (patternnet is a kind of feedforwardnet)
+        model = patternnet(params.hidden_sz, params.train_func, params.perform_func); % default trainFcn = 'trainscg', performFcn = 'crossentropy'
+        model.trainParam.showWindow = 0; % disable gui
+        model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 9999999); % data must be d x n, labels must be one-hot
+        predLabel = sim(model, tstData');
+        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
+    elseif strcmp(classifierType, 'svm') % === svm via matlab ===
         if islogical(trnData)
             trnData = double(trnData);
             tstData = double(tstData);
@@ -151,44 +186,12 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
             [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
         end
-    elseif strcmp(classifierType, 'svmjava') % --- svm via java ---
+    elseif strcmp(classifierType, 'svmjava') % === svm via java ===
         error('not yet implemented');
-    elseif strcmp(classifierType, 'svmliblinear') % --- svm via liblinear-multicore ---
+    elseif strcmp(classifierType, 'svmliblinear') % === svm via liblinear-multicore ===
         doAdjust4UnequalN = true;
         model = ml.LiblinearTrain('svm', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
         [predLabel,acc,score,~,~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
-    elseif strcmp(classifierType, 'logreg') % --- logistic regression via matlab ---
-        error('not yet implemented');
-    elseif strcmp(classifierType, 'logregliblinear') % --- logistic regression via liblinear-multicore
-        doAdjust4UnequalN = true;
-        model = ml.LiblinearTrain('logreg', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
-        [predLabel,acc,score,~,~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
-    elseif strcmp(classifierType, 'knn') % --- knn ---
-        if nargout() > 2 % for efficiency, only calc scores if needed
-            [predLabel,score] = ml.ClassifyKNN(params.k, trnData', tstData', trnLabelIdx, params.distance);
-        else
-            predLabel         = ml.ClassifyKNN(params.k, trnData', tstData', trnLabelIdx, params.distance);
-        end
-        % for knn, score is the "strength" of the classification
-    elseif strcmp(classifierType, 'perceptron') % --- a single perceptron ---
-        assert(n_classes == 2, 'classifier type perceptron only runs on 2-class problems');
-        model = perceptron();
-        model.trainParam.showWindow = 0; % disable gui
-        % 'useParallel' and 'useGPU': 'no' is default, can set to 'yes'
-        model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 0); % data must be d x n, labels must be one-hot n_classes x n
-        predLabel = model(tstData');
-        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
-    elseif strcmp(classifierType, 'patternnet') % --- patternnet ---
-        model = patternnet(params.hidden_sz, params.train_func, params.perform_func); % default trainFcn = 'trainscg', performFcn = 'crossentropy'
-        model.trainParam.showWindow = 0; % disable gui
-        model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 0); % data must be d x n, labels must be one-hot
-        predLabel = sim(model, tstData');
-        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
-        % can also use feedforwardnet for more fine-grained control (patternnet is a kind of feedforwardnet)
-    elseif strcmp(classifierType, 'decisiontree') % --- ensemble of decision trees ---
-        t = templateTree('NumVariablesToSample', params.n_variables_to_sample, 'PredictorSelection', 'allsplits', 'Reproducible', true);
-        model = fitcensemble(trnData, trnLabelIdx, 'Method', params.method, 'NumLearningCycles', params.n_learning_cycles, 'Learners', t); % can also do 'Options', statset(.)
-        predLabel = predict(model, tstData);
     else
         error('unexpected classifierType');
     end

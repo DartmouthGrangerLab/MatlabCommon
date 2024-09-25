@@ -16,6 +16,9 @@ function str = ParseList(str)
 
     if ischar(str)
         str = strsplit(str, ',');
+        for i = 1 : numel(str)
+            str{i} = strtrim(str{i}); % remove leading and trailing whitespace
+        end
     elseif iscell(str)
         assert(all(cellfun(@ischar, str))); % nothing to do
     end

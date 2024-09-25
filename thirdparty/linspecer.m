@@ -44,6 +44,7 @@
 % I made choices from the many there to decide the nicest once for plotting
 % lines in Matlab. I also made a small change to one of the colors I thought was a bit too bright.
 % In addition some interpolation is going on for the sequential line styles.
+% modified by Eli Bowen to support strings
 function lineStyles = linspecer (N,varargin)
     if nargin == 0 % return a colormap
         lineStyles = linspecer(128);
@@ -65,7 +66,7 @@ function lineStyles = linspecer (N,varargin)
     colorblindFlag = 0;
     
     if ~isempty(varargin)>0 % you set a parameter?
-        switch lower(varargin{1})
+        switch lower(char(varargin{1}))
             case {'qualitative','qua'}
                 if N>12 % go home, you just can't get this.
                     warning('qualitiative is not possible for greater than 12 items, please reconsider');
@@ -91,7 +92,7 @@ function lineStyles = linspecer (N,varargin)
             case {'colorblind'}
                 colorblindFlag = 1;
             otherwise
-                warning(['parameter ''' varargin{1} ''' not recognized']);
+                warning(['parameter ''' char(varargin{1}) ''' not recognized']);
         end
     end
     % *.95

@@ -33,6 +33,12 @@ function idx = StringFind(str, pattern, is_exact)
         else
             idx = strfind(str, pattern);
         end
+    elseif isstring(str)
+        if is_exact
+            idx = find(strcmp(str, pattern));
+        else
+            error('TODO');
+        end
     else
         error('parameter str is neither string nor cell array of strings!');
     end
