@@ -4,29 +4,33 @@
 %   trnLabel       - 1 x n_trnpts (int-valued numeric or cellstr)
 %   tstData        - n_tstpts x n_dims (numeric or logical)
 %   tstLabel       - 1 x n_tstpts (int-valued numeric or cellstr)
-%   classifierType - (char) 'decisiontree' | 'knn' | 'lda' | 'logreg' | 'logregliblinear' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'svm' | 'svmjava' | 'svmliblinear'
+%   classifierType - (char) 'decisiontree' | 'knn' | 'lda' | 'logreg' | 'logregliblinear' | 'nb' | 'nbfast' | 'perceptron' | 'patternnet' | 'mlp' | 'cnn' | 'svm' | 'svmjava' | 'svmliblinear'
 %   params         - OPTIONAL (struct):
 %       .cost                  - misclassification cost, a KxK matrix where first dim is true label, second dim is predicted label (default: ones(K) - eye(K))
 %       .k                     - for knn (numeric) DEFAULT = 1
 %       .distance              - for knn (char) 'euclidean' | 'correlation' | 'cosine' | 'hamming' | ...
 %       .distribution          - for nbfast (char) 'bern' | 'gauss' | 'multinomial'
-%       .hidden_sz             - for patternnet (numeric) see patternnet(); DEFAULT = [10] (one layer with 10 nodes)
+%       .hidden_sz             - for patternnet and mlp (numeric) see patternnet(); DEFAULT = [10] (one layer with 10 nodes)
 %       .train_func            - for patternnet (char) see patternnet(); DEFAULT = 'trainscg'
 %       .perform_func          - for patternnet (char) see patternnet(); DEFAULT = 'crossentropy'
 %       .n_variables_to_sample - for decisiontree (numeric or 'all') see templateTree(); DEFAULT = 'all'
 %       .method                - for decisiontree (char) see fitcensemble(); DEFAULT = 'Bag'
-%       .n_learning_cycles     - for decisiontree (numeric) see fitcensemble(); DEFAULT = 100
+%       .n_learning_cycles     - for decisiontree (scalar numeric) see fitcensemble(); DEFAULT = 100
+%       .n_trn_epochs_max      - for mlp and cnn (scalar numeric) max number of training epochs; DEFAULT = 30
+%       .img_sz                - for cnn REQUIRED (3 x 1 numeric) [n_rows, n_cols, n_channels]
+%       .kernel_sz_in_layer    - for cnn (n_layers x 1 numeric) kernel size for each layer (kernels are square); DEFAULT = [3, 3]
+%       .n_filters_in_layer    - for cnn (n_layers x 1 numeric) number of filters in each layer; DEFAULT = [8, 16]
 %   verbose - OPTIONAL scalar (logical) should we print text? (default=false)
 % RETURNS
-%   acc - scalar (double ranged 0 --> 1) accuracy (mean across folds)
+%   acc - scalar (double ranged 0 --> 1) accuracy (mean across fgoolds)
 %   predLabel
 %   score - n_tstpts x n_classes (numeric) 'score(i,j) represents the confidence that data point i is of class j'
-function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, classifierType, params, verbose)
-    validateattributes(trnData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)}, 1);
-    validateattributes(trnLabel,       {'numeric'},           {'nonempty','vector'}, 2);
-    validateattributes(tstData,        {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)}, 3);
-    validateattributes(tstLabel,       {'numeric'},           {'nonempty','vector'}, 4);
-    validateattributes(classifierType, {'char'},              {'nonempty'}, 5);
+function [acc, predLabel, score] = Classify(trnData, trnLabel, tstData, tstLabel, classifierType, params, verbose)
+    validateattributes(trnData,  {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(trnLabel),'ncols',size(tstData, 2)}, 1);
+    validateattributes(trnLabel, {'numeric'},           {'nonempty','vector'}, 2);
+    validateattributes(tstData,  {'numeric','logical'}, {'nonempty','2d','nonnan','nrows',numel(tstLabel),'ncols',size(trnData, 2)}, 3);
+    validateattributes(tstLabel, {'numeric'},           {'nonempty','vector'}, 4);
+    classifierType = char(classifierType); % in case it's a string
     if ~exist('params', 'var') || isempty(params)
         params = struct();
     end
@@ -46,6 +50,10 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     if ~isfield(params, 'n_variables_to_sample'); params.n_variables_to_sample = 'all'; end
     if ~isfield(params, 'method');                params.method = 'Bag'; end
     if ~isfield(params, 'n_learning_cycles');     params.n_learning_cycles = '100'; end
+    if ~isfield(params, 'n_trn_epochs_max');      params.n_trn_epochs_max = 30; end % 30 seems to be Matlab's default
+    % img_sz is required for cnn, ignored for all others
+    if ~isfield(params, 'kernel_sz_in_layer');    params.kernel_sz_in_layer = [3, 3]; end
+    if ~isfield(params, 'n_filters_in_layer');    params.n_filters_in_layer = [8, 16]; end
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
     end
@@ -59,12 +67,12 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     n_classes = numel(uniqLabel);
     
     tstLabelIdx = tstLabel;
-    [r,c] = find(uniqLabel(:) == tstLabel(:)'); % untested may be faster
+    [r, c] = find(uniqLabel(:) == tstLabel(:)'); % untested may be faster
     tstLabelIdx(c) = r;
     % above is faster than below, same result
-%     for i = 1 : numel(tstLabel)
-%         tstLabelIdx(i) = find(uniqLabel == tstLabel(i));
-%     end
+    % for i = 1 : numel(tstLabel)
+    %     tstLabelIdx(i) = find(uniqLabel == tstLabel(i));
+    % end
 
     n_trn = numel(trnLabelIdx);
     n_tst = numel(tstLabelIdx);
@@ -120,7 +128,7 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         end
         acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
+            [predLabel, ~, score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
         end
         error('lda untested');
     elseif strcmp(classifierType, 'logreg') % === logistic regression via matlab ===
@@ -128,7 +136,7 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
     elseif strcmp(classifierType, 'logregliblinear') % === logistic regression via liblinear-multicore ===
         doAdjust4UnequalN = true;
         model = ml.LiblinearTrain('logreg', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
-        [predLabel,acc,score,~,~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
+        [predLabel, acc, score, ~, ~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
     elseif strcmp(classifierType, 'nb') % === naive bayes via matlab ===
         if islogical(trnData)
             error('ues classifierType=nbfast with logical data; classifierType=nb doesnt support bernoulli distributions');
@@ -136,7 +144,7 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         model = fitcnb(trnData, trnLabelIdx, 'ClassNames', uniqLabel, 'Cost', cost);
         acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,~,score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
+            [predLabel, ~, score] = predict(model, tstData, 'Options', statset('UseParallel', do_parallel));
         end
         warning('nb untested');
     elseif strcmp(classifierType, 'nbfast') % === naive bayes via faster 3rd party lib ===
@@ -162,7 +170,7 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         model.trainParam.showWindow = 0; % disable gui
         model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 9999999); % data must be d x n, labels must be one-hot n_classes x n
         predLabel = model(tstData');
-        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
+        [~, predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
     elseif strcmp(classifierType, 'patternnet') % === patternnet ===
         % CheckpointDelay is seconds between saving checkpoints to file
         % 'useParallel' and 'useGPU': 'no' is default, can set to 'yes'
@@ -171,7 +179,12 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         model.trainParam.showWindow = 0; % disable gui
         model = train(model, trnData', encode.OneHot(trnLabelIdx, n_classes)', 'CheckpointDelay', 9999999); % data must be d x n, labels must be one-hot
         predLabel = sim(model, tstData');
-        [~,predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
+        [~, predLabel] = max(predLabel, [], 1); % convert from one-hot to idx
+    elseif strcmp(classifierType, 'mlp')
+        [~, predLabel] = ml.ClassifyMLP(trnData, trnLabelIdx, tstData, tstLabelIdx, n_classes, params.n_trn_epochs_max, params.hidden_sz);
+    elseif strcmp(classifierType, 'cnn')
+        warning('CNN untested');
+        [~, predLabel] = ml.ClassifyCNN(trnData, trnLabelIdx, tstData, tstLabelIdx, n_classes, params.n_trn_epochs_max, params.img_sz, params.kernel_sz_in_layer, params.n_filters_in_layer);
     elseif strcmp(classifierType, 'svm') % === svm via matlab ===
         if islogical(trnData)
             trnData = double(trnData);
@@ -184,14 +197,18 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         end
         acc = 1 - loss(model, tstData, tstLabelIdx, 'LossFun', 'classiferror'); % loss = percent incorrect for each fold on testing data
         if nargout > 1 % for efficiency, only get predLabel and scores if necessary
-            [predLabel,~,score] = predict(model, tstData); % no parallel option for ficsvm
+            [predLabel, ~, score] = predict(model, tstData); % no parallel option for ficsvm
         end
     elseif strcmp(classifierType, 'svmjava') % === svm via java ===
         error('not yet implemented');
     elseif strcmp(classifierType, 'svmliblinear') % === svm via liblinear-multicore ===
-        doAdjust4UnequalN = true;
-        model = ml.LiblinearTrain('svm', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
-        [predLabel,acc,score,~,~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
+        trnidx = EqualizeN(trnLabelIdx);
+        doAdjust4UnequalN = false;
+        model = ml.LiblinearTrain('svm', trnLabelIdx(trnidx), trnData(trnidx,:), doAdjust4UnequalN, params.regularization_lvl);
+        % doAdjust4UnequalN = true; % doesn't seem to always work right (sometimes there's a bias toward the more populous category)
+        % model = ml.LiblinearTrain('svm', trnLabelIdx, trnData, doAdjust4UnequalN, params.regularization_lvl);
+        
+        [predLabel, acc, score, ~, ~] = ml.LiblinearPredict(model, tstLabelIdx, tstData);
     else
         error('unexpected classifierType');
     end
@@ -208,5 +225,7 @@ function [acc,predLabel,score] = Classify(trnData, trnLabel, tstData, tstLabel, 
         score = gather(score);
     end
 
-    Toc(t, verbose, [num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,', n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc, 4)]);
+    if verbose
+        Toc(t, verbose, [num2str(n_classes),'-class ',num2str(size(trnData, 2)),'-dim ',classifierType,', n_trn = ',num2str(n_trn),', n_tst = ',num2str(n_tst),', acc = ',num2str(acc, 4)]);
+    end
 end

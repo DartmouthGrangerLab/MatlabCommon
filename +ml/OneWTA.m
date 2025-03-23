@@ -2,7 +2,7 @@
 % INPUTS
 %   data - d x n (numeric)
 % RETURNS
-%   data - d x n (numeric) if input is on gpu or sparse, so is output
+%   data - d x n (numeric, same type as input) if input is on gpu or sparse, so is output
 % see also ml.KWTA
 function data = OneWTA(data)
     validateattributes(data, {'numeric'}, {}, 1);
@@ -11,9 +11,9 @@ function data = OneWTA(data)
         data = data'; % should be d x 1
         do_flip = true;
     end
-    [~,n] = size(data);
+    [~, n] = size(data);
 
-    [~,idx] = max(data, [], 1); % idx is 1 x n
+    [~, idx] = max(data, [], 1); % idx is 1 x n
     data(:) = 0;
     for i = 1 : n
         data(idx(i),i) = 1;

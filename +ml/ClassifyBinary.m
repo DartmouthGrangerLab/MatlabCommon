@@ -13,7 +13,7 @@
 %   predLabel
 %   score - n_tstpts x n_classes (numeric) 'score(i,j) represents the confidence that data point i is of class j'
 %   uniqueLabelOut - 2 x n_classes x n_classes (cellstr)
-function [acc,predLabel,score,uniqueLabelOut] = ClassifyBinary(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
+function [acc, predLabel, score, uniqueLabelOut] = ClassifyBinary(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
     validateattributes(trnData, {'numeric','logical'}, {'nonempty','nrows',numel(trnLabel)}, 1);
     validateattributes(tstData, {'numeric','logical'}, {'nonempty','nrows',numel(tstLabel)}, 3);
     % other params validated in Classify()
@@ -28,9 +28,9 @@ function [acc,predLabel,score,uniqueLabelOut] = ClassifyBinary(trnData, trnLabel
     [r,c] = find(uniqueLabel(:) == tstLabel(:)'); % untested may be faster
     tstLabelIdx(c) = r;
     % above is faster than below, same result
-%     for i = 1 : numel(tstLabel)
-%         tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
-%     end
+    % for i = 1 : numel(tstLabel)
+    %     tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
+    % end
 
     n_classes = numel(uniqueLabel);
     assert(n_classes > 2); % just call ml.Classify() if 2, if 1 wtf are you doing

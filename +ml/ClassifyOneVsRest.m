@@ -14,7 +14,7 @@
 %   score - n_tstpts x n_classes. 'score(i,j) represents the confidence that data point i is of class j'
 %   uniqLabelOut - 2 x n_classes (cellstr)
 % see also ml.Classify
-function [acc,predLabel,score,uniqLabelOut] = ClassifyOneVsRest(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
+function [acc, predLabel, score, uniqLabelOut] = ClassifyOneVsRest(trnData, trnLabel, tstData, tstLabel, classifierType, classifierParams, verbose)
     % params validated in Classify()
     if ~exist('verbose', 'var') || isempty(verbose)
         verbose = false;
@@ -27,9 +27,9 @@ function [acc,predLabel,score,uniqLabelOut] = ClassifyOneVsRest(trnData, trnLabe
     [r,c] = find(uniqueLabel(:) == tstLabel(:)');
     tstLabelIdx(c) = r;
     % above is faster than below, same result
-%     for i = 1 : numel(tstLabel)
-%         tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
-%     end
+    % for i = 1 : numel(tstLabel)
+    %     tstLabelIdx(i) = find(uniqueLabel == tstLabel(i));
+    % end
 
     n_classes = numel(uniqueLabel);
     assert(n_classes > 2); % if 2, just call Classify(); if 1 wtf are you doing

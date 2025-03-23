@@ -230,15 +230,20 @@ function [acc,accStdErr,predLabel,score,label,selectedIdx,rocTPR,rocFPR] = Class
         end
     elseif strcmp(classifierType, 'svmjava') % === svm via java ===
         error('TODO if we care');
-%         import matlabclusternetworkjavahelper.*;
-%         helper = matlabclusternetworkjavahelper.Logistic(??, ???);
-%         helper.Train(double[][] data, int[] label, SolverType solver);
+        % import matlabclusternetworkjavahelper.*;
+        % helper = matlabclusternetworkjavahelper.Logistic(??, ???);
+        % helper.Train(double[][] data, int[] label, SolverType solver);
     elseif strcmp(classifierType, 'svmliblinear') % === svm via liblinear-multicore ===
         assert(isempty(cost), 'not yet implemented: pass cost into TrainLiblinear()');
+
+        assert(doEvenN, 'svmliblinear seems to behaving iffy without equal n');
+        doAdjust4UnequalN = false;
+        % doAdjust4UnequalN = true; % doesn't seem to always work right (sometimes there's a bias toward the more populous category)
+
         predLabel = zeros(size(labelIdx));
         score = NaN(numel(labelIdx), n_classes);
         for fold = 1 : n_folds
-            model = ml.LiblinearTrain(2, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), true, classifierParams.regularization_lvl);
+            model = ml.LiblinearTrain(2, labelIdx(trnIdx{fold}), data(trnIdx{fold},:), doAdjust4UnequalN, classifierParams.regularization_lvl);
             [predLabel(tstIdx{fold}),accs(fold),score(tstIdx{fold},:),~,~] = ml.LiblinearPredict(model, labelIdx(tstIdx{fold}), data(tstIdx{fold},:));
         end
     else

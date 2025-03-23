@@ -27,6 +27,7 @@
 %   label             - 1 x N (int-valued numeric) vector of category IDs for the data
 %   data              - N x D (numeric or logical)
 %   doAdjust4UnequalN - scalar (logical) if true, categories will be weighted so that rare categories get the same importance as common categories
+%       NOTE: doesn't always seem to work right at the moment, seems to at times be biased toward more populous categories
 %   regularizationLvl - scalar (numeric) how heavily to weight regularization (liblinear's default was = 1). Set to eps to almost disable regularization, but it'll suck. Set to 'optimize' to have liblinear find the highest performing regularizationLevel.
 % RETURNS
 %   model - a struct as described in the 4 liblinear README files. The LAST feature is the bias/intercept term, which you may wish to remove. This struct will change in form depending on whether you passed 2 categories or more than 2
@@ -81,6 +82,9 @@ function model = LiblinearTrain(solverType, label, data, doAdjust4UnequalN, regu
     data = double(data);
     data = sparse([data,ones(N, 1)]); % sparse required by the alg, performance is often poor without a col of ones at the end
 
+    % "We implement 1-vs-the rest multi-class strategy for classification.
+    % In training i vs. non_i, their C parameters are (weight from -wi)*C and C, respectively.
+    % If there are only two classes, we train only one model. Thus weight1*C vs. weight2*C is used."
     weightStr = ''; % using weightStr is probably more fair, but it's unclear
     if doAdjust4UnequalN
         for i = 1 : numel(uniqueLabel)
