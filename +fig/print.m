@@ -1,13 +1,15 @@
 % Eli Bowen 10/7/2021
 % INPUTS
 %   h                  - scalar figure handle or image
-%   path               - (char) file path
-%   file               - (char) file name
+%   path               - (char|string) file path
+%   file               - (char|string) file name
 %   paperSz            - OPTIONAL 1 x 2 (numeric) or (char) size of the paper (in inches?) or 'auto' (default = 'auto')
 %   dpi                - OPTIONAL scalar (int-valued numeric) resolution (default = 300)
 %   do_close_when_done - OPTIONAL scalar (logical) if true, close figure when done printing (default = true)
 function [] = print(h, path, file, paperSz, dpi, do_close_when_done)
     validateattributes(h, {'matlab.ui.Figure','numeric','logical'}, {'nonempty'}, 1);
+    path = char(path); % in case it's a string
+    file = char(file); % in case it's a string
     validateattributes(path, {'char'}, {'nonempty'}, 2);
     validateattributes(file, {'char'}, {'nonempty'}, 3);
     if ~exist('dpi', 'var') || isempty(dpi)
