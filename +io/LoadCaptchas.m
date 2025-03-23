@@ -37,7 +37,7 @@
 %   distortionType - 1 x n_images (cell)
 %   distortionIdx  - 1 x n_images (numeric index)
 %   amount         - 1 x n_images (int-valued numeric)
-function [img,labelIdx,uniqLabel,imgSz,writer,distortionType,distortionIdx,amount] = LoadCaptchas(datasetStr, path)
+function [img, labelIdx, uniqLabel, imgSz, writer, distortionType, distortionIdx, amount] = LoadCaptchas(datasetStr, path)
     validateattributes(datasetStr, {'char'}, {'nonempty'}, 1);
 
     % parse datasetStr
