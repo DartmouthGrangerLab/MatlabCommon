@@ -41,4 +41,7 @@ function [discriminability, sharedness] = SparseClassResponderDiscriminability(h
         sharedness = sum(mask, 1) ./ n_classes; % 1 x n_discriminators
         sharedness(isnan(discriminability)) = NaN; % if one is nan, both should be
     end
+
+    assert(all(discriminability(~isnan(discriminability)) >= 0));
+    assert(all(discriminability(~isnan(discriminability)) <= 1));
 end

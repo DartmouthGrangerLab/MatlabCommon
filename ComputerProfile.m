@@ -14,8 +14,7 @@ classdef ComputerProfile
             'f0018x6@boskop.dartmouth.edu',      '/pdata/ebowen/datasets',     '/pdata/ebowen/tempcache';... % Eli on boskop
             'f0018x6@*.discovery.dartmouth.edu', '/pdata/ebowen/datasets',     '/pdata/ebowen/tempcache';... % Eli on discovery cluster
             'ebowen@bigbrain.dartmouth.edu',     '?',                          '?';...                       % Eli on bigbrain
-            'eli@eb-inspiron',                   'Z:\datasets',                'D:\tempcache';...            % Eli's laptop
-            'eli@eb-desktop',                    'D:\Projects\datasets',       'D:\tempcache';...            % Eli's desktop
+            'ebowen@eb-desktop',                 'D:\Projects\datasets',       'D:\tempcache';...            % Eli's desktop
             'grangerlab@grangerlab-aspire-m3985','/home/grangerlab/Desktop/Projects/Logicnet/datasets','/home/grangerlab/Desktop/Projects/Logicnet/tempcache'; % Anand's desktop
             'cfoye@clays-macbook-pro.local',     '/Users/cfoye/Granger/',      '/Users/cfoye/Granger/cache';... %Clay's macbook
             'rhg@rhg-7.local',                   '/Users/rhg/Documents/MATLAB','/Users/rhg/Documents/MATLAB/logicnet2/cache';...
